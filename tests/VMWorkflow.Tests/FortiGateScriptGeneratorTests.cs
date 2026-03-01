@@ -31,8 +31,8 @@ public class FortiGateScriptGeneratorTests
             {
                 FirewallEntries = new List<FirewallEntry>
                 {
-                    new() { FirewallEntryId = Guid.NewGuid(), PolicyName = "Allow-HTTPS", VDOM = "root", SourceInterface = "port1", DestinationInterface = "port2", SourceIP = "10.0.0.0/24", DestinationIP = "10.0.1.50", Services = "HTTPS", Schedule = "always", Action = PolicyAction.Accept },
-                    new() { FirewallEntryId = Guid.NewGuid(), PolicyName = "Allow-HTTP", VDOM = "dmz", SourceInterface = "port3", DestinationInterface = "port4", SourceIP = "10.0.0.0/24", DestinationIP = "10.0.1.50", Services = "HTTP", Schedule = "always", Action = PolicyAction.Accept }
+                    new() { FirewallEntryId = Guid.NewGuid(), PolicyName = "Allow-HTTPS", VDOM = "root", SourceInterface = "port1", DestinationInterface = "port2", SourceIP = "10.0.0.0/24", DestinationIP = "10.0.1.50", Services = new List<FirewallServiceEntry> { new() { FirewallServiceEntryId = Guid.NewGuid(), Port = "443", Protocol = "TCP", ServiceName = "HTTPS" } }, Schedule = "always", Action = PolicyAction.Accept },
+                    new() { FirewallEntryId = Guid.NewGuid(), PolicyName = "Allow-HTTP", VDOM = "dmz", SourceInterface = "port3", DestinationInterface = "port4", SourceIP = "10.0.0.0/24", DestinationIP = "10.0.1.50", Services = new List<FirewallServiceEntry> { new() { FirewallServiceEntryId = Guid.NewGuid(), Port = "80", Protocol = "TCP", ServiceName = "HTTP" } }, Schedule = "always", Action = PolicyAction.Accept }
                 }
             }
         };

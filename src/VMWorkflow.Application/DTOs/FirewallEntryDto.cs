@@ -8,7 +8,7 @@ public class FirewallEntryDto
     public string DestinationInterface { get; set; } = string.Empty;
     public string SourceIP { get; set; } = string.Empty;
     public string DestinationIP { get; set; } = string.Empty;
-    public string Services { get; set; } = string.Empty;
+    public List<FirewallServiceEntryDto> Services { get; set; } = new();
     public string Schedule { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
     public List<Guid> SecurityProfileIds { get; set; } = new();

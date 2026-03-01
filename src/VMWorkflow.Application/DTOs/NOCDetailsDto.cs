@@ -9,5 +9,7 @@ public class NOCDetailsDto
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
     public string FQDN { get; set; } = string.Empty;
+    public string VirtualPort { get; set; } = string.Empty;
+    public string VirtualFQDN { get; set; } = string.Empty;
     public List<NetworkPathEntryDto> NetworkPaths { get; set; } = new();
 }

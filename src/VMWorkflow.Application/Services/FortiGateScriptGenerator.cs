@@ -50,7 +50,8 @@ public class FortiGateScriptGenerator : IScriptGenerationService
             sb.AppendLine($"        set dstintf \"{fw.DestinationInterface}\"");
             sb.AppendLine($"        set srcaddr \"{fw.SourceIP}\"");
             sb.AppendLine($"        set dstaddr \"{fw.DestinationIP}\"");
-            sb.AppendLine($"        set service \"{fw.Services}\"");
+            var serviceNames = string.Join(" ", fw.Services.Select(s => string.IsNullOrEmpty(s.ServiceName) ? $"{s.Protocol}/{s.Port}" : s.ServiceName));
+            sb.AppendLine($"        set service \"{serviceNames}\"");
             sb.AppendLine($"        set schedule \"{fw.Schedule}\"");
             sb.AppendLine($"        set action {fw.Action.ToString().ToLower()}");
             sb.AppendLine($"        set logtraffic all");

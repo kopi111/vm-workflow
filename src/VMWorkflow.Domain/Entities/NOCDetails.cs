@@ -12,6 +12,8 @@ public class NOCDetails
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
     public string FQDN { get; set; } = string.Empty;
+    public string VirtualPort { get; set; } = string.Empty;
+    public string VirtualFQDN { get; set; } = string.Empty;
 
     public string SubmittedBy { get; set; } = string.Empty;
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;

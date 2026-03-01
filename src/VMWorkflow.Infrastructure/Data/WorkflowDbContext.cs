@@ -15,6 +15,7 @@ public class WorkflowDbContext : DbContext
     public DbSet<SOCDetails> SOCDetails => Set<SOCDetails>();
     public DbSet<NetworkPathEntry> NetworkPathEntries => Set<NetworkPathEntry>();
     public DbSet<FirewallEntry> FirewallEntries => Set<FirewallEntry>();
+    public DbSet<FirewallServiceEntry> FirewallServiceEntries => Set<FirewallServiceEntry>();
     public DbSet<StatusHistory> StatusHistories => Set<StatusHistory>();
     public DbSet<AutomationLog> AutomationLogs => Set<AutomationLog>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
@@ -32,6 +33,7 @@ public class WorkflowDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SOCDetailsConfiguration());
         modelBuilder.ApplyConfiguration(new NetworkPathEntryConfiguration());
         modelBuilder.ApplyConfiguration(new FirewallEntryConfiguration());
+        modelBuilder.ApplyConfiguration(new FirewallServiceEntryConfiguration());
         modelBuilder.ApplyConfiguration(new StatusHistoryConfiguration());
         modelBuilder.ApplyConfiguration(new AutomationLogConfiguration());
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());

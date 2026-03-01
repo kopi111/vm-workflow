@@ -19,6 +19,8 @@ public class NOCDetailsConfiguration : IEntityTypeConfiguration<NOCDetails>
         builder.Property(n => n.Port).IsRequired().HasMaxLength(50);
         builder.Property(n => n.VIP).IsRequired().HasMaxLength(50);
         builder.Property(n => n.FQDN).IsRequired().HasMaxLength(200);
+        builder.Property(n => n.VirtualPort).HasMaxLength(50);
+        builder.Property(n => n.VirtualFQDN).HasMaxLength(200);
         builder.Property(n => n.SubmittedBy).IsRequired().HasMaxLength(100);
 
         builder.HasMany(n => n.NetworkPaths).WithOne(np => np.NOCDetails).HasForeignKey(np => np.NOCDetailsId).OnDelete(DeleteBehavior.Cascade);

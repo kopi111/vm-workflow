@@ -129,6 +129,8 @@ public class NOCDetailsModel
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
     public string FQDN { get; set; } = string.Empty;
+    public string VirtualPort { get; set; } = string.Empty;
+    public string VirtualFQDN { get; set; } = string.Empty;
     public List<NetworkPathEntryModel> NetworkPaths { get; set; } = new();
 }
 
@@ -152,11 +154,18 @@ public class FirewallEntryModel
     public string DestinationInterface { get; set; } = string.Empty;
     public string SourceIP { get; set; } = string.Empty;
     public string DestinationIP { get; set; } = string.Empty;
-    public string Services { get; set; } = string.Empty;
+    public List<ServiceEntryModel> Services { get; set; } = new();
     public string Schedule { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
     public List<Guid> SecurityProfileIds { get; set; } = new();
     public List<string> SecurityProfileNames { get; set; } = new();
+}
+
+public class ServiceEntryModel
+{
+    public string Port { get; set; } = string.Empty;
+    public string Protocol { get; set; } = "TCP";
+    public string? ServiceName { get; set; }
 }
 
 public class ApprovalModel

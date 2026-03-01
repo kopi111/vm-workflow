@@ -74,6 +74,9 @@ public class RequestService : IRequestService
                 .ThenInclude(n => n!.NetworkPaths)
             .Include(r => r.SOCDetails)
                 .ThenInclude(s => s!.FirewallEntries)
+                    .ThenInclude(f => f.Services)
+            .Include(r => r.SOCDetails)
+                .ThenInclude(s => s!.FirewallEntries)
                     .ThenInclude(f => f.SecurityProfiles)
                         .ThenInclude(sp => sp.SecurityProfile)
             .Include(r => r.StatusHistories)
@@ -230,6 +233,8 @@ public class RequestService : IRequestService
             Port = dto.Port,
             VIP = dto.VIP,
             FQDN = dto.FQDN,
+            VirtualPort = dto.VirtualPort,
+            VirtualFQDN = dto.VirtualFQDN,
             SubmittedBy = submittedBy,
             SubmittedAt = DateTime.UtcNow
         };
@@ -296,10 +301,22 @@ public class RequestService : IRequestService
                 DestinationInterface = fe.DestinationInterface,
                 SourceIP = fe.SourceIP,
                 DestinationIP = fe.DestinationIP,
-                Services = fe.Services,
                 Schedule = fe.Schedule,
                 Action = Enum.Parse<PolicyAction>(fe.Action, true)
             };
+
+            // Add service entries
+            foreach (var svc in fe.Services)
+            {
+                entry.Services.Add(new FirewallServiceEntry
+                {
+                    FirewallServiceEntryId = Guid.NewGuid(),
+                    FirewallEntryId = entry.FirewallEntryId,
+                    Port = svc.Port,
+                    Protocol = svc.Protocol,
+                    ServiceName = svc.ServiceName
+                });
+            }
 
             // Add security profile associations
             foreach (var profileId in fe.SecurityProfileIds)
@@ -458,6 +475,9 @@ public class RequestService : IRequestService
                 .ThenInclude(n => n!.NetworkPaths)
             .Include(r => r.SOCDetails)
                 .ThenInclude(s => s!.FirewallEntries)
+                    .ThenInclude(f => f.Services)
+            .Include(r => r.SOCDetails)
+                .ThenInclude(s => s!.FirewallEntries)
                     .ThenInclude(f => f.SecurityProfiles)
                         .ThenInclude(sp => sp.SecurityProfile)
             .Include(r => r.StatusHistories)
@@ -497,6 +517,9 @@ public class RequestService : IRequestService
             .Include(r => r.DataCenterDetails)
             .Include(r => r.NOCDetails)
                 .ThenInclude(n => n!.NetworkPaths)
+            .Include(r => r.SOCDetails)
+                .ThenInclude(s => s!.FirewallEntries)
+                    .ThenInclude(f => f.Services)
             .Include(r => r.SOCDetails)
                 .ThenInclude(s => s!.FirewallEntries)
                     .ThenInclude(f => f.SecurityProfiles)
@@ -569,6 +592,8 @@ public class RequestService : IRequestService
                 Port = r.NOCDetails.Port,
                 VIP = r.NOCDetails.VIP,
                 FQDN = r.NOCDetails.FQDN,
+                VirtualPort = r.NOCDetails.VirtualPort,
+                VirtualFQDN = r.NOCDetails.VirtualFQDN,
                 NetworkPaths = r.NOCDetails.NetworkPaths.Select(np => new NetworkPathEntryDto
                 {
                     SwitchName = np.SwitchName,
@@ -586,7 +611,12 @@ public class RequestService : IRequestService
                     DestinationInterface = fe.DestinationInterface,
                     SourceIP = fe.SourceIP,
                     DestinationIP = fe.DestinationIP,
-                    Services = fe.Services,
+                    Services = fe.Services.Select(s => new FirewallServiceEntryDto
+                    {
+                        Port = s.Port,
+                        Protocol = s.Protocol,
+                        ServiceName = s.ServiceName
+                    }).ToList(),
                     Schedule = fe.Schedule,
                     Action = fe.Action.ToString(),
                     SecurityProfileIds = fe.SecurityProfiles.Select(sp => sp.SecurityProfileId).ToList(),

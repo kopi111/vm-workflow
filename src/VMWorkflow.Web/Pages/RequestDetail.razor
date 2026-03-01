@@ -412,13 +412,19 @@ else
                                 <MudTextField @bind-Value="nocModel.Gateway" Label="Gateway" Variant="Variant.Outlined" Required="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.Port" Label="Port" Variant="Variant.Outlined" Required="true" />
+                                <MudTextField @bind-Value="nocModel.Port" Label="Virtual Port" Variant="Variant.Outlined" Required="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.VIP" Label="VIP" Variant="Variant.Outlined" Required="true" />
+                                <MudTextField @bind-Value="nocModel.VIP" Label="Virtual IP" Variant="Variant.Outlined" Required="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="nocModel.FQDN" Label="FQDN" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.VirtualPort" Label="Virtual Port (Additional)" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.VirtualFQDN" Label="Virtual FQDN" Variant="Variant.Outlined" />
                             </MudItem>
                         </MudGrid>
                         <MudText Typo="Typo.subtitle1" Class="mt-4 mb-2" Style="font-weight: 600;">Network Paths</MudText>
@@ -426,11 +432,14 @@ else
                         {
                             var idx = i;
                             <MudGrid Class="mb-2">
-                                <MudItem xs="5">
-                                    <MudTextField @bind-Value="nocModel.NetworkPaths[idx].SwitchName" Label="Switch Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                <MudItem xs="4">
+                                    <MudTextField @bind-Value="nocModel.NetworkPaths[idx].SwitchName" Label="Device Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                 </MudItem>
-                                <MudItem xs="5">
+                                <MudItem xs="3">
                                     <MudTextField @bind-Value="nocModel.NetworkPaths[idx].Port" Label="Port" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                </MudItem>
+                                <MudItem xs="3">
+                                    <MudTextField @bind-Value="nocModel.NetworkPaths[idx].LinkSpeed" Label="Link Speed" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                 </MudItem>
                                 <MudItem xs="2" Class="d-flex align-center">
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
@@ -468,20 +477,22 @@ else
                                 <tr><td><strong>Subnet Mask</strong></td><td>@request.NOCDetails.SubnetMask</td></tr>
                                 <tr><td><strong>VLAN ID</strong></td><td>@request.NOCDetails.VLANID</td></tr>
                                 <tr><td><strong>Gateway</strong></td><td>@request.NOCDetails.Gateway</td></tr>
-                                <tr><td><strong>Port</strong></td><td>@request.NOCDetails.Port</td></tr>
-                                <tr><td><strong>VIP</strong></td><td>@request.NOCDetails.VIP</td></tr>
+                                <tr><td><strong>Virtual Port</strong></td><td>@request.NOCDetails.Port</td></tr>
+                                <tr><td><strong>Virtual IP</strong></td><td>@request.NOCDetails.VIP</td></tr>
                                 <tr><td><strong>FQDN</strong></td><td>@request.NOCDetails.FQDN</td></tr>
+                                <tr><td><strong>Virtual Port (Additional)</strong></td><td>@request.NOCDetails.VirtualPort</td></tr>
+                                <tr><td><strong>Virtual FQDN</strong></td><td>@request.NOCDetails.VirtualFQDN</td></tr>
                             </tbody>
                         </MudSimpleTable>
                         @if (request.NOCDetails.NetworkPaths.Any())
                         {
                             <MudText Typo="Typo.subtitle2" Class="mt-3 mb-2" Style="font-weight: 600;">Network Paths</MudText>
                             <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
-                                <thead><tr><th>Switch Name</th><th>Port</th></tr></thead>
+                                <thead><tr><th>Device Name</th><th>Port</th><th>Link Speed</th></tr></thead>
                                 <tbody>
                                     @foreach (var np in request.NOCDetails.NetworkPaths)
                                     {
-                                        <tr><td>@np.SwitchName</td><td>@np.Port</td></tr>
+                                        <tr><td>@np.SwitchName</td><td>@np.Port</td><td>@np.LinkSpeed</td></tr>
                                     }
                                 </tbody>
                             </MudSimpleTable>
@@ -528,15 +539,65 @@ else
                                     <MudItem xs="6">
                                         <MudTextField @bind-Value="socModel.FirewallEntries[idx].DestinationIP" Label="Destination IP" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                     </MudItem>
-                                    <MudItem xs="4">
-                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].Services" Label="Services" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                    </MudItem>
-                                    <MudItem xs="4">
+                                    <MudItem xs="8">
                                         <MudTextField @bind-Value="socModel.FirewallEntries[idx].Schedule" Label="Schedule" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                     </MudItem>
                                     <MudItem xs="4" Class="d-flex align-center justify-end">
                                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
                                             OnClick="@(() => socModel.FirewallEntries.RemoveAt(idx))" />
+                                    </MudItem>
+
+                                    @* Services sub-list *@
+                                    <MudItem xs="12">
+                                        <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600;">Services</MudText>
+                                        @for (int si = 0; si < socModel.FirewallEntries[idx].Services.Count; si++)
+                                        {
+                                            var sIdx = si;
+                                            var feIdx = idx;
+                                            <MudGrid Class="mb-1">
+                                                <MudItem xs="3">
+                                                    <MudTextField @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].Port" Label="Port" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. 443" />
+                                                </MudItem>
+                                                <MudItem xs="3">
+                                                    <MudSelect @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].Protocol" Label="Protocol" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
+                                                        <MudSelectItem Value="@("TCP")">TCP</MudSelectItem>
+                                                        <MudSelectItem Value="@("UDP")">UDP</MudSelectItem>
+                                                    </MudSelect>
+                                                </MudItem>
+                                                <MudItem xs="4">
+                                                    <MudTextField @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].ServiceName" Label="Service Name" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. HTTPS" />
+                                                </MudItem>
+                                                <MudItem xs="2" Class="d-flex align-center">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" Size="Size.Small"
+                                                        OnClick="@(() => socModel.FirewallEntries[feIdx].Services.RemoveAt(sIdx))" />
+                                                </MudItem>
+                                            </MudGrid>
+                                        }
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
+                                            OnClick="@(() => socModel.FirewallEntries[idx].Services.Add(new()))" Style="text-transform: none;">
+                                            Add Service
+                                        </MudButton>
+                                    </MudItem>
+
+                                    @* Security Profiles *@
+                                    <MudItem xs="12">
+                                        <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600;">Security Profiles</MudText>
+                                        <MudStack Row="true" Spacing="1" Class="flex-wrap mb-1">
+                                            @for (int pi = 0; pi < socModel.FirewallEntries[idx].SecurityProfileNames.Count; pi++)
+                                            {
+                                                var pIdx = pi;
+                                                var feIdx2 = idx;
+                                                <MudChip T="string" Color="Color.Secondary" Size="Size.Small" OnClose="@(() => socModel.FirewallEntries[feIdx2].SecurityProfileNames.RemoveAt(pIdx))">
+                                                    @socModel.FirewallEntries[feIdx2].SecurityProfileNames[pIdx]
+                                                </MudChip>
+                                            }
+                                        </MudStack>
+                                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                            <MudTextField @bind-Value="newSecurityProfileName" Label="Profile Name" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width: 250px;"
+                                                @onkeydown="@((e) => { if (e.Key == "Enter") AddSecurityProfile(idx); })" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Small"
+                                                OnClick="@(() => AddSecurityProfile(idx))" />
+                                        </MudStack>
                                     </MudItem>
                                 </MudGrid>
                             </MudPaper>
@@ -568,7 +629,7 @@ else
                         @if (request.SOCDetails.FirewallEntries.Any())
                         {
                             <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
-                                <thead><tr><th>Policy Name</th><th>VDOM</th><th>Src Interface</th><th>Dst Interface</th><th>Src IP</th><th>Dst IP</th><th>Services</th><th>Schedule</th><th>Action</th></tr></thead>
+                                <thead><tr><th>Policy Name</th><th>VDOM</th><th>Src Interface</th><th>Dst Interface</th><th>Src IP</th><th>Dst IP</th><th>Services</th><th>Schedule</th><th>Action</th><th>Security Profiles</th></tr></thead>
                                 <tbody>
                                     @foreach (var fe in request.SOCDetails.FirewallEntries)
                                     {
@@ -579,9 +640,23 @@ else
                                             <td>@fe.DestinationInterface</td>
                                             <td>@fe.SourceIP</td>
                                             <td>@fe.DestinationIP</td>
-                                            <td>@fe.Services</td>
+                                            <td>
+                                                @if (fe.Services.Any())
+                                                {
+                                                    @foreach (var svc in fe.Services)
+                                                    {
+                                                        <div>@svc.Port/@svc.Protocol@(string.IsNullOrEmpty(svc.ServiceName) ? "" : $" ({svc.ServiceName})")</div>
+                                                    }
+                                                }
+                                            </td>
                                             <td>@fe.Schedule</td>
                                             <td>@fe.Action</td>
+                                            <td>
+                                                @if (fe.SecurityProfileNames.Any())
+                                                {
+                                                    @string.Join(", ", fe.SecurityProfileNames)
+                                                }
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -749,6 +824,7 @@ else
     private DataCenterDetailsModel dcModel = new();
     private NOCDetailsModel nocModel = new() { NetworkPaths = new() { new() } };
     private SOCDetailsModel socModel = new() { FirewallEntries = new() { new() } };
+    private string newSecurityProfileName = string.Empty;
 
     private record WorkflowStep(int Number, string Label, string Status);
     private static readonly WorkflowStep[] workflowSteps = new[]
@@ -822,6 +898,15 @@ else
         request = await Api.SubmitNOCAsync(RequestId, nocModel);
         Snackbar.Add("NOC details submitted", Severity.Success);
     });
+
+    private void AddSecurityProfile(int fwIdx)
+    {
+        if (!string.IsNullOrWhiteSpace(newSecurityProfileName) && fwIdx < socModel.FirewallEntries.Count)
+        {
+            socModel.FirewallEntries[fwIdx].SecurityProfileNames.Add(newSecurityProfileName.Trim());
+            newSecurityProfileName = string.Empty;
+        }
+    }
 
     private async Task HandleSubmitSOC() => await ExecuteAction(async () =>
     {
