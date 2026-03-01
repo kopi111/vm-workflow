@@ -1,0 +1,137 @@
+@page "/users"
+@using VMWorkflow.Web.Models
+@using VMWorkflow.Web.Services
+@inject IApiClient ApiClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>User Control</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+    <MudText Typo="Typo.h4">User Control</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd" OnClick="OpenAddUserDialog">Add User</MudButton>
+</MudStack>
+
+<div class="premium-table-wrapper">
+    <MudTable Items="@_users" Loading="@_loading" Dense="true" Hover="true" Striped="true" Bordered="true">
+        <HeaderContent>
+            <MudTh>Username</MudTh>
+            <MudTh>Display Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Block / Unblock</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Username">@context.Username</MudTd>
+            <MudTd DataLabel="Display Name">@context.DisplayName</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Role">
+                <MudSelect T="string" Value="@context.Role" ValueChanged="@(val => UpdateRole(context, val))"
+                           Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width: 180px;">
+                    <MudSelectItem Value="@("Requester")">Requester</MudSelectItem>
+                    <MudSelectItem Value="@("NOCEngineer")">NOC Engineer</MudSelectItem>
+                    <MudSelectItem Value="@("SOCAnalyst")">SOC Analyst</MudSelectItem>
+                    <MudSelectItem Value="@("PlatformAdmin")">Platform Admin</MudSelectItem>
+                    <MudSelectItem Value="@("SysAdmin")">Sys Admin</MudSelectItem>
+                </MudSelect>
+            </MudTd>
+            <MudTd DataLabel="Status">
+                @if (context.IsBlocked)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Error">Blocked</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success">Active</MudChip>
+                }
+            </MudTd>
+            <MudTd DataLabel="Block / Unblock">
+                <MudSwitch T="bool" Value="@context.IsBlocked" ValueChanged="@(val => ToggleBlock(context, val))" Color="Color.Error" />
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No users found.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+</div>
+
+@code {
+    private List<UserModel> _users = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _loading = true;
+        try
+        {
+            _users = await ApiClient.GetUsersAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Failed to load users.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task UpdateRole(UserModel user, string newRole)
+    {
+        if (newRole == user.Role) return;
+        try
+        {
+            var updated = await ApiClient.UpdateUserRoleAsync(user.UserId, newRole);
+            user.Role = updated.Role;
+            user.UpdatedAt = updated.UpdatedAt;
+            Snackbar.Add($"Role for '{user.Username}' changed to {newRole}.", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Failed to update user role.", Severity.Error);
+        }
+    }
+
+    private async Task ToggleBlock(UserModel user, bool isBlocked)
+    {
+        try
+        {
+            var updated = await ApiClient.ToggleBlockAsync(user.UserId, isBlocked);
+            user.IsBlocked = updated.IsBlocked;
+            user.UpdatedAt = updated.UpdatedAt;
+            Snackbar.Add($"User '{user.Username}' {(isBlocked ? "blocked" : "unblocked")}.", isBlocked ? Severity.Warning : Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Failed to update user status.", Severity.Error);
+        }
+    }
+
+    private async Task OpenAddUserDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AddUserDialog>("Add User", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadUsers();
+        }
+    }
+
+    private Color GetRoleColor(string role) => role switch
+    {
+        "SysAdmin" => Color.Error,
+        "PlatformAdmin" => Color.Warning,
+        "NOCEngineer" => Color.Info,
+        "SOCAnalyst" => Color.Secondary,
+        _ => Color.Default
+    };
+}

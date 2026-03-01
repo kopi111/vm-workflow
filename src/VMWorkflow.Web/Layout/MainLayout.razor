@@ -1,0 +1,180 @@
+@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="@_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Dense="true" Class="premium-appbar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="ml-2">
+            <MudAvatar Size="Size.Small" Style="background: rgba(255,255,255,0.15);">
+                <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Small" Style="color: white;" />
+            </MudAvatar>
+            <MudText Typo="Typo.h6" Style="font-family: 'Poppins', sans-serif; font-weight: 600; letter-spacing: 0.5px;">VM Workflow</MudText>
+        </MudStack>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Style="opacity: 0.8;" />
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Inherit" OnClick="@ToggleDarkMode" Style="opacity: 0.8;" />
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                    <ActivatorContent>
+                        <MudChip T="string" Style="background: rgba(255,255,255,0.12); color: white; border-radius: 20px; cursor: pointer;" Class="ml-2">
+                            <MudAvatar Style="background: var(--gradient-accent); width: 28px; height: 28px;" Size="Size.Small" Class="mr-1">
+                                <MudText Typo="Typo.caption" Style="color: white; font-weight: 600;">@(_displayName?.FirstOrDefault())</MudText>
+                            </MudAvatar>
+                            @_username
+                        </MudChip>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Person">Profile</MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogout">Logout</MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0"
+               Variant="DrawerVariant.Mini" OpenMiniOnHover="true"
+               Style="border-right: 1px solid var(--mud-palette-lines-default);">
+        <MudNavMenu>
+            <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"
+                     Style="color: var(--mud-palette-text-secondary); font-weight: 600; letter-spacing: 1px; font-size: 0.65rem;">
+                MAIN
+            </MudText>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/create-request" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddCircleOutline">New Request</MudNavLink>
+
+            <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"
+                     Style="color: var(--mud-palette-text-secondary); font-weight: 600; letter-spacing: 1px; font-size: 0.65rem;">
+                WORK QUEUES
+            </MudText>
+            <MudNavLink Href="/drafts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Drafts">Drafts</MudNavLink>
+
+            <AuthorizeView Roles="SysAdmin,PlatformAdmin">
+                <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"
+                         Style="color: var(--mud-palette-text-secondary); font-weight: 600; letter-spacing: 1px; font-size: 0.65rem;">
+                    ADMIN
+                </MudText>
+                <MudNavLink Href="/logs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ListAlt">Logs</MudNavLink>
+                <MudNavLink Href="/users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">User Control</MudNavLink>
+            </AuthorizeView>
+        </MudNavMenu>
+
+        <MudSpacer />
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="pa-4">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudAvatar Style="background: var(--gradient-primary);" Size="Size.Small">
+                            <MudText Style="color: white; font-weight: 600;" Typo="Typo.caption">@(_displayName?.FirstOrDefault())</MudText>
+                        </MudAvatar>
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">@_displayName</MudText>
+                            <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@_role</MudText>
+                        </MudStack>
+                    </MudStack>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </MudDrawer>
+
+    <MudMainContent Class="pt-16 px-4" Style="min-height: 100vh;">
+        <div class="page-content">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    private string? _username;
+    private string? _displayName;
+    private string? _role;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private MudTheme _theme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#667eea",
+            Secondary = "#764ba2",
+            Tertiary = "#f093fb",
+            Info = "#4facfe",
+            Success = "#43e97b",
+            Warning = "#ffa726",
+            Error = "#ef5350",
+            AppbarBackground = "#667eea",
+            Background = "#f5f7fb",
+            Surface = "#ffffff",
+            DrawerBackground = "#ffffff",
+            TextPrimary = "#1a1a2e",
+            TextSecondary = "#6b7280"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#7c8cf5",
+            Secondary = "#a78bfa",
+            Tertiary = "#f093fb",
+            Info = "#4facfe",
+            Success = "#43e97b",
+            Warning = "#ffa726",
+            Error = "#ef5350",
+            AppbarBackground = "#1a1a3e",
+            Background = "#0f0f23",
+            Surface = "#1a1a3e",
+            DrawerBackground = "#12122b",
+            TextPrimary = "#e2e8f0",
+            TextSecondary = "#94a3b8"
+        },
+        Typography = new Typography
+        {
+            Default = new Default { FontFamily = new[] { "Inter", "Roboto", "Helvetica", "Arial", "sans-serif" } },
+            H1 = new H1 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 700 },
+            H2 = new H2 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 700 },
+            H3 = new H3 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 600 },
+            H4 = new H4 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 600 },
+            H5 = new H5 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 600 },
+            H6 = new H6 { FontFamily = new[] { "Poppins", "Inter", "sans-serif" }, FontWeight = 600 }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "12px"
+        }
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AuthState != null)
+        {
+            var state = await AuthState;
+            var user = state.User;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                _username = user.Identity.Name;
+                _displayName = user.FindFirst("displayName")?.Value ?? _username;
+                _role = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            }
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+}

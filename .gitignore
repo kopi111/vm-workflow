@@ -1,0 +1,24 @@
+## .NET
+bin/
+obj/
+
+## User-specific
+*.user
+*.suo
+*.rsuser
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+
+## VS Code
+.vscode/
+
+## SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+## OS
+.DS_Store
+Thumbs.db

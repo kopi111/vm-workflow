@@ -1,0 +1,140 @@
+@page "/logs"
+@using VMWorkflow.Web.Models
+@using VMWorkflow.Web.Services
+@inject IApiClient ApiClient
+
+<PageTitle>Logs</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">Logs</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+        <MudDatePicker Label="From" @bind-Date="_fromDate" Clearable="true" />
+        <MudDatePicker Label="To" @bind-Date="_toDate" Clearable="true" />
+        <MudTextField T="string" Label="User" @bind-Value="_userFilter" Clearable="true" Immediate="true" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilters" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
+    </MudStack>
+</MudPaper>
+
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+    <MudTabPanel Text="Status Transitions" Icon="@Icons.Material.Filled.SwapHoriz">
+        <div class="premium-table-wrapper">
+            <MudTable Items="@_statusLogs" Loading="@_loadingStatus" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>Timestamp</MudTh>
+                    <MudTh>Request</MudTh>
+                    <MudTh>Changed By</MudTh>
+                    <MudTh>Old Status</MudTh>
+                    <MudTh>New Status</MudTh>
+                    <MudTh>Comments</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                    <MudTd DataLabel="Request">
+                        <MudLink Href="@($"/requests/{context.RequestId}")">@context.RequestNumber</MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Changed By">@context.ChangedBy</MudTd>
+                    <MudTd DataLabel="Old Status">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Default">@context.OldStatus</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="New Status">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.NewStatus</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Comments">@(context.Comments ?? "—")</MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText>No status transitions found.</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </div>
+    </MudTabPanel>
+
+    <MudTabPanel Text="HTTP Audit Logs" Icon="@Icons.Material.Filled.Http">
+        <div class="premium-table-wrapper">
+            <MudTable Items="@_auditLogs" Loading="@_loadingAudit" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>Timestamp</MudTh>
+                    <MudTh>User</MudTh>
+                    <MudTh>Method</MudTh>
+                    <MudTh>Path</MudTh>
+                    <MudTh>Status</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                    <MudTd DataLabel="User">@context.User</MudTd>
+                    <MudTd DataLabel="Method">
+                        <MudChip T="string" Size="Size.Small" Color="@GetMethodColor(context.HttpMethod)">@context.HttpMethod</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Path">@context.Path</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.StatusCode)">@context.StatusCode</MudChip>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText>No audit logs found.</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </div>
+    </MudTabPanel>
+</MudTabs>
+
+@code {
+    private List<StatusHistoryLogEntry> _statusLogs = new();
+    private List<AuditLogEntry> _auditLogs = new();
+    private bool _loadingStatus = true;
+    private bool _loadingAudit = true;
+
+    private DateTime? _fromDate;
+    private DateTime? _toDate;
+    private string? _userFilter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task ApplyFilters()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _loadingStatus = true;
+        _loadingAudit = true;
+
+        var from = _fromDate.HasValue ? DateTime.SpecifyKind(_fromDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+        var to = _toDate.HasValue ? DateTime.SpecifyKind(_toDate.Value.AddDays(1).AddTicks(-1), DateTimeKind.Utc) : (DateTime?)null;
+
+        try
+        {
+            _statusLogs = await ApiClient.GetStatusHistoryLogsAsync(from, to, _userFilter);
+        }
+        catch { _statusLogs = new(); }
+        finally { _loadingStatus = false; }
+
+        try
+        {
+            _auditLogs = await ApiClient.GetAuditLogsAsync(from, to, _userFilter);
+        }
+        catch { _auditLogs = new(); }
+        finally { _loadingAudit = false; }
+    }
+
+    private Color GetMethodColor(string method) => method switch
+    {
+        "GET" => Color.Info,
+        "POST" => Color.Success,
+        "PUT" => Color.Warning,
+        "DELETE" => Color.Error,
+        _ => Color.Default
+    };
+
+    private Color GetStatusColor(int code) => code switch
+    {
+        >= 200 and < 300 => Color.Success,
+        >= 400 and < 500 => Color.Warning,
+        >= 500 => Color.Error,
+        _ => Color.Default
+    };
+}

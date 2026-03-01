@@ -1,0 +1,914 @@
+@page "/request/{RequestId:guid}"
+@inject IApiClient Api
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Request Detail</PageTitle>
+
+<div class="page-content">
+@if (isLoading)
+{
+    <MudStack Spacing="4">
+        <div class="shimmer" style="height: 40px; width: 300px;"></div>
+        <div class="shimmer" style="height: 80px;"></div>
+        <div class="shimmer" style="height: 200px;"></div>
+    </MudStack>
+}
+else if (request == null)
+{
+    <MudPaper Class="premium-card pa-8 text-center" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Style="opacity: 0.3;" />
+        <MudText Typo="Typo.h6" Class="mt-3">Request not found</MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/" Class="mt-3" Style="border-radius: 12px;">
+            Back to Dashboard
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    @* Header *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/" Variant="Variant.Outlined" Size="Size.Small"
+                           Style="border-radius: 10px;" />
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Style="font-weight: 700;">@request.ObjectSlug</MudText>
+                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@request.ApplicationName</MudText>
+            </MudStack>
+            <MudChip T="string" Color="@GetStatusColor(request.Status)" Variant="Variant.Filled" Size="Size.Medium"
+                     Style="border-radius: 10px; font-weight: 600;">
+                <span class="pulse-dot @GetPulseClass(request.Status)" style="margin-right: 6px;"></span>
+                @FormatStatus(request.Status)
+            </MudChip>
+        </MudStack>
+        @if (CanSendBack(request.Status))
+        {
+            <MudButton Variant="Variant.Outlined" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Undo"
+                OnClick="@(() => showSendBack = !showSendBack)" Style="border-radius: 12px; text-transform: none;">
+                Send Back
+            </MudButton>
+        }
+    </MudStack>
+
+    @* Workflow Stepper — Premium *@
+    <MudPaper Elevation="0" Class="premium-card pa-0 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div class="workflow-stepper">
+            @for (int i = 0; i < workflowSteps.Length; i++)
+            {
+                var step = workflowSteps[i];
+                var isCurrent = step.Status == request.Status || (step.Status == "PendingNOC" && request.Status == "PendingSOC");
+                var isPast = GetStepIndex(request.Status) > GetStepIndex(step.Status);
+
+                if (i > 0)
+                {
+                    <div class="step-connector @(isPast ? "connector-done" : isCurrent ? "connector-active" : "")"></div>
+                }
+
+                <div class="workflow-step @(isPast ? "step-done" : isCurrent ? "step-current" : "")">
+                    <div class="step-circle @(isPast ? "step-done" : isCurrent ? "step-current" : "step-future")">
+                        @if (isPast)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                        }
+                        else
+                        {
+                            @step.Number
+                        }
+                    </div>
+                    <span class="step-label">@step.Label</span>
+                </div>
+            }
+        </div>
+    </MudPaper>
+
+    @* Send Back Panel *@
+    @if (showSendBack)
+    {
+        <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-warning);">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" />
+                <MudText Typo="Typo.h6">Send Back to Previous Step</MudText>
+            </MudStack>
+            <MudTextField @bind-Value="sendBackComments" Label="Reason (required)" Required="true"
+                Lines="3" Variant="Variant.Outlined" Class="mb-3" />
+            <MudStack Row="true" Spacing="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="HandleSendBack"
+                    Disabled="@(isBusy || string.IsNullOrWhiteSpace(sendBackComments))"
+                    Style="border-radius: 12px; text-transform: none;">
+                    @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                    Send Back
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => showSendBack = false)"
+                    Style="border-radius: 12px; text-transform: none;">Cancel</MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+
+    @* Error *@
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4" ShowCloseIcon="true" CloseIconClicked="@(() => errorMessage = null)"
+                  Style="border-radius: 12px;">@errorMessage</MudAlert>
+    }
+
+    <MudGrid>
+        @* Left Column *@
+        <MudItem xs="12" md="8">
+            <div class="stagger-in">
+                @* Application Info *@
+                <MudPaper Elevation="0" Class="section-card gradient-border-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                        <MudAvatar Size="Size.Small" Style="background: var(--gradient-primary);">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Style="color: white;" />
+                        </MudAvatar>
+                        <MudText Typo="Typo.h6">Application Info</MudText>
+                    </MudStack>
+                    <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                        <tbody>
+                            <tr><td style="width:200px"><strong>Application Name</strong></td><td>@request.ApplicationName</td></tr>
+                            <tr><td><strong>Environment</strong></td><td>@request.Environment</td></tr>
+                            <tr><td><strong>Language</strong></td><td>@(request.ProgrammingLanguage ?? "—")</td></tr>
+                            <tr><td><strong>Framework</strong></td><td>@(request.Framework ?? "—")</td></tr>
+                            <tr><td><strong>Purpose</strong></td><td>@(request.Purpose ?? "—")</td></tr>
+                            <tr><td><strong>Expected Users</strong></td><td>@(request.ExpectedUsers?.ToString() ?? "—")</td></tr>
+                            <tr><td><strong>DBMS</strong></td><td>@(request.DBMS ?? "—")</td></tr>
+                            <tr><td><strong>Git Repo</strong></td><td>@(request.GitRepoLink ?? "—")</td></tr>
+                            <tr><td><strong>Access Group</strong></td><td>@(request.AccessGroup ?? "—")</td></tr>
+                            <tr><td><strong>SLA</strong></td><td>@request.SLA</td></tr>
+                            <tr><td><strong>FQDN Suggestion</strong></td><td>@(request.FQDNSuggestion ?? "—")</td></tr>
+                            <tr><td><strong>Auth Method</strong></td><td>@(request.AuthenticationMethod ?? "—")</td></tr>
+                            <tr><td><strong>Created By</strong></td><td>@request.CreatedBy</td></tr>
+                            <tr><td><strong>Created At</strong></td><td>@request.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td></tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudPaper>
+
+                @* Draft → Edit / Submit *@
+                @if (request.Status == "Draft")
+                {
+                    @if (isEditingDraft)
+                    {
+                        <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                                <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #ffa726, #ff7043);">
+                                    <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Style="color: white;" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.h6">Edit Draft</MudText>
+                            </MudStack>
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.ApplicationName" Label="Application Name" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.ProgrammingLanguage" Label="Language" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.Framework" Label="Framework" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudNumericField @bind-Value="editModel.ExpectedUsers" Label="Expected Users" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="editModel.Purpose" Label="Purpose" Variant="Variant.Outlined" Lines="2" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.DBMS" Label="DBMS" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.GitRepoLink" Label="Git Repo" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.AccessGroup" Label="Access Group" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudSelect @bind-Value="editModel.SLA" Label="SLA" Variant="Variant.Outlined">
+                                        <MudSelectItem Value="@("Standard")">Standard</MudSelectItem>
+                                        <MudSelectItem Value="@("Critical")">Critical</MudSelectItem>
+                                        <MudSelectItem Value="@("MissionCritical")">Mission Critical</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.FQDNSuggestion" Label="FQDN Suggestion" Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="editModel.AuthenticationMethod" Label="Auth Method" Variant="Variant.Outlined" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudStack Row="true" Spacing="2" Class="mt-4">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSaveDraft" Disabled="@isBusy"
+                                           StartIcon="@Icons.Material.Filled.Save" Style="border-radius: 12px; text-transform: none;">
+                                    @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                                    Save Changes
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" OnClick="@(() => isEditingDraft = false)"
+                                           Style="border-radius: 12px; text-transform: none;">Cancel</MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    }
+                    else
+                    {
+                        <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                                <MudAvatar Size="Size.Small" Style="background: var(--gradient-primary);">
+                                    <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" Style="color: white;" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.h6">Submit Request</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2" Class="mb-3" Style="color: var(--mud-palette-text-secondary);">
+                                Submit this request to send it to the SysAdmin for review, or edit the draft first.
+                            </MudText>
+                            <MudStack Row="true" Spacing="2">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmit" Disabled="@isBusy"
+                                           StartIcon="@Icons.Material.Filled.Send" Style="border-radius: 12px; text-transform: none;">
+                                    @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                                    Submit Request
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="StartEditDraft"
+                                           StartIcon="@Icons.Material.Filled.Edit" Style="border-radius: 12px; text-transform: none;">
+                                    Edit Draft
+                                </MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    }
+                }
+
+                @* SysAdmin Form *@
+                @if (request.Status == "PendingSysAdmin")
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">SysAdmin Details</MudText>
+                        </MudStack>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="sysAdminModel.SensitivityLevel" Label="Sensitivity Level" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("Low")">Low</MudSelectItem>
+                                    <MudSelectItem Value="@("Medium")">Medium</MudSelectItem>
+                                    <MudSelectItem Value="@("High")">High</MudSelectItem>
+                                    <MudSelectItem Value="@("Critical")">Critical</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="sysAdminModel.ServerResources" Label="Server Resources" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("Micro")">Micro</MudSelectItem>
+                                    <MudSelectItem Value="@("Small")">Small</MudSelectItem>
+                                    <MudSelectItem Value="@("Medium")">Medium</MudSelectItem>
+                                    <MudSelectItem Value="@("Large")">Large</MudSelectItem>
+                                    <MudSelectItem Value="@("XLarge")">XLarge</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="sysAdminModel.WebServer" Label="Web Server" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("IIS")">IIS</MudSelectItem>
+                                    <MudSelectItem Value="@("Apache")">Apache</MudSelectItem>
+                                    <MudSelectItem Value="@("Nginx")">Nginx</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="sysAdminModel.Hostname" Label="Hostname" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="sysAdminModel.DatabaseName" Label="Database Name" Variant="Variant.Outlined"
+                                    Placeholder="@($"{request.ApplicationName}_Database")" HelperText="Leave blank for auto-fill" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="sysAdminModel.DatabaseUsername" Label="Database Username" Variant="Variant.Outlined"
+                                    Placeholder="@($"{request.ApplicationName}_User")" HelperText="Leave blank for auto-fill" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="HandleSubmitSysAdmin" Disabled="@isBusy"
+                                   Style="border-radius: 12px; text-transform: none;">
+                            @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                            Submit SysAdmin Details
+                        </MudButton>
+                    </MudPaper>
+                }
+
+                @* SysAdmin Details (read-only) *@
+                @if (request.SysAdminDetails != null && request.Status != "PendingSysAdmin")
+                {
+                    <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">SysAdmin Details</MudText>
+                        </MudStack>
+                        <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                            <tbody>
+                                <tr><td style="width:200px"><strong>Sensitivity</strong></td><td>@request.SysAdminDetails.SensitivityLevel</td></tr>
+                                <tr><td><strong>Server Resources</strong></td><td>@request.SysAdminDetails.ServerResources</td></tr>
+                                <tr><td><strong>Web Server</strong></td><td>@request.SysAdminDetails.WebServer</td></tr>
+                                <tr><td><strong>Hostname</strong></td><td>@request.SysAdminDetails.Hostname</td></tr>
+                                <tr><td><strong>Database Name</strong></td><td>@request.SysAdminDetails.DatabaseName</td></tr>
+                                <tr><td><strong>Database Username</strong></td><td>@request.SysAdminDetails.DatabaseUsername</td></tr>
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudPaper>
+                }
+
+                @* DataCenter Form *@
+                @if (request.Status == "DataCenterReview")
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                <MudIcon Icon="@Icons.Material.Filled.Storage" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">DataCenter Details</MudText>
+                        </MudStack>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="dcModel.Environment" Label="Server Environment" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("Dell")">Dell</MudSelectItem>
+                                    <MudSelectItem Value="@("HyperV")">HyperV</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="dcModel.UplinkSpeed" Label="Uplink Speed" Variant="Variant.Outlined" Placeholder="e.g. 10Gbps" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="dcModel.BareMetalType" Label="Bare Metal Type" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("VM")">VM</MudSelectItem>
+                                    <MudSelectItem Value="@("Physical")">Physical</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="dcModel.PortNumber" Label="Port Number" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="dcModel.DC" Label="DC" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="dcModel.RackRoom" Label="Rack Room" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="dcModel.RackNumber" Label="Rack Number" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="dcModel.Cluster" Label="Cluster" Variant="Variant.Outlined" Required="true">
+                                    <MudSelectItem Value="@("HyperFlex")">HyperFlex</MudSelectItem>
+                                    <MudSelectItem Value="@("VxRail")">VxRail</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="HandleSubmitDC" Disabled="@isBusy"
+                                   Style="border-radius: 12px; text-transform: none;">
+                            @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                            Submit DataCenter Details
+                        </MudButton>
+                    </MudPaper>
+                }
+
+                @* DataCenter Details (read-only) *@
+                @if (request.DataCenterDetails != null && request.Status != "DataCenterReview")
+                {
+                    <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">DataCenter Details</MudText>
+                        </MudStack>
+                        <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                            <tbody>
+                                <tr><td style="width:200px"><strong>Environment</strong></td><td>@request.DataCenterDetails.Environment</td></tr>
+                                <tr><td><strong>Uplink Speed</strong></td><td>@request.DataCenterDetails.UplinkSpeed</td></tr>
+                                <tr><td><strong>Bare Metal Type</strong></td><td>@request.DataCenterDetails.BareMetalType</td></tr>
+                                <tr><td><strong>Port Number</strong></td><td>@request.DataCenterDetails.PortNumber</td></tr>
+                                <tr><td><strong>DC</strong></td><td>@request.DataCenterDetails.DC</td></tr>
+                                <tr><td><strong>Rack Room</strong></td><td>@request.DataCenterDetails.RackRoom</td></tr>
+                                <tr><td><strong>Rack Number</strong></td><td>@request.DataCenterDetails.RackNumber</td></tr>
+                                <tr><td><strong>Cluster</strong></td><td>@request.DataCenterDetails.Cluster</td></tr>
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudPaper>
+                }
+
+                @* NOC Form *@
+                @if (request.Status is "PendingNOC" or "PendingSOC" && request.NOCDetails == null)
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #ffa726, #ff7043);">
+                                <MudIcon Icon="@Icons.Material.Filled.Router" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">NOC Details</MudText>
+                        </MudStack>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.IPAddress" Label="IP Address" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.SubnetMask" Label="Subnet Mask" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.VLANID" Label="VLAN ID" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.Gateway" Label="Gateway" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.Port" Label="Port" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.VIP" Label="VIP" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="nocModel.FQDN" Label="FQDN" Variant="Variant.Outlined" Required="true" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudText Typo="Typo.subtitle1" Class="mt-4 mb-2" Style="font-weight: 600;">Network Paths</MudText>
+                        @for (int i = 0; i < nocModel.NetworkPaths.Count; i++)
+                        {
+                            var idx = i;
+                            <MudGrid Class="mb-2">
+                                <MudItem xs="5">
+                                    <MudTextField @bind-Value="nocModel.NetworkPaths[idx].SwitchName" Label="Switch Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                </MudItem>
+                                <MudItem xs="5">
+                                    <MudTextField @bind-Value="nocModel.NetworkPaths[idx].Port" Label="Port" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                </MudItem>
+                                <MudItem xs="2" Class="d-flex align-center">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                        OnClick="@(() => nocModel.NetworkPaths.RemoveAt(idx))" />
+                                </MudItem>
+                            </MudGrid>
+                        }
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
+                            OnClick="@(() => nocModel.NetworkPaths.Add(new()))" Style="border-radius: 10px; text-transform: none;">
+                            Add Network Path
+                        </MudButton>
+                        <div class="mt-4">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmitNOC" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;">
+                                @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                                Submit NOC Details
+                            </MudButton>
+                        </div>
+                    </MudPaper>
+                }
+
+                @* NOC Details (read-only) *@
+                @if (request.NOCDetails != null)
+                {
+                    <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">NOC Details</MudText>
+                        </MudStack>
+                        <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                            <tbody>
+                                <tr><td style="width:200px"><strong>IP Address</strong></td><td>@request.NOCDetails.IPAddress</td></tr>
+                                <tr><td><strong>Subnet Mask</strong></td><td>@request.NOCDetails.SubnetMask</td></tr>
+                                <tr><td><strong>VLAN ID</strong></td><td>@request.NOCDetails.VLANID</td></tr>
+                                <tr><td><strong>Gateway</strong></td><td>@request.NOCDetails.Gateway</td></tr>
+                                <tr><td><strong>Port</strong></td><td>@request.NOCDetails.Port</td></tr>
+                                <tr><td><strong>VIP</strong></td><td>@request.NOCDetails.VIP</td></tr>
+                                <tr><td><strong>FQDN</strong></td><td>@request.NOCDetails.FQDN</td></tr>
+                            </tbody>
+                        </MudSimpleTable>
+                        @if (request.NOCDetails.NetworkPaths.Any())
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="mt-3 mb-2" Style="font-weight: 600;">Network Paths</MudText>
+                            <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                                <thead><tr><th>Switch Name</th><th>Port</th></tr></thead>
+                                <tbody>
+                                    @foreach (var np in request.NOCDetails.NetworkPaths)
+                                    {
+                                        <tr><td>@np.SwitchName</td><td>@np.Port</td></tr>
+                                    }
+                                </tbody>
+                            </MudSimpleTable>
+                        }
+                    </MudPaper>
+                }
+
+                @* SOC Form *@
+                @if (request.Status is "PendingNOC" or "PendingSOC" && request.SOCDetails == null)
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #ef5350, #d32f2f);">
+                                <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">SOC Details — Firewall Entries</MudText>
+                        </MudStack>
+                        @for (int i = 0; i < socModel.FirewallEntries.Count; i++)
+                        {
+                            var idx = i;
+                            <MudPaper Elevation="0" Class="pa-3 mb-3" Style="border: 1px dashed var(--mud-palette-lines-default); border-radius: 8px;">
+                                <MudGrid>
+                                    <MudItem xs="4">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].PolicyName" Label="Policy Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].VDOM" Label="VDOM" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <MudSelect @bind-Value="socModel.FirewallEntries[idx].Action" Label="Action" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
+                                            <MudSelectItem Value="@("Accept")">Accept</MudSelectItem>
+                                            <MudSelectItem Value="@("Reject")">Reject</MudSelectItem>
+                                        </MudSelect>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].SourceInterface" Label="Source Interface" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].DestinationInterface" Label="Destination Interface" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].SourceIP" Label="Source IP" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].DestinationIP" Label="Destination IP" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].Services" Label="Services" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].Schedule" Label="Schedule" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    </MudItem>
+                                    <MudItem xs="4" Class="d-flex align-center justify-end">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                            OnClick="@(() => socModel.FirewallEntries.RemoveAt(idx))" />
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
+                        }
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
+                            OnClick="@(() => socModel.FirewallEntries.Add(new()))" Style="border-radius: 10px; text-transform: none;">
+                            Add Firewall Entry
+                        </MudButton>
+                        <div class="mt-4">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmitSOC" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;">
+                                @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                                Submit SOC Details
+                            </MudButton>
+                        </div>
+                    </MudPaper>
+                }
+
+                @* SOC Details (read-only) *@
+                @if (request.SOCDetails != null)
+                {
+                    <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">SOC Details</MudText>
+                        </MudStack>
+                        @if (request.SOCDetails.FirewallEntries.Any())
+                        {
+                            <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                                <thead><tr><th>Policy Name</th><th>VDOM</th><th>Src Interface</th><th>Dst Interface</th><th>Src IP</th><th>Dst IP</th><th>Services</th><th>Schedule</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    @foreach (var fe in request.SOCDetails.FirewallEntries)
+                                    {
+                                        <tr>
+                                            <td>@fe.PolicyName</td>
+                                            <td>@fe.VDOM</td>
+                                            <td>@fe.SourceInterface</td>
+                                            <td>@fe.DestinationInterface</td>
+                                            <td>@fe.SourceIP</td>
+                                            <td>@fe.DestinationIP</td>
+                                            <td>@fe.Services</td>
+                                            <td>@fe.Schedule</td>
+                                            <td>@fe.Action</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </MudSimpleTable>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">No firewall entries.</MudText>
+                        }
+                    </MudPaper>
+                }
+
+                @* IOC Manager Approval *@
+                @if (request.Status == "PendingIOCApproval")
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #764ba2, #667eea);">
+                                <MudIcon Icon="@Icons.Material.Filled.Approval" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">IOC Manager Approval</MudText>
+                        </MudStack>
+                        <MudTextField @bind-Value="approvalComments" Label="Comments" Lines="3" Variant="Variant.Outlined" Class="mb-3" />
+                        <MudStack Row="true" Spacing="2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => HandleApproval("Approve"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.CheckCircle">
+                                Approve
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => HandleApproval("Reject"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Cancel">
+                                Reject
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => HandleApproval("Return"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Undo">
+                                Return
+                            </MudButton>
+                        </MudStack>
+                    </MudPaper>
+                }
+
+                @* Approval (CISO / CTO / Ops Officer - any 2 of 3) *@
+                @if (request.Status == "PendingApproval")
+                {
+                    <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #f093fb, #764ba2);">
+                                <MudIcon Icon="@Icons.Material.Filled.Shield" Size="Size.Small" Style="color: white;" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6">Approval (2 of 3 Required)</MudText>
+                        </MudStack>
+                        <MudText Typo="Typo.body2" Class="mb-2">CISO: @(request.CisoDecision ?? "Pending") | CTO: @(request.CtoDecision ?? "Pending") | Ops: @(request.OpsDecision ?? "Pending")</MudText>
+                        <MudTextField @bind-Value="approvalComments" Label="Comments" Lines="3" Variant="Variant.Outlined" Class="mb-3" />
+                        <MudStack Row="true" Spacing="2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => HandleCISOApproval("Approve"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.CheckCircle">
+                                CISO Approve
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => HandleCTOApproval("Approve"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.CheckCircle">
+                                CTO Approve
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => HandleOpsApproval("Approve"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.CheckCircle">
+                                Ops Approve
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => HandleCISOApproval("Reject"))" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Cancel">
+                                Reject
+                            </MudButton>
+                        </MudStack>
+                    </MudPaper>
+                }
+
+                @* Final status banners *@
+                @if (request.Status == "Approved")
+                {
+                    <MudAlert Severity="Severity.Success" Class="mb-4" Icon="@Icons.Material.Filled.CheckCircle" Style="border-radius: 12px;">
+                        This request has been fully approved and is ready for implementation.
+                    </MudAlert>
+                }
+                @if (request.Status == "Rejected")
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4" Icon="@Icons.Material.Filled.Cancel" Style="border-radius: 12px;">
+                        This request has been rejected.
+                    </MudAlert>
+                }
+                @if (request.Status == "Implemented")
+                {
+                    <MudAlert Severity="Severity.Success" Class="mb-4" Icon="@Icons.Material.Filled.RocketLaunch" Style="border-radius: 12px;">
+                        This request has been implemented.
+                    </MudAlert>
+                }
+                @if (request.Status == "Closed")
+                {
+                    <MudAlert Severity="Severity.Info" Class="mb-4" Icon="@Icons.Material.Filled.Lock" Style="border-radius: 12px;">
+                        This request is closed.
+                    </MudAlert>
+                }
+            </div>
+        </MudItem>
+
+        @* Right Column: Status History *@
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default); position: sticky; top: 80px;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                    <MudAvatar Size="Size.Small" Style="background: var(--gradient-primary);">
+                        <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" Style="color: white;" />
+                    </MudAvatar>
+                    <MudText Typo="Typo.h6">Status History</MudText>
+                </MudStack>
+                @if (request.StatusHistories.Any())
+                {
+                    <MudTimeline TimelinePosition="TimelinePosition.Start">
+                        @foreach (var h in request.StatusHistories)
+                        {
+                            var isSendBack = h.Comments?.StartsWith("Sent back") == true;
+                            <MudTimelineItem Color="@(isSendBack ? Color.Warning : Color.Primary)" Size="Size.Small">
+                                <MudStack Spacing="0">
+                                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(h.NewStatus)" Variant="Variant.Filled"
+                                             Style="border-radius: 8px; font-weight: 500;">
+                                        @FormatStatus(h.NewStatus)
+                                    </MudChip>
+                                    <MudText Typo="Typo.caption" Class="mt-1" Style="color: var(--mud-palette-text-secondary);">
+                                        @h.ChangedBy &bull; @h.Timestamp.ToString("MMM dd, HH:mm")
+                                    </MudText>
+                                    @if (!string.IsNullOrEmpty(h.Comments))
+                                    {
+                                        <MudText Typo="Typo.body2" Class="mt-1" Style="@(isSendBack ? "color: var(--mud-palette-warning);" : "")">
+                                            @h.Comments
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudTimelineItem>
+                        }
+                    </MudTimeline>
+                }
+                else
+                {
+                    <MudStack AlignItems="AlignItems.Center" Class="pa-4" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Large" Style="opacity: 0.2;" />
+                        <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">No history yet.</MudText>
+                    </MudStack>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+</div>
+
+@code {
+    [Parameter] public Guid RequestId { get; set; }
+
+    private RequestResponse? request;
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? errorMessage;
+    private bool showSendBack;
+    private string sendBackComments = string.Empty;
+    private string approvalComments = string.Empty;
+
+    private bool isEditingDraft;
+    private UpdateRequestModel editModel = new();
+
+    private SysAdminDetailsModel sysAdminModel = new();
+    private DataCenterDetailsModel dcModel = new();
+    private NOCDetailsModel nocModel = new() { NetworkPaths = new() { new() } };
+    private SOCDetailsModel socModel = new() { FirewallEntries = new() { new() } };
+
+    private record WorkflowStep(int Number, string Label, string Status);
+    private static readonly WorkflowStep[] workflowSteps = new[]
+    {
+        new WorkflowStep(1, "Draft", "Draft"),
+        new WorkflowStep(2, "SysAdmin", "PendingSysAdmin"),
+        new WorkflowStep(3, "DataCenter", "DataCenterReview"),
+        new WorkflowStep(4, "NOC/SOC", "PendingNOC"),
+        new WorkflowStep(5, "IOC Approve", "PendingIOCApproval"),
+        new WorkflowStep(6, "Approval", "PendingApproval"),
+        new WorkflowStep(8, "Approved", "Approved"),
+    };
+
+    protected override async Task OnInitializedAsync() => await LoadRequest();
+
+    private async Task LoadRequest()
+    {
+        isLoading = true;
+        try { request = await Api.GetRequestAsync(RequestId); }
+        catch { request = null; }
+        finally { isLoading = false; }
+    }
+
+    private void StartEditDraft()
+    {
+        if (request == null) return;
+        editModel = new UpdateRequestModel
+        {
+            ApplicationName = request.ApplicationName,
+            ProgrammingLanguage = request.ProgrammingLanguage,
+            Framework = request.Framework,
+            Purpose = request.Purpose,
+            ExpectedUsers = request.ExpectedUsers,
+            DBMS = request.DBMS,
+            GitRepoLink = request.GitRepoLink,
+            AccessGroup = request.AccessGroup,
+            SLA = request.SLA,
+            FQDNSuggestion = request.FQDNSuggestion,
+            AuthenticationMethod = request.AuthenticationMethod
+        };
+        isEditingDraft = true;
+    }
+
+    private async Task HandleSaveDraft() => await ExecuteAction(async () =>
+    {
+        request = await Api.UpdateRequestAsync(RequestId, editModel);
+        isEditingDraft = false;
+        Snackbar.Add("Draft updated successfully!", Severity.Success);
+    });
+
+    private async Task HandleSubmit() => await ExecuteAction(async () =>
+    {
+        request = await Api.SubmitRequestAsync(RequestId);
+        Snackbar.Add("Request submitted to SysAdmin", Severity.Success);
+    });
+
+    private async Task HandleSubmitSysAdmin() => await ExecuteAction(async () =>
+    {
+        request = await Api.SubmitSysAdminAsync(RequestId, sysAdminModel);
+        Snackbar.Add("SysAdmin details submitted", Severity.Success);
+    });
+
+    private async Task HandleSubmitDC() => await ExecuteAction(async () =>
+    {
+        request = await Api.SubmitDataCenterAsync(RequestId, dcModel);
+        Snackbar.Add("DataCenter details submitted", Severity.Success);
+    });
+
+    private async Task HandleSubmitNOC() => await ExecuteAction(async () =>
+    {
+        request = await Api.SubmitNOCAsync(RequestId, nocModel);
+        Snackbar.Add("NOC details submitted", Severity.Success);
+    });
+
+    private async Task HandleSubmitSOC() => await ExecuteAction(async () =>
+    {
+        request = await Api.SubmitSOCAsync(RequestId, socModel);
+        Snackbar.Add("SOC details submitted", Severity.Success);
+    });
+
+    private async Task HandleApproval(string decision) => await ExecuteAction(async () =>
+    {
+        request = await Api.ProcessApprovalAsync(RequestId, new ApprovalModel { Decision = decision, Comments = approvalComments });
+        approvalComments = string.Empty;
+        Snackbar.Add($"IOC decision: {decision}", decision == "Approve" ? Severity.Success : Severity.Warning);
+    });
+
+    private async Task HandleCISOApproval(string decision) => await ExecuteAction(async () =>
+    {
+        request = await Api.ProcessCISOApprovalAsync(RequestId, new ApprovalModel { Decision = decision, Comments = approvalComments });
+        approvalComments = string.Empty;
+        Snackbar.Add($"CISO decision: {decision}", decision == "Approve" ? Severity.Success : Severity.Warning);
+    });
+
+    private async Task HandleCTOApproval(string decision) => await ExecuteAction(async () =>
+    {
+        request = await Api.ProcessCTOApprovalAsync(RequestId, new ApprovalModel { Decision = decision, Comments = approvalComments });
+        approvalComments = string.Empty;
+        Snackbar.Add($"CTO decision: {decision}", decision == "Approve" ? Severity.Success : Severity.Warning);
+    });
+
+    private async Task HandleOpsApproval(string decision) => await ExecuteAction(async () =>
+    {
+        request = await Api.ProcessOpsApprovalAsync(RequestId, new ApprovalModel { Decision = decision, Comments = approvalComments });
+        approvalComments = string.Empty;
+        Snackbar.Add($"Ops Officer decision: {decision}", decision == "Approve" ? Severity.Success : Severity.Warning);
+    });
+
+    private async Task HandleSendBack() => await ExecuteAction(async () =>
+    {
+        request = await Api.SendBackAsync(RequestId, new SendBackModel { Comments = sendBackComments });
+        sendBackComments = string.Empty;
+        showSendBack = false;
+        Snackbar.Add("Request sent back to previous step", Severity.Warning);
+    });
+
+    private async Task ExecuteAction(Func<Task> action)
+    {
+        isBusy = true;
+        errorMessage = null;
+        try { await action(); }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally { isBusy = false; }
+    }
+
+    private static int GetStepIndex(string status) => status switch
+    {
+        "Draft" => 0, "PendingSysAdmin" => 1, "DataCenterReview" => 2,
+        "PendingNOC" or "PendingSOC" => 3, "PendingIOCApproval" => 4,
+        "PendingApproval" => 5, "Approved" => 6,
+        "Implemented" => 8, "Closed" => 9, "Rejected" => -1, _ => -1
+    };
+
+    private static bool CanSendBack(string status) => status is
+        "PendingSysAdmin" or "DataCenterReview" or "PendingNOC" or "PendingSOC" or "PendingIOCApproval" or "PendingApproval";
+
+    private static string GetPulseClass(string status) => status switch
+    {
+        "Approved" or "Implemented" or "Closed" => "pulse-active",
+        "Rejected" => "pulse-error",
+        _ => "pulse-pending"
+    };
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "Draft" => Color.Default, "PendingSysAdmin" => Color.Info, "DataCenterReview" => Color.Info,
+        "PendingNOC" => Color.Warning, "PendingSOC" => Color.Warning,
+        "PendingIOCApproval" => Color.Secondary, "PendingApproval" => Color.Secondary,
+        "Approved" => Color.Success, "Rejected" => Color.Error,
+        "Implemented" => Color.Success, "Closed" => Color.Dark, _ => Color.Default
+    };
+
+    private static string FormatStatus(string status) => status switch
+    {
+        "PendingSysAdmin" => "Pending SysAdmin", "DataCenterReview" => "DC Review",
+        "PendingNOC" => "Pending NOC", "PendingSOC" => "Pending SOC",
+        "PendingIOCApproval" => "IOC Approval", "PendingApproval" => "Pending Approval (2 of 3)", _ => status
+    };
+}

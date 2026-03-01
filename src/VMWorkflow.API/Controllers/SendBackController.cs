@@ -1,0 +1,25 @@
+using Microsoft.AspNetCore.Mvc;
+using VMWorkflow.Application.DTOs;
+using VMWorkflow.Application.Interfaces;
+
+namespace VMWorkflow.API.Controllers;
+
+[ApiController]
+[Route("api/requests/{id:guid}/send-back")]
+public class SendBackController : ControllerBase
+{
+    private readonly IRequestService _requestService;
+
+    public SendBackController(IRequestService requestService)
+    {
+        _requestService = requestService;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<RequestResponseDto>> SendBack(Guid id, [FromBody] SendBackDto dto)
+    {
+        var user = User.Identity?.Name ?? "dev-user";
+        var result = await _requestService.SendBackAsync(id, dto, user);
+        return Ok(result);
+    }
+}

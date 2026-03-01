@@ -1,0 +1,115 @@
+@page "/login"
+@layout EmptyLayout
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="auth-bg">
+    @* Animated gradient blobs *@
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    @* Particle canvas *@
+    <canvas id="particles-login" class="particles-canvas"></canvas>
+
+    @* Glassmorphism login card *@
+    <div class="auth-card" id="auth-card-login">
+        @* Logo *@
+        <div class="text-center mb-6 auth-field">
+            <MudAvatar Size="Size.Large" Style="background: var(--gradient-primary); width: 64px; height: 64px; margin: 0 auto;" Class="auth-logo">
+                <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Large" Style="color: white;" />
+            </MudAvatar>
+        </div>
+
+        <div class="auth-field text-center mb-2">
+            <MudText Typo="Typo.h4" Class="auth-title">VM Workflow</MudText>
+        </div>
+        <div class="auth-field text-center mb-6">
+            <MudText Typo="Typo.body2" Class="auth-subtitle">Sign in to your account</MudText>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="auth-field">
+                <MudAlert Severity="Severity.Error" Class="mb-4" Variant="Variant.Filled"
+                    Style="border-radius: 12px; background: rgba(239, 83, 80, 0.2); border: 1px solid rgba(239, 83, 80, 0.3); color: #ffa4a4;">
+                    @_error
+                </MudAlert>
+            </div>
+        }
+
+        <div class="auth-field">
+            <MudTextField @bind-Value="_model.Username" Label="Username" Variant="Variant.Outlined"
+                          Class="mb-4" Immediate="true" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Person" />
+        </div>
+
+        <div class="auth-field">
+            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined"
+                          InputType="InputType.Password" Class="mb-5" Immediate="true"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock"
+                          OnKeyDown="@OnKeyDown" />
+        </div>
+
+        <div class="auth-field">
+            <MudButton FullWidth="true" OnClick="HandleLogin" Disabled="@_loading"
+                       Class="auth-btn mb-4" Variant="Variant.Filled" Size="Size.Large">
+                @if (_loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" Style="color: white;" />
+                }
+                Sign In
+            </MudButton>
+        </div>
+
+        <div class="auth-field text-center">
+            <MudText Typo="Typo.body2" Class="auth-subtitle">
+                Don't have an account?
+                <MudLink Href="/register" Class="auth-link" Underline="Underline.None">Register</MudLink>
+            </MudText>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel _model = new();
+    private string? _error;
+    private bool _loading;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("VmEffects.initParticles", "particles-login");
+            await JS.InvokeVoidAsync("VmEffects.initParallax", "auth-card-login");
+            await JS.InvokeVoidAsync("VmEffects.initBlobParallax");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        _error = null;
+        _loading = true;
+
+        var result = await AuthService.LoginAsync(_model);
+
+        if (result != null)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            _error = "Invalid username or password.";
+        }
+
+        _loading = false;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await HandleLogin();
+    }
+}

@@ -1,0 +1,6 @@
+@VMWorkflow.API_HostAddress = http://localhost:5028
+
+GET {{VMWorkflow.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

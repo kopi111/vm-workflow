@@ -1,0 +1,120 @@
+@page "/drafts"
+@inject IApiClient Api
+@inject NavigationManager Navigation
+
+@attribute [Authorize]
+
+<PageTitle>Drafts</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Drafts</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests saved as draft. Edit and submit when ready.</MudText>
+        </MudStack>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-request" Style="border-radius: 12px; text-transform: none; font-weight: 600;">
+            New Request
+        </MudButton>
+    </MudStack>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="border-radius: 8px;" />
+    }
+    else if (!drafts.Any())
+    {
+        <MudPaper Elevation="0" Class="premium-card pa-8 text-center" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudIcon Icon="@Icons.Material.Filled.Drafts" Size="Size.Large" Style="opacity: 0.2;" />
+            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">No drafts yet</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+                Create a new request and save it as a draft to see it here.
+            </MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/create-request"
+                       StartIcon="@Icons.Material.Filled.Add" Style="border-radius: 12px; text-transform: none;">
+                Create Request
+            </MudButton>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid Class="stagger-in">
+            @foreach (var draft in drafts)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default); cursor: pointer;"
+                              @onclick="@(() => Navigation.NavigateTo($"/request/{draft.RequestId}"))">
+                        <MudStack Spacing="2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                                    @draft.ObjectSlug
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Filled" Style="border-radius: 8px;">
+                                    Draft
+                                </MudChip>
+                            </MudStack>
+
+                            <MudText Typo="Typo.h6" Style="font-weight: 600;">@draft.ApplicationName</MudText>
+
+                            <MudStack Row="true" Spacing="2">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                    @draft.Environment
+                                </MudChip>
+                                @if (!string.IsNullOrEmpty(draft.Framework))
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                        @draft.Framework
+                                    </MudChip>
+                                }
+                            </MudStack>
+
+                            <MudDivider Class="my-1" />
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
+                                    @draft.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                                </MudText>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                                                   Href="@($"/request/{draft.RequestId}")" />
+                                </MudStack>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    private List<RequestResponse> drafts = new();
+    private bool isLoading = true;
+    private string? _currentUser;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (AuthState != null)
+            {
+                var state = await AuthState;
+                _currentUser = state.User.Identity?.Name;
+            }
+
+            var all = await Api.GetRequestsAsync();
+            drafts = all
+                .Where(r => r.Status == "Draft" && r.CreatedBy.Equals(_currentUser, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+        }
+        catch { }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

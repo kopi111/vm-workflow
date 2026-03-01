@@ -1,0 +1,584 @@
+2026-03-01 08:36:36.925 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-03-01 08:36:37.011 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-03-01 08:36:37.056 -05:00 [INF] Now listening on: http://localhost:5028
+2026-03-01 08:36:37.057 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-01 08:36:37.057 -05:00 [INF] Hosting environment: Development
+2026-03-01 08:36:37.057 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-03-01 08:37:34.354 -05:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5028/api/requests - null null
+2026-03-01 08:37:34.372 -05:00 [INF] [AUDIT] OPTIONS /api/requests by anonymous at "2026-03-01T13:37:34.3719116Z"
+2026-03-01 08:37:34.379 -05:00 [INF] CORS policy execution successful.
+2026-03-01 08:37:34.380 -05:00 [INF] [AUDIT] OPTIONS /api/requests responded 204
+2026-03-01 08:37:34.511 -05:00 [INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 7), @p2='?' (Size = 13), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:37:34.532 -05:00 [INF] HTTP OPTIONS /api/requests responded 204 in 162.0562 ms
+2026-03-01 08:37:34.534 -05:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5028/api/requests - 204 null null 181.6611ms
+2026-03-01 08:37:34.539 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-01 08:37:34.540 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-01T13:37:34.5405307Z"
+2026-03-01 08:37:34.544 -05:00 [INF] CORS policy execution successful.
+2026-03-01 08:37:34.584 -05:00 [INF] Failed to validate the token.
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException: IDX10503: Signature validation failed. Token does not have a kid. Keys tried: '[PII of type 'System.Text.StringBuilder' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. Number of keys in TokenValidationParameters: '1'. 
+Number of keys in Configuration: '0'. 
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignature(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignatureAndIssuerSecurityKey(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+2026-03-01 08:37:34.590 -05:00 [INF] Bearer was not authenticated. Failure message: IDX10503: Signature validation failed. Token does not have a kid. Keys tried: '[PII of type 'System.Text.StringBuilder' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. Number of keys in TokenValidationParameters: '1'. 
+Number of keys in Configuration: '0'. 
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+2026-03-01 08:37:34.593 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:37:34.601 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:37:34.837 -05:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-03-01 08:37:34.868 -05:00 [ERR] Failed executing DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."RequestId", "r"."AccessGroup", "r"."ApplicationName", "r"."AuthenticationMethod", "r"."CreatedAt", "r"."CreatedBy", "r"."DBMS", "r"."Environment", "r"."ExpectedUsers", "r"."ExternalSyncStatus", "r"."FQDNSuggestion", "r"."FortiGatePolicyId", "r"."Framework", "r"."GitRepoLink", "r"."NetBoxId", "r"."ObjectSlug", "r"."ProgrammingLanguage", "r"."Purpose", "r"."SLA", "r"."Status", "r"."UpdatedAt", "s"."SysAdminDetailsId", "s"."DatabaseName", "s"."DatabaseUsername", "s"."Hostname", "s"."RequestId", "s"."SensitivityLevel", "s"."ServerResources", "s"."SubmittedAt", "s"."SubmittedBy", "s"."WebServer", "d"."DataCenterDetailsId", "d"."BareMetalType", "d"."Cluster", "d"."DC", "d"."Environment", "d"."PortNumber", "d"."RackNumber", "d"."RackRoom", "d"."RequestId", "d"."SubmittedAt", "d"."SubmittedBy", "d"."UplinkSpeed", "n"."NOCDetailsId", "n"."FQDN", "n"."Gateway", "n"."IPAddress", "n"."Port", "n"."RequestId", "n"."SubmittedAt", "n"."SubmittedBy", "n"."SubnetMask", "n"."VIP", "n"."VLANID", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "n0"."NOCDetailsId", "n0"."Port", "n0"."SwitchName", "s0"."RequestId", "s0"."SubmittedAt", "s0"."SubmittedBy", "f"."FirewallEntryId", "f"."Policies", "f"."SOCDetailsId", "f"."SecurityProfile", "f"."VDOM", "s1"."StatusHistoryId", "s1"."ChangedBy", "s1"."Comments", "s1"."NewStatus", "s1"."OldStatus", "s1"."RequestId", "s1"."Timestamp"
+FROM "Requests" AS "r"
+LEFT JOIN "SysAdminDetails" AS "s" ON "r"."RequestId" = "s"."RequestId"
+LEFT JOIN "DataCenterDetails" AS "d" ON "r"."RequestId" = "d"."RequestId"
+LEFT JOIN "NOCDetails" AS "n" ON "r"."RequestId" = "n"."RequestId"
+LEFT JOIN "SOCDetails" AS "s0" ON "r"."RequestId" = "s0"."RequestId"
+LEFT JOIN "NetworkPathEntries" AS "n0" ON "n"."NOCDetailsId" = "n0"."NOCDetailsId"
+LEFT JOIN "FirewallEntries" AS "f" ON "s0"."SOCDetailsId" = "f"."SOCDetailsId"
+LEFT JOIN "StatusHistories" AS "s1" ON "r"."RequestId" = "s1"."RequestId"
+ORDER BY "r"."CreatedAt" DESC, "r"."RequestId", "s"."SysAdminDetailsId", "d"."DataCenterDetailsId", "n"."NOCDetailsId", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "f"."FirewallEntryId"
+2026-03-01 08:37:34.874 -05:00 [ERR] An exception occurred while iterating over the results of a query for context type 'VMWorkflow.Infrastructure.Data.WorkflowDbContext'.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+2026-03-01 08:37:34.878 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 274.5466ms
+2026-03-01 08:37:34.879 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:37:34.879 -05:00 [ERR] Unhandled exception on GET /api/requests
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at VMWorkflow.Infrastructure.Services.RequestService.GetAllAsync() in /home/kopi/projects/vm-workflow/src/VMWorkflow.Infrastructure/Services/RequestService.cs:line 70
+   at VMWorkflow.API.Controllers.RequestsController.GetAll() in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Controllers/RequestsController.cs:line 37
+   at lambda_method73(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at VMWorkflow.API.Middleware.UserBlockingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/UserBlockingMiddleware.cs:line 40
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at VMWorkflow.API.Middleware.AuditLoggingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/AuditLoggingMiddleware.cs:line 26
+   at VMWorkflow.API.Middleware.GlobalExceptionHandler.InvokeAsync(HttpContext context) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/GlobalExceptionHandler.cs:line 23
+2026-03-01 08:37:34.897 -05:00 [ERR] HTTP GET /api/requests responded 500 in 357.2172 ms
+2026-03-01 08:37:34.900 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 500 null application/json 360.8828ms
+2026-03-01 08:39:03.005 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/requests - application/json 74
+2026-03-01 08:39:03.006 -05:00 [INF] [AUDIT] POST /api/requests by anonymous at "2026-03-01T13:39:03.0061032Z"
+2026-03-01 08:39:03.008 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.Create (VMWorkflow.API)'
+2026-03-01 08:39:03.016 -05:00 [INF] Route matched with {action = "Create", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.RequestResponseDto]] Create(VMWorkflow.Application.DTOs.CreateRequestDto) on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:39:03.078 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[@__dto_ApplicationName_0='?' (Size = 7), @__dto_Environment_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Requests" AS "r"
+WHERE "r"."ApplicationName" = @__dto_ApplicationName_0 AND "r"."Environment" = @__dto_Environment_1
+2026-03-01 08:39:03.178 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?' (Size = 7), @p3='?', @p4='?' (DbType = DateTime), @p5='?' (Size = 8), @p6='?', @p7='?' (Size = 11), @p8='?' (DbType = Int32), @p9='?' (Size = 10), @p10='?', @p11='?', @p12='?', @p13='?', @p14='?', @p15='?' (Size = 14), @p16='?', @p17='?', @p18='?' (Size = 8), @p19='?' (Size = 5), @p20='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Requests" ("RequestId", "AccessGroup", "ApplicationName", "AuthenticationMethod", "CreatedAt", "CreatedBy", "DBMS", "Environment", "ExpectedUsers", "ExternalSyncStatus", "FQDNSuggestion", "FortiGatePolicyId", "Framework", "GitRepoLink", "NetBoxId", "ObjectSlug", "ProgrammingLanguage", "Purpose", "SLA", "Status", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+2026-03-01 08:39:03.179 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 8), @p2='?' (Size = 15), @p3='?' (Size = 5), @p4='?' (Size = 5), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "StatusHistories" ("StatusHistoryId", "ChangedBy", "Comments", "NewStatus", "OldStatus", "RequestId", "Timestamp")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6);
+2026-03-01 08:39:03.186 -05:00 [INF] Request "6c0a0964-27fe-46c9-9654-d0dce7a3bea4" created with slug testapp-dev-01 by dev-user
+2026-03-01 08:39:03.191 -05:00 [INF] Executing CreatedAtActionResult, writing value of type 'VMWorkflow.Application.DTOs.RequestResponseDto'.
+2026-03-01 08:39:03.223 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.Create (VMWorkflow.API) in 207.5203ms
+2026-03-01 08:39:03.223 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.Create (VMWorkflow.API)'
+2026-03-01 08:39:03.224 -05:00 [INF] [AUDIT] POST /api/requests responded 201
+2026-03-01 08:39:03.227 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 4), @p2='?' (Size = 13), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:39:03.228 -05:00 [INF] HTTP POST /api/requests responded 201 in 222.1187 ms
+2026-03-01 08:39:03.228 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/requests - 201 null application/json; charset=utf-8 223.2313ms
+2026-03-01 08:48:25.554 -05:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-03-01 08:48:25.641 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-03-01 08:48:25.684 -05:00 [INF] Now listening on: http://localhost:5028
+2026-03-01 08:48:25.685 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-01 08:48:25.685 -05:00 [INF] Hosting environment: Development
+2026-03-01 08:48:25.686 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-03-01 08:49:10.477 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/swagger/index.html - null null
+2026-03-01 08:49:10.496 -05:00 [INF] [AUDIT] GET /swagger/index.html by anonymous at "2026-03-01T13:49:10.4958493Z"
+2026-03-01 08:49:10.546 -05:00 [INF] [AUDIT] GET /swagger/index.html responded 200
+2026-03-01 08:49:10.652 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 3), @p2='?' (Size = 19), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:49:10.662 -05:00 [INF] HTTP GET /swagger/index.html responded 200 in 168.4073 ms
+2026-03-01 08:49:10.663 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/swagger/index.html - 200 null text/html;charset=utf-8 187.2569ms
+2026-03-01 08:49:10.669 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-01 08:49:10.670 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-01T13:49:10.6709625Z"
+2026-03-01 08:49:10.688 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:49:10.696 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:49:10.919 -05:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-03-01 08:49:10.943 -05:00 [ERR] Failed executing DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."RequestId", "r"."AccessGroup", "r"."ApplicationName", "r"."AuthenticationMethod", "r"."CreatedAt", "r"."CreatedBy", "r"."DBMS", "r"."Environment", "r"."ExpectedUsers", "r"."ExternalSyncStatus", "r"."FQDNSuggestion", "r"."FortiGatePolicyId", "r"."Framework", "r"."GitRepoLink", "r"."NetBoxId", "r"."ObjectSlug", "r"."ProgrammingLanguage", "r"."Purpose", "r"."SLA", "r"."Status", "r"."UpdatedAt", "s"."SysAdminDetailsId", "s"."DatabaseName", "s"."DatabaseUsername", "s"."Hostname", "s"."RequestId", "s"."SensitivityLevel", "s"."ServerResources", "s"."SubmittedAt", "s"."SubmittedBy", "s"."WebServer", "d"."DataCenterDetailsId", "d"."BareMetalType", "d"."Cluster", "d"."DC", "d"."Environment", "d"."PortNumber", "d"."RackNumber", "d"."RackRoom", "d"."RequestId", "d"."SubmittedAt", "d"."SubmittedBy", "d"."UplinkSpeed", "n"."NOCDetailsId", "n"."FQDN", "n"."Gateway", "n"."IPAddress", "n"."Port", "n"."RequestId", "n"."SubmittedAt", "n"."SubmittedBy", "n"."SubnetMask", "n"."VIP", "n"."VLANID", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "n0"."NOCDetailsId", "n0"."Port", "n0"."SwitchName", "s0"."RequestId", "s0"."SubmittedAt", "s0"."SubmittedBy", "f"."FirewallEntryId", "f"."Policies", "f"."SOCDetailsId", "f"."SecurityProfile", "f"."VDOM", "s1"."StatusHistoryId", "s1"."ChangedBy", "s1"."Comments", "s1"."NewStatus", "s1"."OldStatus", "s1"."RequestId", "s1"."Timestamp"
+FROM "Requests" AS "r"
+LEFT JOIN "SysAdminDetails" AS "s" ON "r"."RequestId" = "s"."RequestId"
+LEFT JOIN "DataCenterDetails" AS "d" ON "r"."RequestId" = "d"."RequestId"
+LEFT JOIN "NOCDetails" AS "n" ON "r"."RequestId" = "n"."RequestId"
+LEFT JOIN "SOCDetails" AS "s0" ON "r"."RequestId" = "s0"."RequestId"
+LEFT JOIN "NetworkPathEntries" AS "n0" ON "n"."NOCDetailsId" = "n0"."NOCDetailsId"
+LEFT JOIN "FirewallEntries" AS "f" ON "s0"."SOCDetailsId" = "f"."SOCDetailsId"
+LEFT JOIN "StatusHistories" AS "s1" ON "r"."RequestId" = "s1"."RequestId"
+ORDER BY "r"."CreatedAt" DESC, "r"."RequestId", "s"."SysAdminDetailsId", "d"."DataCenterDetailsId", "n"."NOCDetailsId", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "f"."FirewallEntryId"
+2026-03-01 08:49:10.952 -05:00 [ERR] An exception occurred while iterating over the results of a query for context type 'VMWorkflow.Infrastructure.Data.WorkflowDbContext'.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+2026-03-01 08:49:10.956 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 258.1934ms
+2026-03-01 08:49:10.957 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:49:10.957 -05:00 [ERR] Unhandled exception on GET /api/requests
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at VMWorkflow.Infrastructure.Services.RequestService.GetAllAsync() in /home/kopi/projects/vm-workflow/src/VMWorkflow.Infrastructure/Services/RequestService.cs:line 70
+   at VMWorkflow.API.Controllers.RequestsController.GetAll() in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Controllers/RequestsController.cs:line 37
+   at lambda_method73(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at VMWorkflow.API.Middleware.UserBlockingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/UserBlockingMiddleware.cs:line 40
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at VMWorkflow.API.Middleware.AuditLoggingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/AuditLoggingMiddleware.cs:line 26
+   at VMWorkflow.API.Middleware.GlobalExceptionHandler.InvokeAsync(HttpContext context) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/GlobalExceptionHandler.cs:line 23
+2026-03-01 08:49:10.965 -05:00 [ERR] HTTP GET /api/requests responded 500 in 294.6427 ms
+2026-03-01 08:49:10.967 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 500 null application/json 298.0527ms
+2026-03-01 08:50:28.863 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-01 08:50:28.865 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-01T13:50:28.8650002Z"
+2026-03-01 08:50:28.867 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:50:28.867 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:50:28.875 -05:00 [ERR] Failed executing DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."RequestId", "r"."AccessGroup", "r"."ApplicationName", "r"."AuthenticationMethod", "r"."CreatedAt", "r"."CreatedBy", "r"."DBMS", "r"."Environment", "r"."ExpectedUsers", "r"."ExternalSyncStatus", "r"."FQDNSuggestion", "r"."FortiGatePolicyId", "r"."Framework", "r"."GitRepoLink", "r"."NetBoxId", "r"."ObjectSlug", "r"."ProgrammingLanguage", "r"."Purpose", "r"."SLA", "r"."Status", "r"."UpdatedAt", "s"."SysAdminDetailsId", "s"."DatabaseName", "s"."DatabaseUsername", "s"."Hostname", "s"."RequestId", "s"."SensitivityLevel", "s"."ServerResources", "s"."SubmittedAt", "s"."SubmittedBy", "s"."WebServer", "d"."DataCenterDetailsId", "d"."BareMetalType", "d"."Cluster", "d"."DC", "d"."Environment", "d"."PortNumber", "d"."RackNumber", "d"."RackRoom", "d"."RequestId", "d"."SubmittedAt", "d"."SubmittedBy", "d"."UplinkSpeed", "n"."NOCDetailsId", "n"."FQDN", "n"."Gateway", "n"."IPAddress", "n"."Port", "n"."RequestId", "n"."SubmittedAt", "n"."SubmittedBy", "n"."SubnetMask", "n"."VIP", "n"."VLANID", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "n0"."NOCDetailsId", "n0"."Port", "n0"."SwitchName", "s0"."RequestId", "s0"."SubmittedAt", "s0"."SubmittedBy", "f"."FirewallEntryId", "f"."Policies", "f"."SOCDetailsId", "f"."SecurityProfile", "f"."VDOM", "s1"."StatusHistoryId", "s1"."ChangedBy", "s1"."Comments", "s1"."NewStatus", "s1"."OldStatus", "s1"."RequestId", "s1"."Timestamp"
+FROM "Requests" AS "r"
+LEFT JOIN "SysAdminDetails" AS "s" ON "r"."RequestId" = "s"."RequestId"
+LEFT JOIN "DataCenterDetails" AS "d" ON "r"."RequestId" = "d"."RequestId"
+LEFT JOIN "NOCDetails" AS "n" ON "r"."RequestId" = "n"."RequestId"
+LEFT JOIN "SOCDetails" AS "s0" ON "r"."RequestId" = "s0"."RequestId"
+LEFT JOIN "NetworkPathEntries" AS "n0" ON "n"."NOCDetailsId" = "n0"."NOCDetailsId"
+LEFT JOIN "FirewallEntries" AS "f" ON "s0"."SOCDetailsId" = "f"."SOCDetailsId"
+LEFT JOIN "StatusHistories" AS "s1" ON "r"."RequestId" = "s1"."RequestId"
+ORDER BY "r"."CreatedAt" DESC, "r"."RequestId", "s"."SysAdminDetailsId", "d"."DataCenterDetailsId", "n"."NOCDetailsId", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "f"."FirewallEntryId"
+2026-03-01 08:50:28.877 -05:00 [ERR] An exception occurred while iterating over the results of a query for context type 'VMWorkflow.Infrastructure.Data.WorkflowDbContext'.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+2026-03-01 08:50:28.878 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 10.2291ms
+2026-03-01 08:50:28.878 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:50:28.878 -05:00 [ERR] Unhandled exception on GET /api/requests
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such column: f.SecurityProfile'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at VMWorkflow.Infrastructure.Services.RequestService.GetAllAsync() in /home/kopi/projects/vm-workflow/src/VMWorkflow.Infrastructure/Services/RequestService.cs:line 70
+   at VMWorkflow.API.Controllers.RequestsController.GetAll() in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Controllers/RequestsController.cs:line 37
+   at lambda_method73(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at VMWorkflow.API.Middleware.UserBlockingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/UserBlockingMiddleware.cs:line 40
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at VMWorkflow.API.Middleware.AuditLoggingMiddleware.InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/AuditLoggingMiddleware.cs:line 26
+   at VMWorkflow.API.Middleware.GlobalExceptionHandler.InvokeAsync(HttpContext context) in /home/kopi/projects/vm-workflow/src/VMWorkflow.API/Middleware/GlobalExceptionHandler.cs:line 23
+2026-03-01 08:50:28.882 -05:00 [ERR] HTTP GET /api/requests responded 500 in 17.6650 ms
+2026-03-01 08:50:28.882 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 500 null application/json 19.6862ms
+2026-03-01 08:51:26.965 -05:00 [INF] Application is shutting down...
+ trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-03-01 08:52:13.844 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-03-01 08:52:13.988 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AuditLogs" (
+    "AuditLogId" TEXT NOT NULL CONSTRAINT "PK_AuditLogs" PRIMARY KEY,
+    "User" TEXT NOT NULL,
+    "HttpMethod" TEXT NOT NULL,
+    "Path" TEXT NOT NULL,
+    "StatusCode" INTEGER NOT NULL,
+    "Timestamp" TEXT NOT NULL
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Requests" (
+    "RequestId" TEXT NOT NULL CONSTRAINT "PK_Requests" PRIMARY KEY,
+    "ApplicationName" TEXT NOT NULL,
+    "Environment" TEXT NOT NULL,
+    "ObjectSlug" TEXT NOT NULL,
+    "ProgrammingLanguage" TEXT NULL,
+    "Framework" TEXT NULL,
+    "Purpose" TEXT NULL,
+    "ExpectedUsers" INTEGER NULL,
+    "DBMS" TEXT NULL,
+    "GitRepoLink" TEXT NULL,
+    "AccessGroup" TEXT NULL,
+    "SLA" TEXT NOT NULL,
+    "FQDNSuggestion" TEXT NULL,
+    "AuthenticationMethod" TEXT NULL,
+    "Status" TEXT NOT NULL,
+    "ExternalSyncStatus" TEXT NOT NULL,
+    "NetBoxId" TEXT NULL,
+    "FortiGatePolicyId" TEXT NULL,
+    "CreatedBy" TEXT NOT NULL,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NOT NULL
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "UserId" TEXT NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY,
+    "Username" TEXT NOT NULL,
+    "DisplayName" TEXT NOT NULL,
+    "Email" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "IsBlocked" INTEGER NOT NULL,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NOT NULL
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AutomationLogs" (
+    "AutomationLogId" TEXT NOT NULL CONSTRAINT "PK_AutomationLogs" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "Action" TEXT NOT NULL,
+    "Payload" TEXT NULL,
+    "Response" TEXT NULL,
+    "Success" INTEGER NOT NULL,
+    "Timestamp" TEXT NOT NULL,
+    CONSTRAINT "FK_AutomationLogs_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DataCenterDetails" (
+    "DataCenterDetailsId" TEXT NOT NULL CONSTRAINT "PK_DataCenterDetails" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "Environment" TEXT NOT NULL,
+    "UplinkSpeed" TEXT NOT NULL,
+    "BareMetalType" TEXT NOT NULL,
+    "PortNumber" TEXT NOT NULL,
+    "DC" TEXT NOT NULL,
+    "RackRoom" TEXT NOT NULL,
+    "RackNumber" TEXT NOT NULL,
+    "Cluster" TEXT NOT NULL,
+    "SubmittedBy" TEXT NOT NULL,
+    "SubmittedAt" TEXT NOT NULL,
+    CONSTRAINT "FK_DataCenterDetails_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "NOCDetails" (
+    "NOCDetailsId" TEXT NOT NULL CONSTRAINT "PK_NOCDetails" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "IPAddress" TEXT NOT NULL,
+    "SubnetMask" TEXT NOT NULL,
+    "VLANID" TEXT NOT NULL,
+    "Gateway" TEXT NOT NULL,
+    "Port" TEXT NOT NULL,
+    "VIP" TEXT NOT NULL,
+    "FQDN" TEXT NOT NULL,
+    "SubmittedBy" TEXT NOT NULL,
+    "SubmittedAt" TEXT NOT NULL,
+    CONSTRAINT "FK_NOCDetails_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "SOCDetails" (
+    "SOCDetailsId" TEXT NOT NULL CONSTRAINT "PK_SOCDetails" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "SubmittedBy" TEXT NOT NULL,
+    "SubmittedAt" TEXT NOT NULL,
+    CONSTRAINT "FK_SOCDetails_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "StatusHistories" (
+    "StatusHistoryId" TEXT NOT NULL CONSTRAINT "PK_StatusHistories" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "OldStatus" TEXT NOT NULL,
+    "NewStatus" TEXT NOT NULL,
+    "ChangedBy" TEXT NOT NULL,
+    "Comments" TEXT NULL,
+    "Timestamp" TEXT NOT NULL,
+    CONSTRAINT "FK_StatusHistories_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "SysAdminDetails" (
+    "SysAdminDetailsId" TEXT NOT NULL CONSTRAINT "PK_SysAdminDetails" PRIMARY KEY,
+    "RequestId" TEXT NOT NULL,
+    "SensitivityLevel" TEXT NOT NULL,
+    "ServerResources" TEXT NOT NULL,
+    "WebServer" TEXT NOT NULL,
+    "DatabaseName" TEXT NOT NULL,
+    "DatabaseUsername" TEXT NOT NULL,
+    "Hostname" TEXT NOT NULL,
+    "SubmittedBy" TEXT NOT NULL,
+    "SubmittedAt" TEXT NOT NULL,
+    CONSTRAINT "FK_SysAdminDetails_Requests_RequestId" FOREIGN KEY ("RequestId") REFERENCES "Requests" ("RequestId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "NetworkPathEntries" (
+    "NetworkPathEntryId" TEXT NOT NULL CONSTRAINT "PK_NetworkPathEntries" PRIMARY KEY,
+    "NOCDetailsId" TEXT NOT NULL,
+    "SwitchName" TEXT NOT NULL,
+    "Port" TEXT NOT NULL,
+    CONSTRAINT "FK_NetworkPathEntries_NOCDetails_NOCDetailsId" FOREIGN KEY ("NOCDetailsId") REFERENCES "NOCDetails" ("NOCDetailsId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FirewallEntries" (
+    "FirewallEntryId" TEXT NOT NULL CONSTRAINT "PK_FirewallEntries" PRIMARY KEY,
+    "SOCDetailsId" TEXT NOT NULL,
+    "Policies" TEXT NOT NULL,
+    "VDOM" TEXT NOT NULL,
+    "SecurityProfile" TEXT NOT NULL,
+    CONSTRAINT "FK_FirewallEntries_SOCDetails_SOCDetailsId" FOREIGN KEY ("SOCDetailsId") REFERENCES "SOCDetails" ("SOCDetailsId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.989 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ServiceEntry" (
+    "ServiceEntryId" TEXT NOT NULL CONSTRAINT "PK_ServiceEntry" PRIMARY KEY,
+    "SysAdminDetailsId" TEXT NOT NULL,
+    "ServiceName" TEXT NOT NULL,
+    "Port" TEXT NOT NULL,
+    "Protocol" TEXT NOT NULL,
+    CONSTRAINT "FK_ServiceEntry_SysAdminDetails_SysAdminDetailsId" FOREIGN KEY ("SysAdminDetailsId") REFERENCES "SysAdminDetails" ("SysAdminDetailsId") ON DELETE CASCADE
+);
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AuditLogs_Timestamp" ON "AuditLogs" ("Timestamp");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AuditLogs_User" ON "AuditLogs" ("User");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AutomationLogs_RequestId" ON "AutomationLogs" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_DataCenterDetails_RequestId" ON "DataCenterDetails" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_FirewallEntries_SOCDetailsId" ON "FirewallEntries" ("SOCDetailsId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_NetworkPathEntries_NOCDetailsId" ON "NetworkPathEntries" ("NOCDetailsId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_NOCDetails_RequestId" ON "NOCDetails" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Requests_ObjectSlug" ON "Requests" ("ObjectSlug");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ServiceEntry_SysAdminDetailsId" ON "ServiceEntry" ("SysAdminDetailsId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_SOCDetails_RequestId" ON "SOCDetails" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_StatusHistories_RequestId" ON "StatusHistories" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_SysAdminDetails_RequestId" ON "SysAdminDetails" ("RequestId");
+2026-03-01 08:52:13.990 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-03-01 08:52:14.047 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-03-01 08:52:14.101 -05:00 [INF] Now listening on: http://localhost:5028
+2026-03-01 08:52:14.103 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-01 08:52:14.103 -05:00 [INF] Hosting environment: Development
+2026-03-01 08:52:14.103 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-03-01 08:52:16.618 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-01 08:52:16.636 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-01T13:52:16.6362238Z"
+2026-03-01 08:52:16.660 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:52:16.672 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:52:16.896 -05:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-03-01 08:52:16.924 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."RequestId", "r"."AccessGroup", "r"."ApplicationName", "r"."AuthenticationMethod", "r"."CreatedAt", "r"."CreatedBy", "r"."DBMS", "r"."Environment", "r"."ExpectedUsers", "r"."ExternalSyncStatus", "r"."FQDNSuggestion", "r"."FortiGatePolicyId", "r"."Framework", "r"."GitRepoLink", "r"."NetBoxId", "r"."ObjectSlug", "r"."ProgrammingLanguage", "r"."Purpose", "r"."SLA", "r"."Status", "r"."UpdatedAt", "s"."SysAdminDetailsId", "s"."DatabaseName", "s"."DatabaseUsername", "s"."Hostname", "s"."RequestId", "s"."SensitivityLevel", "s"."ServerResources", "s"."SubmittedAt", "s"."SubmittedBy", "s"."WebServer", "d"."DataCenterDetailsId", "d"."BareMetalType", "d"."Cluster", "d"."DC", "d"."Environment", "d"."PortNumber", "d"."RackNumber", "d"."RackRoom", "d"."RequestId", "d"."SubmittedAt", "d"."SubmittedBy", "d"."UplinkSpeed", "n"."NOCDetailsId", "n"."FQDN", "n"."Gateway", "n"."IPAddress", "n"."Port", "n"."RequestId", "n"."SubmittedAt", "n"."SubmittedBy", "n"."SubnetMask", "n"."VIP", "n"."VLANID", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "n0"."NOCDetailsId", "n0"."Port", "n0"."SwitchName", "s0"."RequestId", "s0"."SubmittedAt", "s0"."SubmittedBy", "f"."FirewallEntryId", "f"."Policies", "f"."SOCDetailsId", "f"."SecurityProfile", "f"."VDOM", "s1"."StatusHistoryId", "s1"."ChangedBy", "s1"."Comments", "s1"."NewStatus", "s1"."OldStatus", "s1"."RequestId", "s1"."Timestamp"
+FROM "Requests" AS "r"
+LEFT JOIN "SysAdminDetails" AS "s" ON "r"."RequestId" = "s"."RequestId"
+LEFT JOIN "DataCenterDetails" AS "d" ON "r"."RequestId" = "d"."RequestId"
+LEFT JOIN "NOCDetails" AS "n" ON "r"."RequestId" = "n"."RequestId"
+LEFT JOIN "SOCDetails" AS "s0" ON "r"."RequestId" = "s0"."RequestId"
+LEFT JOIN "NetworkPathEntries" AS "n0" ON "n"."NOCDetailsId" = "n0"."NOCDetailsId"
+LEFT JOIN "FirewallEntries" AS "f" ON "s0"."SOCDetailsId" = "f"."SOCDetailsId"
+LEFT JOIN "StatusHistories" AS "s1" ON "r"."RequestId" = "s1"."RequestId"
+ORDER BY "r"."CreatedAt" DESC, "r"."RequestId", "s"."SysAdminDetailsId", "d"."DataCenterDetailsId", "n"."NOCDetailsId", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "f"."FirewallEntryId"
+2026-03-01 08:52:16.931 -05:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[VMWorkflow.Application.DTOs.RequestResponseDto, VMWorkflow.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-03-01 08:52:16.967 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 292.2982ms
+2026-03-01 08:52:16.967 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:52:16.967 -05:00 [INF] [AUDIT] GET /api/requests responded 200
+2026-03-01 08:52:17.086 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 3), @p2='?' (Size = 13), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:52:17.092 -05:00 [INF] HTTP GET /api/requests responded 200 in 459.4129 ms
+2026-03-01 08:52:17.095 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 200 null application/json; charset=utf-8 478.2363ms
+2026-03-01 08:53:10.442 -05:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5028/api/requests - null null
+2026-03-01 08:53:10.443 -05:00 [INF] [AUDIT] OPTIONS /api/requests by anonymous at "2026-03-01T13:53:10.4435363Z"
+2026-03-01 08:53:10.444 -05:00 [INF] CORS policy execution successful.
+2026-03-01 08:53:10.445 -05:00 [INF] [AUDIT] OPTIONS /api/requests responded 204
+2026-03-01 08:53:10.451 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 7), @p2='?' (Size = 13), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:53:10.451 -05:00 [INF] HTTP OPTIONS /api/requests responded 204 in 8.0381 ms
+2026-03-01 08:53:10.451 -05:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5028/api/requests - 204 null null 9.7039ms
+2026-03-01 08:53:10.455 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-01 08:53:10.455 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-01T13:53:10.4555820Z"
+2026-03-01 08:53:10.456 -05:00 [INF] CORS policy execution successful.
+2026-03-01 08:53:10.486 -05:00 [INF] Failed to validate the token.
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException: IDX10503: Signature validation failed. Token does not have a kid. Keys tried: '[PII of type 'System.Text.StringBuilder' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. Number of keys in TokenValidationParameters: '1'. 
+Number of keys in Configuration: '0'. 
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignature(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignatureAndIssuerSecurityKey(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+2026-03-01 08:53:10.491 -05:00 [INF] Bearer was not authenticated. Failure message: IDX10503: Signature validation failed. Token does not have a kid. Keys tried: '[PII of type 'System.Text.StringBuilder' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. Number of keys in TokenValidationParameters: '1'. 
+Number of keys in Configuration: '0'. 
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+2026-03-01 08:53:10.491 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:53:10.491 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-01 08:53:10.494 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."RequestId", "r"."AccessGroup", "r"."ApplicationName", "r"."AuthenticationMethod", "r"."CreatedAt", "r"."CreatedBy", "r"."DBMS", "r"."Environment", "r"."ExpectedUsers", "r"."ExternalSyncStatus", "r"."FQDNSuggestion", "r"."FortiGatePolicyId", "r"."Framework", "r"."GitRepoLink", "r"."NetBoxId", "r"."ObjectSlug", "r"."ProgrammingLanguage", "r"."Purpose", "r"."SLA", "r"."Status", "r"."UpdatedAt", "s"."SysAdminDetailsId", "s"."DatabaseName", "s"."DatabaseUsername", "s"."Hostname", "s"."RequestId", "s"."SensitivityLevel", "s"."ServerResources", "s"."SubmittedAt", "s"."SubmittedBy", "s"."WebServer", "d"."DataCenterDetailsId", "d"."BareMetalType", "d"."Cluster", "d"."DC", "d"."Environment", "d"."PortNumber", "d"."RackNumber", "d"."RackRoom", "d"."RequestId", "d"."SubmittedAt", "d"."SubmittedBy", "d"."UplinkSpeed", "n"."NOCDetailsId", "n"."FQDN", "n"."Gateway", "n"."IPAddress", "n"."Port", "n"."RequestId", "n"."SubmittedAt", "n"."SubmittedBy", "n"."SubnetMask", "n"."VIP", "n"."VLANID", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "n0"."NOCDetailsId", "n0"."Port", "n0"."SwitchName", "s0"."RequestId", "s0"."SubmittedAt", "s0"."SubmittedBy", "f"."FirewallEntryId", "f"."Policies", "f"."SOCDetailsId", "f"."SecurityProfile", "f"."VDOM", "s1"."StatusHistoryId", "s1"."ChangedBy", "s1"."Comments", "s1"."NewStatus", "s1"."OldStatus", "s1"."RequestId", "s1"."Timestamp"
+FROM "Requests" AS "r"
+LEFT JOIN "SysAdminDetails" AS "s" ON "r"."RequestId" = "s"."RequestId"
+LEFT JOIN "DataCenterDetails" AS "d" ON "r"."RequestId" = "d"."RequestId"
+LEFT JOIN "NOCDetails" AS "n" ON "r"."RequestId" = "n"."RequestId"
+LEFT JOIN "SOCDetails" AS "s0" ON "r"."RequestId" = "s0"."RequestId"
+LEFT JOIN "NetworkPathEntries" AS "n0" ON "n"."NOCDetailsId" = "n0"."NOCDetailsId"
+LEFT JOIN "FirewallEntries" AS "f" ON "s0"."SOCDetailsId" = "f"."SOCDetailsId"
+LEFT JOIN "StatusHistories" AS "s1" ON "r"."RequestId" = "s1"."RequestId"
+ORDER BY "r"."CreatedAt" DESC, "r"."RequestId", "s"."SysAdminDetailsId", "d"."DataCenterDetailsId", "n"."NOCDetailsId", "s0"."SOCDetailsId", "n0"."NetworkPathEntryId", "f"."FirewallEntryId"
+2026-03-01 08:53:10.495 -05:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[VMWorkflow.Application.DTOs.RequestResponseDto, VMWorkflow.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-03-01 08:53:10.496 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 4.3358ms
+2026-03-01 08:53:10.496 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-01 08:53:10.496 -05:00 [INF] [AUDIT] GET /api/requests responded 200
+2026-03-01 08:53:10.498 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 3), @p2='?' (Size = 13), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 9)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "AuditLogs" ("AuditLogId", "HttpMethod", "Path", "StatusCode", "Timestamp", "User")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-01 08:53:10.498 -05:00 [INF] HTTP GET /api/requests responded 200 in 42.7083 ms
+2026-03-01 08:53:10.498 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 200 null application/json; charset=utf-8 43.0967ms
+2026-03-01 09:18:54.010 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-03-01 09:18:54.096 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-03-01 09:18:54.138 -05:00 [INF] Now listening on: http://localhost:5028
+2026-03-01 09:18:54.139 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-01 09:18:54.140 -05:00 [INF] Hosting environment: Development
+2026-03-01 09:18:54.140 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API

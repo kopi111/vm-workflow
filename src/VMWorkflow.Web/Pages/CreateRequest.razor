@@ -1,0 +1,279 @@
+@page "/create-request"
+@inject IApiClient Api
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Create Request</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="mb-4">
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/" Variant="Variant.Outlined" Size="Size.Small"
+                       Style="border-radius: 10px;" />
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h5" Style="font-weight: 700;">Create New Request</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Fill in the application details below.</MudText>
+        </MudStack>
+    </MudStack>
+
+    @* Progress Stepper *@
+    <MudPaper Elevation="0" Class="premium-card pa-0 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div class="workflow-stepper" style="padding: 20px 24px;">
+            @for (int i = 1; i <= 3; i++)
+            {
+                var step = i;
+                var isCurrent = currentStep == step;
+                var isPast = currentStep > step;
+                string[] labels = { "Application Info", "Infrastructure", "Review" };
+
+                if (i > 1)
+                {
+                    <div class="step-connector @(isPast ? "connector-done" : isCurrent ? "connector-active" : "")"></div>
+                }
+
+                <div class="workflow-step @(isPast ? "step-done" : isCurrent ? "step-current" : "")">
+                    <div class="step-circle @(isPast ? "step-done" : isCurrent ? "step-current" : "step-future")">
+                        @if (isPast)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: white;" />
+                        }
+                        else
+                        {
+                            @step
+                        }
+                    </div>
+                    <span class="step-label">@labels[step - 1]</span>
+                </div>
+            }
+        </div>
+    </MudPaper>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4" Style="border-radius: 12px;" ShowCloseIcon="true"
+                  CloseIconClicked="@(() => errorMessage = null)">@errorMessage</MudAlert>
+    }
+
+    @if (currentStep == 1)
+    {
+        <MudPaper Elevation="0" Class="section-card gradient-border-card pa-6" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudAvatar Size="Size.Small" Style="background: var(--gradient-primary);">
+                    <MudIcon Icon="@Icons.Material.Filled.Apps" Size="Size.Small" Style="color: white;" />
+                </MudAvatar>
+                <MudText Typo="Typo.h6">Application Info</MudText>
+            </MudStack>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.ApplicationName" Label="Application Name" Required="true"
+                                  Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AppRegistration" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="model.Environment" Label="Environment" Required="true" Variant="Variant.Outlined">
+                        <MudSelectItem Value="@("Development")">Development</MudSelectItem>
+                        <MudSelectItem Value="@("Staging")">Staging</MudSelectItem>
+                        <MudSelectItem Value="@("Production")">Production</MudSelectItem>
+                        <MudSelectItem Value="@("DR")">DR</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.ProgrammingLanguage" Label="Programming Language" Variant="Variant.Outlined"
+                                  Placeholder="e.g. Java, C#, Python" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.Framework" Label="Framework" Variant="Variant.Outlined"
+                                  Placeholder="e.g. .NET 8, Spring Boot" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="model.Purpose" Label="Purpose" Variant="Variant.Outlined" Lines="3"
+                                  Placeholder="Describe what the application does" />
+                </MudItem>
+            </MudGrid>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mt-4">
+                <MudButton Variant="Variant.Outlined" OnClick="SaveAsDraft" Disabled="@isSavingDraft"
+                           StartIcon="@Icons.Material.Filled.Save" Style="border-radius: 12px; text-transform: none;">
+                    @if (isSavingDraft) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                    Save as Draft
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextStep"
+                           EndIcon="@Icons.Material.Filled.ArrowForward" Style="border-radius: 12px; text-transform: none;">
+                    Next
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+    else if (currentStep == 2)
+    {
+        <MudPaper Elevation="0" Class="section-card gradient-border-card pa-6" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <MudIcon Icon="@Icons.Material.Filled.SettingsEthernet" Size="Size.Small" Style="color: white;" />
+                </MudAvatar>
+                <MudText Typo="Typo.h6">Infrastructure & Access</MudText>
+            </MudStack>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="model.ExpectedUsers" Label="Expected Users" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.DBMS" Label="DBMS" Variant="Variant.Outlined" Placeholder="e.g. SQL Server, PostgreSQL" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="model.GitRepoLink" Label="Git Repository Link" Variant="Variant.Outlined"
+                                  Placeholder="https://github.com/..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Link" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.AccessGroup" Label="Access Group (AD)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="model.SLA" Label="SLA Level" Variant="Variant.Outlined">
+                        <MudSelectItem Value="@("Standard")">Standard</MudSelectItem>
+                        <MudSelectItem Value="@("Critical")">Critical</MudSelectItem>
+                        <MudSelectItem Value="@("MissionCritical")">Mission Critical</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.FQDNSuggestion" Label="FQDN Suggestion" Variant="Variant.Outlined"
+                                  Placeholder="e.g. myapp.corp.local" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="model.AuthenticationMethod" Label="Authentication Method" Variant="Variant.Outlined"
+                                  Placeholder="e.g. LDAP, AD, OAuth" />
+                </MudItem>
+            </MudGrid>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mt-4">
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Outlined" OnClick="PreviousStep"
+                               StartIcon="@Icons.Material.Filled.ArrowBack" Style="border-radius: 12px; text-transform: none;">
+                        Back
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" OnClick="SaveAsDraft" Disabled="@isSavingDraft"
+                               StartIcon="@Icons.Material.Filled.Save" Style="border-radius: 12px; text-transform: none;">
+                        @if (isSavingDraft) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                        Save as Draft
+                    </MudButton>
+                </MudStack>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextStep"
+                           EndIcon="@Icons.Material.Filled.ArrowForward" Style="border-radius: 12px; text-transform: none;">
+                    Next
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+    else if (currentStep == 3)
+    {
+        <MudPaper Elevation="0" Class="section-card gradient-border-card pa-6" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                    <MudIcon Icon="@Icons.Material.Filled.RateReview" Size="Size.Small" Style="color: white;" />
+                </MudAvatar>
+                <MudText Typo="Typo.h6">Review & Submit</MudText>
+            </MudStack>
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">Application Info</MudText>
+            <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;" Class="mb-4">
+                <tbody>
+                    <tr><th style="width:200px">Application Name</th><td>@model.ApplicationName</td></tr>
+                    <tr><th>Environment</th><td>@model.Environment</td></tr>
+                    <tr><th>Programming Language</th><td>@(model.ProgrammingLanguage ?? "—")</td></tr>
+                    <tr><th>Framework</th><td>@(model.Framework ?? "—")</td></tr>
+                    <tr><th>Purpose</th><td>@(model.Purpose ?? "—")</td></tr>
+                </tbody>
+            </MudSimpleTable>
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">Infrastructure & Access</MudText>
+            <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                <tbody>
+                    <tr><th style="width:200px">Expected Users</th><td>@(model.ExpectedUsers?.ToString() ?? "—")</td></tr>
+                    <tr><th>DBMS</th><td>@(model.DBMS ?? "—")</td></tr>
+                    <tr><th>Git Repository</th><td>@(model.GitRepoLink ?? "—")</td></tr>
+                    <tr><th>Access Group</th><td>@(model.AccessGroup ?? "—")</td></tr>
+                    <tr><th>SLA</th><td>@model.SLA</td></tr>
+                    <tr><th>FQDN Suggestion</th><td>@(model.FQDNSuggestion ?? "—")</td></tr>
+                    <tr><th>Authentication</th><td>@(model.AuthenticationMethod ?? "—")</td></tr>
+                </tbody>
+            </MudSimpleTable>
+
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mt-4">
+                <MudButton Variant="Variant.Outlined" OnClick="PreviousStep"
+                           StartIcon="@Icons.Material.Filled.ArrowBack" Style="border-radius: 12px; text-transform: none;">
+                    Back
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitRequest" Disabled="@isSubmitting"
+                           StartIcon="@Icons.Material.Filled.CheckCircle" Style="border-radius: 12px; text-transform: none;">
+                    @if (isSubmitting) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                    Create Request
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+</div>
+
+@code {
+    private CreateRequestModel model = new();
+    private int currentStep = 1;
+    private string? errorMessage;
+    private bool isSubmitting;
+    private bool isSavingDraft;
+
+    private void NextStep()
+    {
+        if (currentStep == 1 && string.IsNullOrWhiteSpace(model.ApplicationName))
+        {
+            errorMessage = "Application Name is required.";
+            return;
+        }
+        errorMessage = null;
+        currentStep++;
+    }
+
+    private void PreviousStep()
+    {
+        errorMessage = null;
+        currentStep--;
+    }
+
+    private async Task SaveAsDraft()
+    {
+        if (string.IsNullOrWhiteSpace(model.ApplicationName))
+        {
+            errorMessage = "Application Name is required to save a draft.";
+            return;
+        }
+
+        isSavingDraft = true;
+        errorMessage = null;
+        try
+        {
+            var result = await Api.CreateRequestAsync(model);
+            Snackbar.Add("Draft saved successfully!", Severity.Success);
+            Navigation.NavigateTo($"/request/{result.RequestId}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to save draft: {ex.Message}";
+        }
+        finally
+        {
+            isSavingDraft = false;
+        }
+    }
+
+    private async Task SubmitRequest()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+        try
+        {
+            var result = await Api.CreateRequestAsync(model);
+            Navigation.NavigateTo($"/request/{result.RequestId}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to create request: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

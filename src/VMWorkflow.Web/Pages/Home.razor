@@ -1,0 +1,299 @@
+@page "/"
+@inject IApiClient Api
+@inject NavigationManager Navigation
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Dashboard</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Welcome back. Here's your workflow overview.</MudText>
+        </MudStack>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-request" Style="border-radius: 12px; text-transform: none; font-weight: 600;">
+            New Request
+        </MudButton>
+    </MudStack>
+
+    @if (isLoading)
+    {
+        <MudGrid Class="mb-6 stagger-in">
+            @for (int i = 0; i < 4; i++)
+            {
+                <MudItem xs="12" sm="6" md="3">
+                    <div class="shimmer" style="height: 120px;"></div>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        @* Stat Cards *@
+        <MudGrid Class="mb-6 stagger-in">
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="stat-card stat-total" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.Inbox" Class="stat-icon" />
+                    <div class="stat-value">@requests.Count</div>
+                    <div class="stat-label mt-1">Total Requests</div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="stat-card stat-progress" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.Pending" Class="stat-icon" />
+                    <div class="stat-value">@inProgressCount</div>
+                    <div class="stat-label mt-1">In Progress</div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="stat-card stat-pending" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.HourglassTop" Class="stat-icon" />
+                    <div class="stat-value">@pendingApprovalCount</div>
+                    <div class="stat-label mt-1">Pending Approval</div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="stat-card stat-completed" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="stat-icon" />
+                    <div class="stat-value">@completedCount</div>
+                    <div class="stat-label mt-1">Completed</div>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        @* Charts Row *@
+        <MudGrid Class="mb-6">
+            @* Status Distribution Donut Chart *@
+            <MudItem xs="12" md="5">
+                <MudPaper Elevation="0" Class="premium-card pa-4 chart-container" Style="border: 1px solid var(--mud-palette-lines-default);">
+                    <MudText Typo="Typo.h6" Class="mb-4">Status Distribution</MudText>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 32px;">
+                        <svg viewBox="0 0 36 36" style="width: 160px; height: 160px; transform: rotate(-90deg);">
+                            @{ var offset = 0.0; }
+                            @foreach (var seg in donutSegments)
+                            {
+                                var currentOffset = offset;
+                                <circle cx="18" cy="18" r="15.9" fill="none"
+                                        stroke="@seg.Color" stroke-width="3.5"
+                                        stroke-dasharray="@($"{seg.Value:F1} {(100 - seg.Value):F1}")"
+                                        stroke-dashoffset="@($"-{currentOffset:F1}")"
+                                        style="transition: stroke-dasharray 1s ease-out, stroke-dashoffset 1s ease-out;" />
+                                offset += seg.Value;
+                            }
+                        </svg>
+                        <MudStack Spacing="2">
+                            @foreach (var seg in donutSegments)
+                            {
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <div style="width: 10px; height: 10px; border-radius: 3px; background: @seg.Color;"></div>
+                                    <MudText Typo="Typo.caption">@seg.Label</MudText>
+                                    <MudText Typo="Typo.caption" Style="font-weight: 600;">@seg.Count</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </div>
+                </MudPaper>
+            </MudItem>
+
+            @* Weekly Activity Bar Chart *@
+            <MudItem xs="12" md="7">
+                <MudPaper Elevation="0" Class="premium-card pa-4 chart-container" Style="border: 1px solid var(--mud-palette-lines-default);">
+                    <MudText Typo="Typo.h6" Class="mb-4">Weekly Activity</MudText>
+                    <div style="display: flex; align-items: flex-end; gap: 8px; height: 180px; padding-top: 16px;">
+                        @for (int i = 0; i < barData.Length; i++)
+                        {
+                            var bar = barData[i];
+                            var height = barMaxValue > 0 ? (bar.Value / (double)barMaxValue * 140) : 0;
+                            var idx = i;
+                            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <MudText Typo="Typo.caption" Style="font-weight: 600; font-size: 0.7rem;">@bar.Value</MudText>
+                                <div class="chart-bar" style="width: 100%; max-width: 40px; height: @($"{height}px"); background: var(--gradient-primary); border-radius: 6px 6px 2px 2px; animation-delay: @($"{idx * 0.1}s");"></div>
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary); font-size: 0.65rem;">@bar.Label</MudText>
+                            </div>
+                        }
+                    </div>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        @* Requests Table *@
+        <MudPaper Elevation="0" Class="premium-card" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+            <div class="premium-table-wrapper">
+                <MudTable Items="@requests" Hover="true" Dense="true" Filter="FilterFunc" Loading="@isLoading"
+                          RowStyle="cursor: pointer;" T="RequestResponse" OnRowClick="@(args => GoToRequest(args.Item))"
+                          Style="border-radius: 16px;">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">All Requests</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search requests..." Adornment="Adornment.Start"
+                            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Immediate="true"
+                            Style="max-width: 300px;" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.ObjectSlug)">Request #</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.ApplicationName)">Application</MudTableSortLabel></MudTh>
+                        <MudTh>Environment</MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.Status)">Status</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.CreatedBy)">Created By</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<RequestResponse, object>(x => x.CreatedAt)">Created</MudTableSortLabel></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudLink Href="@($"/request/{context.RequestId}")" Underline="Underline.Hover" Color="Color.Primary" Style="font-weight: 600;">
+                                @context.ObjectSlug
+                            </MudLink>
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudAvatar Size="Size.Small" Style="background: var(--gradient-card); width: 28px; height: 28px;">
+                                    <MudIcon Icon="@Icons.Material.Filled.Apps" Size="Size.Small" Color="Color.Primary" />
+                                </MudAvatar>
+                                @context.ApplicationName
+                            </MudStack>
+                        </MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                                @context.Environment
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <span class="pulse-dot @GetPulseClass(context.Status)"></span>
+                                <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled"
+                                         Style="border-radius: 8px; font-weight: 500;">
+                                    @FormatStatus(context.Status)
+                                </MudChip>
+                            </MudStack>
+                        </MudTd>
+                        <MudTd>@context.CreatedBy</MudTd>
+                        <MudTd>
+                            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">
+                                @context.CreatedAt.ToString("MMM dd, yyyy")
+                            </MudText>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                    <NoRecordsContent>
+                        <MudStack AlignItems="AlignItems.Center" Class="pa-8" Spacing="3">
+                            <MudIcon Icon="@Icons.Material.Filled.Inbox" Size="Size.Large" Style="opacity: 0.3;" />
+                            <MudText Typo="Typo.body1" Style="color: var(--mud-palette-text-secondary);">No requests found.</MudText>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/create-request"
+                                       StartIcon="@Icons.Material.Filled.Add" Style="border-radius: 12px;">
+                                Create your first request
+                            </MudButton>
+                        </MudStack>
+                    </NoRecordsContent>
+                </MudTable>
+            </div>
+        </MudPaper>
+    }
+</div>
+
+@code {
+    private List<RequestResponse> requests = new();
+    private bool isLoading = true;
+    private string searchString = string.Empty;
+
+    private int inProgressCount;
+    private int pendingApprovalCount;
+    private int completedCount;
+
+    // Chart data
+    private record DonutSegment(string Label, double Value, int Count, string Color);
+    private DonutSegment[] donutSegments = Array.Empty<DonutSegment>();
+
+    private record BarItem(string Label, int Value);
+    private BarItem[] barData = Array.Empty<BarItem>();
+    private int barMaxValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            requests = await Api.GetRequestsAsync();
+            CalculateStats();
+        }
+        catch { }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void CalculateStats()
+    {
+        inProgressCount = requests.Count(r => r.Status is "Draft" or "PendingSysAdmin" or "DataCenterReview" or "PendingNOC" or "PendingSOC");
+        pendingApprovalCount = requests.Count(r => r.Status is "PendingIOCApproval" or "PendingApproval");
+        completedCount = requests.Count(r => r.Status is "Approved" or "Implemented" or "Closed");
+
+        // Donut chart
+        var total = Math.Max(requests.Count, 1);
+        var rejectedCount = requests.Count(r => r.Status is "Rejected");
+        var segments = new List<DonutSegment>();
+        if (inProgressCount > 0) segments.Add(new("In Progress", inProgressCount * 100.0 / total, inProgressCount, "#f093fb"));
+        if (pendingApprovalCount > 0) segments.Add(new("Pending", pendingApprovalCount * 100.0 / total, pendingApprovalCount, "#4facfe"));
+        if (completedCount > 0) segments.Add(new("Completed", completedCount * 100.0 / total, completedCount, "#43e97b"));
+        if (rejectedCount > 0) segments.Add(new("Rejected", rejectedCount * 100.0 / total, rejectedCount, "#ef5350"));
+        if (segments.Count == 0) segments.Add(new("None", 100, 0, "#e0e0e0"));
+        donutSegments = segments.ToArray();
+
+        // Bar chart (last 7 days)
+        var bars = new List<BarItem>();
+        for (int i = 6; i >= 0; i--)
+        {
+            var day = DateTime.UtcNow.Date.AddDays(-i);
+            var count = requests.Count(r => r.CreatedAt.Date == day);
+            bars.Add(new BarItem(day.ToString("ddd"), count));
+        }
+        barData = bars.ToArray();
+        barMaxValue = barData.Length > 0 ? Math.Max(barData.Max(b => b.Value), 1) : 1;
+    }
+
+    private void GoToRequest(RequestResponse r) => Navigation.NavigateTo($"/request/{r.RequestId}");
+
+    private bool FilterFunc(RequestResponse r)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        var s = searchString.Trim();
+        return r.ObjectSlug.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.ApplicationName.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.Status.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.CreatedBy.Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetPulseClass(string status) => status switch
+    {
+        "Approved" or "Implemented" or "Closed" => "pulse-active",
+        "Rejected" => "pulse-error",
+        _ => "pulse-pending"
+    };
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "Draft" => Color.Default,
+        "PendingSysAdmin" => Color.Info,
+        "DataCenterReview" => Color.Info,
+        "PendingNOC" => Color.Warning,
+        "PendingSOC" => Color.Warning,
+        "PendingIOCApproval" => Color.Secondary,
+        "PendingApproval" => Color.Secondary,
+        "Approved" => Color.Success,
+        "Rejected" => Color.Error,
+        "Implemented" => Color.Success,
+        "Closed" => Color.Dark,
+        _ => Color.Default
+    };
+
+    private static string FormatStatus(string status) => status switch
+    {
+        "PendingSysAdmin" => "Pending SysAdmin",
+        "DataCenterReview" => "DC Review",
+        "PendingNOC" => "Pending NOC",
+        "PendingSOC" => "Pending SOC",
+        "PendingIOCApproval" => "IOC Approval",
+        "PendingApproval" => "Pending Approval",
+        _ => status
+    };
+}
