@@ -152,11 +152,12 @@ public class RequestService : IRequestService
             SensitivityLevel = dto.SensitivityLevel,
             ServerResources = Enum.Parse<ServerResourceSize>(dto.ServerResources, true),
             WebServer = Enum.Parse<WebServerType>(dto.WebServer, true),
+            DatabaseNameType = dto.DatabaseNameType ?? "none",
             DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
-                ? $"{request.ApplicationName}_Database"
+                ? $"{request.ApplicationName}-db"
                 : dto.DatabaseName,
             DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
-                ? $"{request.ApplicationName}_User"
+                ? $"{request.ApplicationName}-user"
                 : dto.DatabaseUsername,
             Hostname = dto.Hostname,
             SubmittedBy = submittedBy,
@@ -242,11 +243,12 @@ public class RequestService : IRequestService
             SensitivityLevel = dto.SensitivityLevel,
             ServerResources = Enum.Parse<ServerResourceSize>(dto.ServerResources, true),
             WebServer = Enum.Parse<WebServerType>(dto.WebServer, true),
+            DatabaseNameType = dto.DatabaseNameType ?? "none",
             DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
-                ? $"{request.ApplicationName}_Database"
+                ? $"{request.ApplicationName}-db"
                 : dto.DatabaseName,
             DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
-                ? $"{request.ApplicationName}_User"
+                ? $"{request.ApplicationName}-user"
                 : dto.DatabaseUsername,
             Hostname = dto.Hostname,
             SubmittedBy = savedBy,
@@ -796,6 +798,7 @@ public class RequestService : IRequestService
                 SensitivityLevel = r.SysAdminDetails.SensitivityLevel,
                 ServerResources = r.SysAdminDetails.ServerResources.ToString(),
                 WebServer = r.SysAdminDetails.WebServer.ToString(),
+                DatabaseNameType = r.SysAdminDetails.DatabaseNameType,
                 DatabaseName = r.SysAdminDetails.DatabaseName,
                 DatabaseUsername = r.SysAdminDetails.DatabaseUsername,
                 Hostname = r.SysAdminDetails.Hostname,

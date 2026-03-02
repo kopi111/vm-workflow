@@ -1,0 +1,373 @@
+@page "/admin/settings"
+@inject IApiClient Api
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "SysAdmin,PlatformAdmin")]
+
+<PageTitle>Admin Settings</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="mb-4">
+        <MudAvatar Size="Size.Medium" Style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <MudIcon Icon="@Icons.Material.Filled.Settings" Style="color: white;" />
+        </MudAvatar>
+        <MudText Typo="Typo.h5" Style="font-weight: 700;">Admin Settings</MudText>
+    </MudStack>
+
+    <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4"
+             Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px;">
+
+        @* ===== VDOMs Tab ===== *@
+        <MudTabPanel Text="VDOMs" Icon="@Icons.Material.Filled.Dns">
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudTextField @bind-Value="newVdomName" Label="VDOM Name" Variant="Variant.Outlined" Margin="Margin.Dense"
+                    Style="max-width: 300px;" @onkeydown="@(async (e) => { if (e.Key == "Enter") await CreateVdom(); })" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateVdom" Disabled="@isBusy"
+                           Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Add">
+                    Add VDOM
+                </MudButton>
+            </MudStack>
+
+            @if (vdoms.Any())
+            {
+                <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                    <thead><tr><th>Name</th><th style="width: 120px;">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var v in vdoms)
+                        {
+                            <tr>
+                                <td>
+                                    @if (editingVdomId == v.VdomId)
+                                    {
+                                        <MudTextField @bind-Value="editVdomName" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                            @onkeydown="@(async (e) => { if (e.Key == "Enter") await UpdateVdom(v.VdomId); })" />
+                                    }
+                                    else { @v.Name }
+                                </td>
+                                <td>
+                                    @if (editingVdomId == v.VdomId)
+                                    {
+                                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="@(() => UpdateVdom(v.VdomId))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" Size="Size.Small" OnClick="@(() => editingVdomId = null)" />
+                                    }
+                                    else
+                                    {
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => { editingVdomId = v.VdomId; editVdomName = v.Name; })" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteVdom(v.VdomId))" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">No VDOMs configured yet.</MudText>
+            }
+        </MudTabPanel>
+
+        @* ===== Resource Groups Tab ===== *@
+        <MudTabPanel Text="Resource Groups" Icon="@Icons.Material.Filled.Memory">
+            <MudText Typo="Typo.subtitle2" Class="mb-3" Style="font-weight: 600;">
+                Define server resource tiers displayed to SysAdmin when selecting server size.
+            </MudText>
+            <MudGrid Class="mb-4" Spacing="2">
+                <MudItem xs="12" sm="3">
+                    <MudTextField @bind-Value="newRgName" Label="Name" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. Micro" />
+                </MudItem>
+                <MudItem xs="4" sm="2">
+                    <MudNumericField @bind-Value="newRgVCpu" Label="vCPU" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" />
+                </MudItem>
+                <MudItem xs="4" sm="2">
+                    <MudTextField @bind-Value="newRgRam" Label="RAM" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. 1G" />
+                </MudItem>
+                <MudItem xs="4" sm="2">
+                    <MudTextField @bind-Value="newRgHdd" Label="HDD" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. 60G" />
+                </MudItem>
+                <MudItem xs="12" sm="3" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateResourceGroup" Disabled="@isBusy"
+                               Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Add">
+                        Add
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            @if (resourceGroups.Any())
+            {
+                <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                    <thead><tr><th>Name</th><th>vCPU</th><th>RAM</th><th>HDD</th><th style="width: 120px;">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var rg in resourceGroups)
+                        {
+                            <tr>
+                                @if (editingRgId == rg.ResourceGroupId)
+                                {
+                                    <td><MudTextField @bind-Value="editRgName" Variant="Variant.Outlined" Margin="Margin.Dense" /></td>
+                                    <td><MudNumericField @bind-Value="editRgVCpu" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" T="int" /></td>
+                                    <td><MudTextField @bind-Value="editRgRam" Variant="Variant.Outlined" Margin="Margin.Dense" /></td>
+                                    <td><MudTextField @bind-Value="editRgHdd" Variant="Variant.Outlined" Margin="Margin.Dense" /></td>
+                                    <td>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="@(() => UpdateResourceGroup(rg.ResourceGroupId))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" Size="Size.Small" OnClick="@(() => editingRgId = null)" />
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>@rg.Name</td>
+                                    <td>@rg.VCpu</td>
+                                    <td>@rg.Ram</td>
+                                    <td>@rg.Hdd</td>
+                                    <td>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small"
+                                            OnClick="@(() => { editingRgId = rg.ResourceGroupId; editRgName = rg.Name; editRgVCpu = rg.VCpu; editRgRam = rg.Ram; editRgHdd = rg.Hdd; })" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteResourceGroup(rg.ResourceGroupId))" />
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">No resource groups configured yet.</MudText>
+            }
+        </MudTabPanel>
+
+        @* ===== Security Profiles Tab ===== *@
+        <MudTabPanel Text="Security Profiles" Icon="@Icons.Material.Filled.Shield">
+            <MudText Typo="Typo.subtitle2" Class="mb-3" Style="font-weight: 600;">
+                Define security profile names available for SOC firewall policies.
+            </MudText>
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudTextField @bind-Value="newSpName" Label="Profile Name" Variant="Variant.Outlined" Margin="Margin.Dense"
+                    Style="max-width: 300px;" @onkeydown="@(async (e) => { if (e.Key == "Enter") await CreateSecurityProfile(); })" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateSecurityProfile" Disabled="@isBusy"
+                           Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Add">
+                    Add Profile
+                </MudButton>
+            </MudStack>
+
+            @if (securityProfiles.Any())
+            {
+                <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
+                    <thead><tr><th>Name</th><th style="width: 120px;">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var sp in securityProfiles)
+                        {
+                            <tr>
+                                <td>
+                                    @if (editingSpId == sp.SecurityProfileId)
+                                    {
+                                        <MudTextField @bind-Value="editSpName" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                            @onkeydown="@(async (e) => { if (e.Key == "Enter") await UpdateSecurityProfile(sp.SecurityProfileId); })" />
+                                    }
+                                    else { @sp.Name }
+                                </td>
+                                <td>
+                                    @if (editingSpId == sp.SecurityProfileId)
+                                    {
+                                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="@(() => UpdateSecurityProfile(sp.SecurityProfileId))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" Size="Size.Small" OnClick="@(() => editingSpId = null)" />
+                                    }
+                                    else
+                                    {
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => { editingSpId = sp.SecurityProfileId; editSpName = sp.Name; })" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteSecurityProfile(sp.SecurityProfileId))" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">No security profiles configured yet.</MudText>
+            }
+        </MudTabPanel>
+    </MudTabs>
+</div>
+
+@code {
+    private bool isBusy;
+
+    // ===== VDOMs =====
+    private List<VdomModel> vdoms = new();
+    private string newVdomName = string.Empty;
+    private Guid? editingVdomId;
+    private string editVdomName = string.Empty;
+
+    // ===== Resource Groups =====
+    private List<ResourceGroupModel> resourceGroups = new();
+    private string newRgName = string.Empty;
+    private int newRgVCpu = 1;
+    private string newRgRam = string.Empty;
+    private string newRgHdd = string.Empty;
+    private Guid? editingRgId;
+    private string editRgName = string.Empty;
+    private int editRgVCpu;
+    private string editRgRam = string.Empty;
+    private string editRgHdd = string.Empty;
+
+    // ===== Security Profiles =====
+    private List<SecurityProfileModel> securityProfiles = new();
+    private string newSpName = string.Empty;
+    private Guid? editingSpId;
+    private string editSpName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(LoadVdoms(), LoadResourceGroups(), LoadSecurityProfiles());
+    }
+
+    // ===== VDOM CRUD =====
+    private async Task LoadVdoms()
+    {
+        try { vdoms = await Api.GetVdomsAsync(); }
+        catch (Exception ex) { Snackbar.Add($"Error loading VDOMs: {ex.Message}", Severity.Error); }
+    }
+
+    private async Task CreateVdom()
+    {
+        if (string.IsNullOrWhiteSpace(newVdomName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.CreateVdomAsync(new VdomModel { Name = newVdomName.Trim() });
+            newVdomName = string.Empty;
+            await LoadVdoms();
+            Snackbar.Add("VDOM created", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task UpdateVdom(Guid id)
+    {
+        if (string.IsNullOrWhiteSpace(editVdomName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.UpdateVdomAsync(id, new VdomModel { Name = editVdomName.Trim() });
+            editingVdomId = null;
+            await LoadVdoms();
+            Snackbar.Add("VDOM updated", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task DeleteVdom(Guid id)
+    {
+        isBusy = true;
+        try
+        {
+            await Api.DeleteVdomAsync(id);
+            await LoadVdoms();
+            Snackbar.Add("VDOM deleted", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    // ===== RESOURCE GROUP CRUD =====
+    private async Task LoadResourceGroups()
+    {
+        try { resourceGroups = await Api.GetResourceGroupsAsync(); }
+        catch (Exception ex) { Snackbar.Add($"Error loading resource groups: {ex.Message}", Severity.Error); }
+    }
+
+    private async Task CreateResourceGroup()
+    {
+        if (string.IsNullOrWhiteSpace(newRgName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.CreateResourceGroupAsync(new ResourceGroupModel { Name = newRgName.Trim(), VCpu = newRgVCpu, Ram = newRgRam.Trim(), Hdd = newRgHdd.Trim() });
+            newRgName = string.Empty; newRgVCpu = 1; newRgRam = string.Empty; newRgHdd = string.Empty;
+            await LoadResourceGroups();
+            Snackbar.Add("Resource group created", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task UpdateResourceGroup(Guid id)
+    {
+        if (string.IsNullOrWhiteSpace(editRgName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.UpdateResourceGroupAsync(id, new ResourceGroupModel { Name = editRgName.Trim(), VCpu = editRgVCpu, Ram = editRgRam.Trim(), Hdd = editRgHdd.Trim() });
+            editingRgId = null;
+            await LoadResourceGroups();
+            Snackbar.Add("Resource group updated", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task DeleteResourceGroup(Guid id)
+    {
+        isBusy = true;
+        try
+        {
+            await Api.DeleteResourceGroupAsync(id);
+            await LoadResourceGroups();
+            Snackbar.Add("Resource group deleted", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    // ===== SECURITY PROFILE CRUD =====
+    private async Task LoadSecurityProfiles()
+    {
+        try { securityProfiles = await Api.GetSecurityProfilesAsync(); }
+        catch (Exception ex) { Snackbar.Add($"Error loading security profiles: {ex.Message}", Severity.Error); }
+    }
+
+    private async Task CreateSecurityProfile()
+    {
+        if (string.IsNullOrWhiteSpace(newSpName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.CreateSecurityProfileAsync(new SecurityProfileModel { Name = newSpName.Trim() });
+            newSpName = string.Empty;
+            await LoadSecurityProfiles();
+            Snackbar.Add("Security profile created", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task UpdateSecurityProfile(Guid id)
+    {
+        if (string.IsNullOrWhiteSpace(editSpName)) return;
+        isBusy = true;
+        try
+        {
+            await Api.UpdateSecurityProfileAsync(id, new SecurityProfileModel { Name = editSpName.Trim() });
+            editingSpId = null;
+            await LoadSecurityProfiles();
+            Snackbar.Add("Security profile updated", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+
+    private async Task DeleteSecurityProfile(Guid id)
+    {
+        isBusy = true;
+        try
+        {
+            await Api.DeleteSecurityProfileAsync(id);
+            await LoadSecurityProfiles();
+            Snackbar.Add("Security profile deleted", Severity.Success);
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+        finally { isBusy = false; }
+    }
+}

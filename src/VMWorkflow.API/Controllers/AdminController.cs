@@ -127,4 +127,54 @@ public class AdminController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    // ===== VDOMs =====
+
+    [HttpGet("vdoms")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<VdomDto>>> GetVdoms()
+    {
+        var vdoms = await _db.Vdoms.OrderBy(v => v.Name).ToListAsync();
+        return Ok(vdoms.Select(v => new VdomDto
+        {
+            VdomId = v.VdomId,
+            Name = v.Name
+        }));
+    }
+
+    [HttpPost("vdoms")]
+    public async Task<ActionResult<VdomDto>> CreateVdom([FromBody] VdomDto dto)
+    {
+        var entity = new Vdom
+        {
+            VdomId = Guid.NewGuid(),
+            Name = dto.Name,
+            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.Vdoms.Add(entity);
+        await _db.SaveChangesAsync();
+        dto.VdomId = entity.VdomId;
+        return CreatedAtAction(nameof(GetVdoms), dto);
+    }
+
+    [HttpPut("vdoms/{id:guid}")]
+    public async Task<ActionResult> UpdateVdom(Guid id, [FromBody] VdomDto dto)
+    {
+        var entity = await _db.Vdoms.FindAsync(id);
+        if (entity == null) return NotFound();
+        entity.Name = dto.Name;
+        await _db.SaveChangesAsync();
+        return Ok(dto);
+    }
+
+    [HttpDelete("vdoms/{id:guid}")]
+    public async Task<ActionResult> DeleteVdom(Guid id)
+    {
+        var entity = await _db.Vdoms.FindAsync(id);
+        if (entity == null) return NotFound();
+        _db.Vdoms.Remove(entity);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }

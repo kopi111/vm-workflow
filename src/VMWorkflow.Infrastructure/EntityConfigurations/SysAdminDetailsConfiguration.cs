@@ -15,7 +15,8 @@ public class SysAdminDetailsConfiguration : IEntityTypeConfiguration<SysAdminDet
         builder.Property(s => s.SensitivityLevel).IsRequired().HasMaxLength(100);
         builder.Property(s => s.ServerResources).HasConversion<string>().HasMaxLength(50);
         builder.Property(s => s.WebServer).HasConversion<string>().HasMaxLength(50);
-        builder.Property(s => s.DatabaseName).IsRequired().HasMaxLength(200);
+        builder.Property(s => s.DatabaseNameType).HasMaxLength(20).HasDefaultValue("none");
+        builder.Property(s => s.DatabaseName).HasMaxLength(200);
         builder.Property(s => s.DatabaseUsername).IsRequired().HasMaxLength(200);
         builder.Property(s => s.Hostname).IsRequired().HasMaxLength(200);
         builder.Property(s => s.SubmittedBy).IsRequired().HasMaxLength(100);

@@ -279,14 +279,36 @@ else
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="sysAdminModel.Hostname" Label="Hostname" Variant="Variant.Outlined" Required="true" />
                             </MudItem>
-                            <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="sysAdminModel.DatabaseName" Label="Database Name" Variant="Variant.Outlined"
-                                    Placeholder="@($"{request.ApplicationName}_Database")" HelperText="Leave blank for auto-fill" />
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600;">Database</MudText>
+                                <MudRadioGroup @bind-Value="sysAdminModel.DatabaseNameType" T="string">
+                                    <MudRadio Value="@("new")" Color="Color.Primary" Dense="true">New Database</MudRadio>
+                                    <MudRadio Value="@("existing")" Color="Color.Primary" Dense="true">Existing Database</MudRadio>
+                                    <MudRadio Value="@("none")" Color="Color.Primary" Dense="true">None</MudRadio>
+                                </MudRadioGroup>
                             </MudItem>
-                            <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="sysAdminModel.DatabaseUsername" Label="Database Username" Variant="Variant.Outlined"
-                                    Placeholder="@($"{request.ApplicationName}_User")" HelperText="Leave blank for auto-fill" />
-                            </MudItem>
+                            @if (sysAdminModel.DatabaseNameType == "new")
+                            {
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="sysAdminModel.DatabaseName" Label="Database Name" Variant="Variant.Outlined"
+                                        Placeholder="@($"{request.ApplicationName}-db")" HelperText="Leave blank to auto-generate (e.g. appname-db)" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="sysAdminModel.DatabaseUsername" Label="Database Username" Variant="Variant.Outlined"
+                                        Placeholder="@($"{request.ApplicationName}-user")" HelperText="Leave blank to auto-generate" />
+                                </MudItem>
+                            }
+                            @if (sysAdminModel.DatabaseNameType == "existing")
+                            {
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="sysAdminModel.DatabaseName" Label="Existing Database Name" Variant="Variant.Outlined" Required="true"
+                                        HelperText="Enter the name of the existing database" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="sysAdminModel.DatabaseUsername" Label="Database Username" Variant="Variant.Outlined"
+                                        HelperText="Enter the existing database username" />
+                                </MudItem>
+                            }
                             <MudItem xs="12" sm="6">
                                 <MudSelect @bind-Value="sysAdminModel.ResourceGroupId" Label="Resource Group" Variant="Variant.Outlined" T="Guid?" Clearable="true">
                                     @foreach (var rg in resourceGroups)
@@ -367,8 +389,12 @@ else
                                 <tr><td><strong>Server Resources</strong></td><td>@request.SysAdminDetails.ServerResources</td></tr>
                                 <tr><td><strong>Web Server</strong></td><td>@request.SysAdminDetails.WebServer</td></tr>
                                 <tr><td><strong>Hostname</strong></td><td>@request.SysAdminDetails.Hostname</td></tr>
-                                <tr><td><strong>Database Name</strong></td><td>@request.SysAdminDetails.DatabaseName</td></tr>
-                                <tr><td><strong>Database Username</strong></td><td>@request.SysAdminDetails.DatabaseUsername</td></tr>
+                                <tr><td><strong>Database</strong></td><td>@(request.SysAdminDetails.DatabaseNameType == "none" ? "None" : request.SysAdminDetails.DatabaseNameType == "new" ? "New Database" : "Existing Database")</td></tr>
+                                @if (request.SysAdminDetails.DatabaseNameType != "none")
+                                {
+                                    <tr><td><strong>Database Name</strong></td><td>@request.SysAdminDetails.DatabaseName</td></tr>
+                                    <tr><td><strong>Database Username</strong></td><td>@request.SysAdminDetails.DatabaseUsername</td></tr>
+                                }
                             </tbody>
                         </MudSimpleTable>
                     </MudPaper>
@@ -591,7 +617,12 @@ else
                                         <MudTextField @bind-Value="socModel.FirewallEntries[idx].PolicyName" Label="Policy Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                     </MudItem>
                                     <MudItem xs="4">
-                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].VDOM" Label="VDOM" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                        <MudSelect @bind-Value="socModel.FirewallEntries[idx].VDOM" Label="VDOM" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
+                                            @foreach (var v in vdoms)
+                                            {
+                                                <MudSelectItem Value="@v.Name">@v.Name</MudSelectItem>
+                                            }
+                                        </MudSelect>
                                     </MudItem>
                                     <MudItem xs="4">
                                         <MudSelect @bind-Value="socModel.FirewallEntries[idx].Action" Label="Action" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
@@ -619,57 +650,48 @@ else
                                             OnClick="@(() => socModel.FirewallEntries.RemoveAt(idx))" />
                                     </MudItem>
 
-                                    @* Services sub-list *@
+                                    @* Services multi-select (from SysAdmin services) *@
                                     <MudItem xs="12">
                                         <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600;">Services</MudText>
-                                        @for (int si = 0; si < socModel.FirewallEntries[idx].Services.Count; si++)
+                                        @if (GetAvailableSysAdminServices().Any())
                                         {
-                                            var sIdx = si;
                                             var feIdx = idx;
-                                            <MudGrid Class="mb-1">
-                                                <MudItem xs="3">
-                                                    <MudTextField @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].Port" Label="Port" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. 443" />
-                                                </MudItem>
-                                                <MudItem xs="3">
-                                                    <MudSelect @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].Protocol" Label="Protocol" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
-                                                        <MudSelectItem Value="@("TCP")">TCP</MudSelectItem>
-                                                        <MudSelectItem Value="@("UDP")">UDP</MudSelectItem>
-                                                    </MudSelect>
-                                                </MudItem>
-                                                <MudItem xs="4">
-                                                    <MudTextField @bind-Value="socModel.FirewallEntries[feIdx].Services[sIdx].ServiceName" Label="Service Name" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. HTTPS" />
-                                                </MudItem>
-                                                <MudItem xs="2" Class="d-flex align-center">
-                                                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" Size="Size.Small"
-                                                        OnClick="@(() => socModel.FirewallEntries[feIdx].Services.RemoveAt(sIdx))" />
-                                                </MudItem>
-                                            </MudGrid>
+                                            @foreach (var svc in GetAvailableSysAdminServices())
+                                            {
+                                                var svcLabel = $"{svc.Port}/{svc.Protocol}{(string.IsNullOrEmpty(svc.ServiceName) ? "" : $" ({svc.ServiceName})")}";
+                                                var isSelected = socModel.FirewallEntries[feIdx].Services.Any(s =>
+                                                    s.Port == svc.Port && s.Protocol == svc.Protocol && s.ServiceName == svc.ServiceName);
+                                                <MudCheckBox T="bool" Value="@isSelected" Label="@svcLabel" Dense="true"
+                                                    ValueChanged="@((bool val) => ToggleSOCService(feIdx, svc, val))" />
+                                            }
                                         }
-                                        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
-                                            OnClick="@(() => socModel.FirewallEntries[idx].Services.Add(new()))" Style="text-transform: none;">
-                                            Add Service
-                                        </MudButton>
+                                        else
+                                        {
+                                            <MudAlert Severity="Severity.Info" Dense="true" Style="border-radius: 8px;">
+                                                No services defined in SysAdmin details yet.
+                                            </MudAlert>
+                                        }
                                     </MudItem>
 
-                                    @* Security Profiles *@
+                                    @* Security Profiles (multi-select from admin list) *@
                                     <MudItem xs="12">
                                         <MudText Typo="Typo.subtitle2" Class="mb-1" Style="font-weight: 600;">Security Profiles</MudText>
-                                        <MudStack Row="true" Spacing="1" Class="flex-wrap mb-1">
-                                            @for (int pi = 0; pi < socModel.FirewallEntries[idx].SecurityProfileNames.Count; pi++)
+                                        @if (securityProfiles.Any())
+                                        {
+                                            var feIdx2 = idx;
+                                            @foreach (var sp in securityProfiles)
                                             {
-                                                var pIdx = pi;
-                                                var feIdx2 = idx;
-                                                <MudChip T="string" Color="Color.Secondary" Size="Size.Small" OnClose="@(() => socModel.FirewallEntries[feIdx2].SecurityProfileNames.RemoveAt(pIdx))">
-                                                    @socModel.FirewallEntries[feIdx2].SecurityProfileNames[pIdx]
-                                                </MudChip>
+                                                var isSelected = socModel.FirewallEntries[feIdx2].SecurityProfileNames.Contains(sp.Name);
+                                                <MudCheckBox T="bool" Value="@isSelected" Label="@sp.Name" Dense="true"
+                                                    ValueChanged="@((bool val) => ToggleSecurityProfile(feIdx2, sp.Name, val))" />
                                             }
-                                        </MudStack>
-                                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
-                                            <MudTextField @bind-Value="newSecurityProfileName" Label="Profile Name" Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width: 250px;"
-                                                @onkeydown="@((e) => { if (e.Key == "Enter") AddSecurityProfile(idx); })" />
-                                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Small"
-                                                OnClick="@(() => AddSecurityProfile(idx))" />
-                                        </MudStack>
+                                        }
+                                        else
+                                        {
+                                            <MudAlert Severity="Severity.Info" Dense="true" Style="border-radius: 8px;">
+                                                No security profiles defined. Add them in Admin Settings.
+                                            </MudAlert>
+                                        }
                                     </MudItem>
                                 </MudGrid>
                             </MudPaper>
@@ -678,11 +700,17 @@ else
                             OnClick="@(() => socModel.FirewallEntries.Add(new()))" Style="border-radius: 10px; text-transform: none;">
                             Add Firewall Entry
                         </MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="HandleSaveSOC" Disabled="@isBusy"
-                                   Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Save">
-                            @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
-                            Save SOC Details
-                        </MudButton>
+                        <MudStack Row="true" Spacing="2" Class="mt-4">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="HandleSaveSOC" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Save">
+                                Save
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmitSOC" Disabled="@isBusy"
+                                       Style="border-radius: 12px; text-transform: none;" StartIcon="@Icons.Material.Filled.Publish">
+                                @if (isBusy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                                Submit
+                            </MudButton>
+                        </MudStack>
                     </MudPaper>
                 }
 
@@ -1041,12 +1069,13 @@ else
     private UpdateRequestModel editModel = new();
 
     private List<ResourceGroupModel> resourceGroups = new();
+    private List<VdomModel> vdoms = new();
+    private List<SecurityProfileModel> securityProfiles = new();
 
     private SysAdminDetailsModel sysAdminModel = new();
     private DataCenterDetailsModel dcModel = new();
     private NOCDetailsModel nocModel = new() { NetworkPaths = new() { new() } };
     private SOCDetailsModel socModel = new() { FirewallEntries = new() { new() } };
-    private string newSecurityProfileName = string.Empty;
 
     private record WorkflowStep(int Number, string Label, string Status);
     private static readonly WorkflowStep[] workflowSteps = new[]
@@ -1069,6 +1098,8 @@ else
         {
             request = await Api.GetRequestAsync(RequestId);
             resourceGroups = await Api.GetResourceGroupsAsync();
+            vdoms = await Api.GetVdomsAsync();
+            securityProfiles = await Api.GetSecurityProfilesAsync();
             PrePopulateFromSavedData();
         }
         catch { request = null; }
@@ -1200,12 +1231,38 @@ else
         Snackbar.Add("NOC details submitted", Severity.Success);
     });
 
-    private void AddSecurityProfile(int fwIdx)
+    private List<ServiceEntryModel> GetAvailableSysAdminServices()
     {
-        if (!string.IsNullOrWhiteSpace(newSecurityProfileName) && fwIdx < socModel.FirewallEntries.Count)
+        return request?.SysAdminDetails?.Services ?? sysAdminModel.Services;
+    }
+
+    private void ToggleSOCService(int fwIdx, ServiceEntryModel svc, bool selected)
+    {
+        if (fwIdx >= socModel.FirewallEntries.Count) return;
+        var services = socModel.FirewallEntries[fwIdx].Services;
+        if (selected)
         {
-            socModel.FirewallEntries[fwIdx].SecurityProfileNames.Add(newSecurityProfileName.Trim());
-            newSecurityProfileName = string.Empty;
+            if (!services.Any(s => s.Port == svc.Port && s.Protocol == svc.Protocol && s.ServiceName == svc.ServiceName))
+                services.Add(new ServiceEntryModel { Port = svc.Port, Protocol = svc.Protocol, ServiceName = svc.ServiceName });
+        }
+        else
+        {
+            services.RemoveAll(s => s.Port == svc.Port && s.Protocol == svc.Protocol && s.ServiceName == svc.ServiceName);
+        }
+    }
+
+    private void ToggleSecurityProfile(int fwIdx, string profileName, bool selected)
+    {
+        if (fwIdx >= socModel.FirewallEntries.Count) return;
+        var names = socModel.FirewallEntries[fwIdx].SecurityProfileNames;
+        if (selected)
+        {
+            if (!names.Contains(profileName))
+                names.Add(profileName);
+        }
+        else
+        {
+            names.Remove(profileName);
         }
     }
 

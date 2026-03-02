@@ -10,6 +10,7 @@ public class SysAdminDetails
     public string SensitivityLevel { get; set; } = string.Empty;
     public ServerResourceSize ServerResources { get; set; }
     public WebServerType WebServer { get; set; }
+    public string DatabaseNameType { get; set; } = "none";
     public string DatabaseName { get; set; } = string.Empty;
     public string DatabaseUsername { get; set; } = string.Empty;
     public string Hostname { get; set; } = string.Empty;

@@ -103,12 +103,25 @@ public class SysAdminDetailsModel
     public string SensitivityLevel { get; set; } = string.Empty;
     public string ServerResources { get; set; } = string.Empty;
     public string WebServer { get; set; } = string.Empty;
+    public string DatabaseNameType { get; set; } = "none";
     public string DatabaseName { get; set; } = string.Empty;
     public string DatabaseUsername { get; set; } = string.Empty;
     public string Hostname { get; set; } = string.Empty;
     public Guid? ResourceGroupId { get; set; }
     public string? ResourceGroupSummary { get; set; }
     public List<ServiceEntryModel> Services { get; set; } = new();
+}
+
+public class VdomModel
+{
+    public Guid VdomId { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+
+public class SecurityProfileModel
+{
+    public Guid SecurityProfileId { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
 
 public class DataCenterDetailsModel

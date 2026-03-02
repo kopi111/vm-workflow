@@ -33,6 +33,21 @@ public interface IApiClient
 
     // Resource Groups
     Task<List<ResourceGroupModel>> GetResourceGroupsAsync();
+    Task<ResourceGroupModel> CreateResourceGroupAsync(ResourceGroupModel model);
+    Task UpdateResourceGroupAsync(Guid id, ResourceGroupModel model);
+    Task DeleteResourceGroupAsync(Guid id);
+
+    // Security Profiles
+    Task<List<SecurityProfileModel>> GetSecurityProfilesAsync();
+    Task<SecurityProfileModel> CreateSecurityProfileAsync(SecurityProfileModel model);
+    Task UpdateSecurityProfileAsync(Guid id, SecurityProfileModel model);
+    Task DeleteSecurityProfileAsync(Guid id);
+
+    // VDOMs
+    Task<List<VdomModel>> GetVdomsAsync();
+    Task<VdomModel> CreateVdomAsync(VdomModel model);
+    Task UpdateVdomAsync(Guid id, VdomModel model);
+    Task DeleteVdomAsync(Guid id);
 
     // Users
     Task<List<UserModel>> GetUsersAsync();

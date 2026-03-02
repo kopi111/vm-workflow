@@ -22,6 +22,7 @@ public class WorkflowDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<ResourceGroup> ResourceGroups => Set<ResourceGroup>();
     public DbSet<SecurityProfile> SecurityProfiles => Set<SecurityProfile>();
+    public DbSet<Vdom> Vdoms => Set<Vdom>();
     public DbSet<FirewallEntrySecurityProfile> FirewallEntrySecurityProfiles => Set<FirewallEntrySecurityProfile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +42,7 @@ public class WorkflowDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ResourceGroupConfiguration());
         modelBuilder.ApplyConfiguration(new SecurityProfileConfiguration());
         modelBuilder.ApplyConfiguration(new FirewallEntrySecurityProfileConfiguration());
+        modelBuilder.ApplyConfiguration(new VdomConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

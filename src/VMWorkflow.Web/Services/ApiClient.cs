@@ -147,6 +147,76 @@ public class ApiClient : IApiClient
         return await _http.GetFromJsonAsync<List<ResourceGroupModel>>("api/admin/resource-groups") ?? new();
     }
 
+    // Resource Groups CRUD
+    public async Task<ResourceGroupModel> CreateResourceGroupAsync(ResourceGroupModel model)
+    {
+        var response = await _http.PostAsJsonAsync("api/admin/resource-groups", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<ResourceGroupModel>())!;
+    }
+
+    public async Task UpdateResourceGroupAsync(Guid id, ResourceGroupModel model)
+    {
+        var response = await _http.PutAsJsonAsync($"api/admin/resource-groups/{id}", model);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteResourceGroupAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"api/admin/resource-groups/{id}");
+        response.EnsureSuccessStatusCode();
+    }
+
+    // Security Profiles
+    public async Task<List<SecurityProfileModel>> GetSecurityProfilesAsync()
+    {
+        return await _http.GetFromJsonAsync<List<SecurityProfileModel>>("api/admin/security-profiles") ?? new();
+    }
+
+    public async Task<SecurityProfileModel> CreateSecurityProfileAsync(SecurityProfileModel model)
+    {
+        var response = await _http.PostAsJsonAsync("api/admin/security-profiles", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<SecurityProfileModel>())!;
+    }
+
+    public async Task UpdateSecurityProfileAsync(Guid id, SecurityProfileModel model)
+    {
+        var response = await _http.PutAsJsonAsync($"api/admin/security-profiles/{id}", model);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteSecurityProfileAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"api/admin/security-profiles/{id}");
+        response.EnsureSuccessStatusCode();
+    }
+
+    // VDOMs
+    public async Task<List<VdomModel>> GetVdomsAsync()
+    {
+        return await _http.GetFromJsonAsync<List<VdomModel>>("api/admin/vdoms") ?? new();
+    }
+
+    public async Task<VdomModel> CreateVdomAsync(VdomModel model)
+    {
+        var response = await _http.PostAsJsonAsync("api/admin/vdoms", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<VdomModel>())!;
+    }
+
+    public async Task UpdateVdomAsync(Guid id, VdomModel model)
+    {
+        var response = await _http.PutAsJsonAsync($"api/admin/vdoms/{id}", model);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteVdomAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"api/admin/vdoms/{id}");
+        response.EnsureSuccessStatusCode();
+    }
+
     // Audit Logs
     public async Task<List<AuditLogEntry>> GetAuditLogsAsync(DateTime? from = null, DateTime? to = null, string? user = null)
     {
