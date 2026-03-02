@@ -112,10 +112,19 @@
             </MudStack>
             <MudGrid>
                 <MudItem xs="12" sm="6">
-                    <MudNumericField @bind-Value="model.ExpectedUsers" Label="Expected Users" Variant="Variant.Outlined" />
+                    <MudNumericField @bind-Value="model.ExpectedUsers" Label="Expected Concurrent User Count" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="model.DBMS" Label="DBMS" Variant="Variant.Outlined" Placeholder="e.g. SQL Server, PostgreSQL" />
+                    <MudSelect @bind-Value="model.DBMS" Label="DBMS" Variant="Variant.Outlined" T="string" Clearable="true">
+                        <MudSelectItem Value="@("PostgreSQL")">PostgreSQL</MudSelectItem>
+                        <MudSelectItem Value="@("MySQL")">MySQL</MudSelectItem>
+                        <MudSelectItem Value="@("SQL Server")">SQL Server</MudSelectItem>
+                        <MudSelectItem Value="@("Oracle")">Oracle</MudSelectItem>
+                        <MudSelectItem Value="@("MongoDB")">MongoDB</MudSelectItem>
+                        <MudSelectItem Value="@("MariaDB")">MariaDB</MudSelectItem>
+                        <MudSelectItem Value="@("SQLite")">SQLite</MudSelectItem>
+                        <MudSelectItem Value="@("None")">None</MudSelectItem>
+                    </MudSelect>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="model.GitRepoLink" Label="Git Repository Link" Variant="Variant.Outlined"
@@ -183,7 +192,7 @@
             <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">Infrastructure & Access</MudText>
             <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 12px;">
                 <tbody>
-                    <tr><th style="width:200px">Expected Users</th><td>@(model.ExpectedUsers?.ToString() ?? "—")</td></tr>
+                    <tr><th style="width:200px">Expected Concurrent User Count</th><td>@(model.ExpectedUsers?.ToString() ?? "—")</td></tr>
                     <tr><th>DBMS</th><td>@(model.DBMS ?? "—")</td></tr>
                     <tr><th>Git Repository</th><td>@(model.GitRepoLink ?? "—")</td></tr>
                     <tr><th>Access Group</th><td>@(model.AccessGroup ?? "—")</td></tr>

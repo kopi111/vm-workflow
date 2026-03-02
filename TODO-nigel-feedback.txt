@@ -1,0 +1,39 @@
+=== NIGEL'S FEEDBACK - ROUND 2 TODO LIST ===
+Date: 2026-03-01
+
+[x] 1. Fix SysAdmin Services Bug + Add UI
+    - SubmitSysAdminAsync doesn't persist services (data loss bug)
+    - MapToDto doesn't map services back
+    - Includes don't load services
+    - No UI for services in SysAdmin form or read-only view
+    - Need addable list: Port, Protocol (TCP/UDP), ServiceName
+
+[x] 2. Resource Group Selection + Summary
+    - ResourceGroup entity exists but not wired to SysAdmin form
+    - Add ResourceGroupId FK to SysAdminDetails
+    - Dropdown in SysAdmin form with resource summary (vCPU, RAM, HDD)
+    - API: GET /api/admin/resource-groups already exists
+
+[x] 3. Save/Reject for NOC & SOC Teams
+    - Currently only "Submit" button (advances workflow immediately)
+    - Add "Save" (persist without status change) and keep "Submit"
+    - Allow re-editing saved NOC/SOC data
+    - Pre-populate forms from existing saved data
+
+[x] 4. Pending Queue Pages per Role
+    - Only Drafts page exists
+    - API: GET /api/queue/{role} already exists
+    - New page: WorkQueue.razor at /queue/{role}
+    - Nav links: SysAdmin, DataCenter, NOC, SOC, IOC, CISO, CTO, Ops
+
+[x] 5. Rename "Expected Users" → "Expected Concurrent User Count"
+    - CreateRequest.razor (form + review)
+    - RequestDetail.razor (read-only + edit draft)
+
+[x] 6. DBMS Dropdown (instead of free text)
+    - Options: PostgreSQL, MySQL, SQL Server, Oracle, MongoDB, MariaDB, SQLite, None
+    - CreateRequest.razor + RequestDetail.razor (edit draft)
+
+[x] 7. Approval Summary for CISO/CTO/Ops
+    - Collapsible panel showing all submitted details
+    - App Info, SysAdmin, DataCenter, NOC, SOC, IOC comments

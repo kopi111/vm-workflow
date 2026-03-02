@@ -57,6 +57,14 @@
                 WORK QUEUES
             </MudText>
             <MudNavLink Href="/drafts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Drafts">Drafts</MudNavLink>
+            <MudNavLink Href="/queue/sysadmin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Computer">SysAdmin</MudNavLink>
+            <MudNavLink Href="/queue/datacenter" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Data Center</MudNavLink>
+            <MudNavLink Href="/queue/noc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lan">NOC</MudNavLink>
+            <MudNavLink Href="/queue/soc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Security">SOC</MudNavLink>
+            <MudNavLink Href="/queue/ioc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.VerifiedUser">IOC</MudNavLink>
+            <MudNavLink Href="/queue/ciso" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Shield">CISO</MudNavLink>
+            <MudNavLink Href="/queue/cto" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Engineering">CTO</MudNavLink>
+            <MudNavLink Href="/queue/ops" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Ops</MudNavLink>
 
             <AuthorizeView Roles="SysAdmin,PlatformAdmin">
                 <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"

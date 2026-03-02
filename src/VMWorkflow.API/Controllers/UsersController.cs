@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
             DisplayName = dto.DisplayName,
             Email = dto.Email,
             Role = dto.Role,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? "ChangeMe123!"),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password ?? Guid.NewGuid().ToString("N")[..16]),
             IsBlocked = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

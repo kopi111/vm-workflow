@@ -69,6 +69,7 @@ public class RequestService : IRequestService
     {
         var query = _db.Requests
             .Include(r => r.SysAdminDetails)
+                .ThenInclude(s => s!.Services)
             .Include(r => r.DataCenterDetails)
             .Include(r => r.NOCDetails)
                 .ThenInclude(n => n!.NetworkPaths)
@@ -162,6 +163,18 @@ public class RequestService : IRequestService
             SubmittedAt = DateTime.UtcNow
         };
 
+        foreach (var svc in dto.Services)
+        {
+            sysAdminDetails.Services.Add(new ServiceEntry
+            {
+                ServiceEntryId = Guid.NewGuid(),
+                SysAdminDetailsId = sysAdminDetails.SysAdminDetailsId,
+                ServiceName = svc.ServiceName,
+                Port = svc.Port,
+                Protocol = svc.Protocol
+            });
+        }
+
         if (request.SysAdminDetails != null)
             _db.SysAdminDetails.Remove(request.SysAdminDetails);
 
@@ -214,12 +227,96 @@ public class RequestService : IRequestService
         return MapToDto(request);
     }
 
+    public async Task<RequestResponseDto> SaveSysAdminAsync(Guid requestId, SysAdminDetailsDto dto, string savedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.PendingSysAdmin)
+            throw new InvalidOperationException($"Cannot save SysAdmin details when status is {request.Status}.");
+
+        var sysAdminDetails = new SysAdminDetails
+        {
+            SysAdminDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            SensitivityLevel = dto.SensitivityLevel,
+            ServerResources = Enum.Parse<ServerResourceSize>(dto.ServerResources, true),
+            WebServer = Enum.Parse<WebServerType>(dto.WebServer, true),
+            DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
+                ? $"{request.ApplicationName}_Database"
+                : dto.DatabaseName,
+            DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
+                ? $"{request.ApplicationName}_User"
+                : dto.DatabaseUsername,
+            Hostname = dto.Hostname,
+            SubmittedBy = savedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var svc in dto.Services)
+        {
+            sysAdminDetails.Services.Add(new ServiceEntry
+            {
+                ServiceEntryId = Guid.NewGuid(),
+                SysAdminDetailsId = sysAdminDetails.SysAdminDetailsId,
+                ServiceName = svc.ServiceName,
+                Port = svc.Port,
+                Protocol = svc.Protocol
+            });
+        }
+
+        if (request.SysAdminDetails != null)
+            _db.SysAdminDetails.Remove(request.SysAdminDetails);
+
+        _db.SysAdminDetails.Add(sysAdminDetails);
+        request.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+        _logger.LogInformation("SysAdmin details saved (without status change) for {RequestId} by {User}", requestId, savedBy);
+        return MapToDto(request);
+    }
+
+    public async Task<RequestResponseDto> SaveDataCenterAsync(Guid requestId, DataCenterDetailsDto dto, string savedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.DataCenterReview)
+            throw new InvalidOperationException($"Cannot save DC details when status is {request.Status}.");
+
+        var dcDetails = new DataCenterDetails
+        {
+            DataCenterDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            Environment = Enum.Parse<ServerEnvironment>(dto.Environment, true),
+            UplinkSpeed = dto.UplinkSpeed,
+            BareMetalType = Enum.Parse<BareMetalType>(dto.BareMetalType, true),
+            PortNumber = dto.PortNumber,
+            DC = dto.DC,
+            RackRoom = dto.RackRoom,
+            RackNumber = dto.RackNumber,
+            Cluster = Enum.Parse<ClusterType>(dto.Cluster, true),
+            SubmittedBy = savedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        if (request.DataCenterDetails != null)
+            _db.DataCenterDetails.Remove(request.DataCenterDetails);
+
+        _db.DataCenterDetails.Add(dcDetails);
+        request.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+        _logger.LogInformation("DC details saved (without status change) for {RequestId} by {User}", requestId, savedBy);
+        return MapToDto(request);
+    }
+
     public async Task<RequestResponseDto> SubmitNOCAsync(Guid requestId, NOCDetailsDto dto, string submittedBy)
     {
         var request = await GetRequestWithIncludes(requestId)
             ?? throw new KeyNotFoundException($"Request {requestId} not found.");
 
-        if (request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingSOC)
+        if (request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingIOCApproval)
             throw new InvalidOperationException($"Cannot submit NOC details when status is {request.Status}.");
 
         var nocDetails = new NOCDetails
@@ -233,6 +330,7 @@ public class RequestService : IRequestService
             Port = dto.Port,
             VIP = dto.VIP,
             FQDN = dto.FQDN,
+            VirtualIP = dto.VirtualIP,
             VirtualPort = dto.VirtualPort,
             VirtualFQDN = dto.VirtualFQDN,
             SubmittedBy = submittedBy,
@@ -257,16 +355,23 @@ public class RequestService : IRequestService
         request.UpdatedAt = DateTime.UtcNow;
 
         var oldStatus = request.Status;
-        var socCompleted = request.SOCDetails != null;
-        if (_workflow.IsIOCReady(true, socCompleted))
+        if (oldStatus != RequestStatus.PendingIOCApproval)
         {
-            request.Status = RequestStatus.PendingIOCApproval;
-            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "NOC submitted; both NOC+SOC complete — ready for IOC");
+            var socCompleted = request.SOCDetails != null;
+            if (_workflow.IsIOCReady(true, socCompleted))
+            {
+                request.Status = RequestStatus.PendingIOCApproval;
+                AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "NOC submitted; both NOC+SOC complete — ready for IOC");
+            }
+            else
+            {
+                request.Status = RequestStatus.PendingSOC;
+                AddStatusHistory(request, oldStatus, RequestStatus.PendingSOC, submittedBy, "NOC details submitted; awaiting SOC");
+            }
         }
         else
         {
-            request.Status = RequestStatus.PendingSOC;
-            AddStatusHistory(request, oldStatus, RequestStatus.PendingSOC, submittedBy, "NOC details submitted; awaiting SOC");
+            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "NOC details re-submitted by IOC Manager");
         }
 
         await _db.SaveChangesAsync();
@@ -279,7 +384,7 @@ public class RequestService : IRequestService
         var request = await GetRequestWithIncludes(requestId)
             ?? throw new KeyNotFoundException($"Request {requestId} not found.");
 
-        if (request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingNOC)
+        if (request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingIOCApproval)
             throw new InvalidOperationException($"Cannot submit SOC details when status is {request.Status}.");
 
         var socDetails = new SOCDetails
@@ -338,20 +443,141 @@ public class RequestService : IRequestService
         request.UpdatedAt = DateTime.UtcNow;
 
         var oldStatus = request.Status;
-        var nocCompleted = request.NOCDetails != null;
-        if (_workflow.IsIOCReady(nocCompleted, true))
+        if (oldStatus != RequestStatus.PendingIOCApproval)
         {
-            request.Status = RequestStatus.PendingIOCApproval;
-            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "SOC submitted; both NOC+SOC complete — ready for IOC");
+            var nocCompleted = request.NOCDetails != null;
+            if (_workflow.IsIOCReady(nocCompleted, true))
+            {
+                request.Status = RequestStatus.PendingIOCApproval;
+                AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "SOC submitted; both NOC+SOC complete — ready for IOC");
+            }
+            else
+            {
+                request.Status = RequestStatus.PendingNOC;
+                AddStatusHistory(request, oldStatus, RequestStatus.PendingNOC, submittedBy, "SOC details submitted; awaiting NOC");
+            }
         }
         else
         {
-            request.Status = RequestStatus.PendingNOC;
-            AddStatusHistory(request, oldStatus, RequestStatus.PendingNOC, submittedBy, "SOC details submitted; awaiting NOC");
+            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "SOC details re-submitted by IOC Manager");
         }
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("SOC details submitted for {RequestId} by {User}", requestId, submittedBy);
+        return MapToDto(request);
+    }
+
+    public async Task<RequestResponseDto> SaveNOCAsync(Guid requestId, NOCDetailsDto dto, string savedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingSOC)
+            throw new InvalidOperationException($"Cannot save NOC details when status is {request.Status}.");
+
+        var nocDetails = new NOCDetails
+        {
+            NOCDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            IPAddress = dto.IPAddress,
+            SubnetMask = dto.SubnetMask,
+            VLANID = dto.VLANID,
+            Gateway = dto.Gateway,
+            Port = dto.Port,
+            VIP = dto.VIP,
+            FQDN = dto.FQDN,
+            VirtualIP = dto.VirtualIP,
+            VirtualPort = dto.VirtualPort,
+            VirtualFQDN = dto.VirtualFQDN,
+            SubmittedBy = savedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var np in dto.NetworkPaths)
+        {
+            nocDetails.NetworkPaths.Add(new NetworkPathEntry
+            {
+                NetworkPathEntryId = Guid.NewGuid(),
+                SwitchName = np.SwitchName,
+                Port = np.Port,
+                LinkSpeed = np.LinkSpeed
+            });
+        }
+
+        if (request.NOCDetails != null)
+            _db.NOCDetails.Remove(request.NOCDetails);
+
+        _db.NOCDetails.Add(nocDetails);
+        request.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+        _logger.LogInformation("NOC details saved (without status change) for {RequestId} by {User}", requestId, savedBy);
+        return MapToDto(request);
+    }
+
+    public async Task<RequestResponseDto> SaveSOCAsync(Guid requestId, SOCDetailsDto dto, string savedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingNOC)
+            throw new InvalidOperationException($"Cannot save SOC details when status is {request.Status}.");
+
+        var socDetails = new SOCDetails
+        {
+            SOCDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            SubmittedBy = savedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var fe in dto.FirewallEntries)
+        {
+            var entry = new FirewallEntry
+            {
+                FirewallEntryId = Guid.NewGuid(),
+                PolicyName = fe.PolicyName,
+                VDOM = fe.VDOM,
+                SourceInterface = fe.SourceInterface,
+                DestinationInterface = fe.DestinationInterface,
+                SourceIP = fe.SourceIP,
+                DestinationIP = fe.DestinationIP,
+                Schedule = fe.Schedule,
+                Action = Enum.Parse<PolicyAction>(fe.Action, true)
+            };
+
+            foreach (var svc in fe.Services)
+            {
+                entry.Services.Add(new FirewallServiceEntry
+                {
+                    FirewallServiceEntryId = Guid.NewGuid(),
+                    FirewallEntryId = entry.FirewallEntryId,
+                    Port = svc.Port,
+                    Protocol = svc.Protocol,
+                    ServiceName = svc.ServiceName
+                });
+            }
+
+            foreach (var profileId in fe.SecurityProfileIds)
+            {
+                entry.SecurityProfiles.Add(new FirewallEntrySecurityProfile
+                {
+                    FirewallEntryId = entry.FirewallEntryId,
+                    SecurityProfileId = profileId
+                });
+            }
+
+            socDetails.FirewallEntries.Add(entry);
+        }
+
+        if (request.SOCDetails != null)
+            _db.SOCDetails.Remove(request.SOCDetails);
+
+        _db.SOCDetails.Add(socDetails);
+        request.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+        _logger.LogInformation("SOC details saved (without status change) for {RequestId} by {User}", requestId, savedBy);
         return MapToDto(request);
     }
 
@@ -470,6 +696,7 @@ public class RequestService : IRequestService
 
         var query = _db.Requests
             .Include(r => r.SysAdminDetails)
+                .ThenInclude(s => s!.Services)
             .Include(r => r.DataCenterDetails)
             .Include(r => r.NOCDetails)
                 .ThenInclude(n => n!.NetworkPaths)
@@ -514,6 +741,7 @@ public class RequestService : IRequestService
     {
         return await _db.Requests
             .Include(r => r.SysAdminDetails)
+                .ThenInclude(s => s!.Services)
             .Include(r => r.DataCenterDetails)
             .Include(r => r.NOCDetails)
                 .ThenInclude(n => n!.NetworkPaths)
@@ -570,7 +798,13 @@ public class RequestService : IRequestService
                 WebServer = r.SysAdminDetails.WebServer.ToString(),
                 DatabaseName = r.SysAdminDetails.DatabaseName,
                 DatabaseUsername = r.SysAdminDetails.DatabaseUsername,
-                Hostname = r.SysAdminDetails.Hostname
+                Hostname = r.SysAdminDetails.Hostname,
+                Services = r.SysAdminDetails.Services.Select(s => new ServiceEntryDto
+                {
+                    ServiceName = s.ServiceName,
+                    Port = s.Port,
+                    Protocol = s.Protocol
+                }).ToList()
             },
             DataCenterDetails = r.DataCenterDetails == null ? null : new DataCenterDetailsDto
             {
@@ -592,6 +826,7 @@ public class RequestService : IRequestService
                 Port = r.NOCDetails.Port,
                 VIP = r.NOCDetails.VIP,
                 FQDN = r.NOCDetails.FQDN,
+                VirtualIP = r.NOCDetails.VirtualIP,
                 VirtualPort = r.NOCDetails.VirtualPort,
                 VirtualFQDN = r.NOCDetails.VirtualFQDN,
                 NetworkPaths = r.NOCDetails.NetworkPaths.Select(np => new NetworkPathEntryDto

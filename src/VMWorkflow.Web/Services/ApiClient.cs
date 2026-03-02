@@ -51,9 +51,23 @@ public class ApiClient : IApiClient
         return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
     }
 
+    public async Task<RequestResponse> SaveSysAdminAsync(Guid requestId, SysAdminDetailsModel model)
+    {
+        var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/sysadmin?action=save", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
+    }
+
     public async Task<RequestResponse> SubmitDataCenterAsync(Guid requestId, DataCenterDetailsModel model)
     {
         var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/datacenter", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
+    }
+
+    public async Task<RequestResponse> SaveDataCenterAsync(Guid requestId, DataCenterDetailsModel model)
+    {
+        var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/datacenter?action=save", model);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
     }
@@ -65,9 +79,23 @@ public class ApiClient : IApiClient
         return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
     }
 
+    public async Task<RequestResponse> SaveNOCAsync(Guid requestId, NOCDetailsModel model)
+    {
+        var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/noc?action=save", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
+    }
+
     public async Task<RequestResponse> SubmitSOCAsync(Guid requestId, SOCDetailsModel model)
     {
         var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/soc", model);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
+    }
+
+    public async Task<RequestResponse> SaveSOCAsync(Guid requestId, SOCDetailsModel model)
+    {
+        var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/soc?action=save", model);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
     }
@@ -105,6 +133,18 @@ public class ApiClient : IApiClient
         var response = await _http.PostAsJsonAsync($"api/requests/{requestId}/send-back", model);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<RequestResponse>())!;
+    }
+
+    // Work Queue
+    public async Task<List<RequestResponse>> GetQueueAsync(string role)
+    {
+        return await _http.GetFromJsonAsync<List<RequestResponse>>($"api/queue/{role}") ?? new();
+    }
+
+    // Resource Groups
+    public async Task<List<ResourceGroupModel>> GetResourceGroupsAsync()
+    {
+        return await _http.GetFromJsonAsync<List<ResourceGroupModel>>("api/admin/resource-groups") ?? new();
     }
 
     // Audit Logs

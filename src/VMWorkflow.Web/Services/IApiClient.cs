@@ -11,9 +11,13 @@ public interface IApiClient
     Task<RequestResponse> UpdateRequestAsync(Guid requestId, UpdateRequestModel model);
     Task<RequestResponse> SubmitRequestAsync(Guid requestId);
     Task<RequestResponse> SubmitSysAdminAsync(Guid requestId, SysAdminDetailsModel model);
+    Task<RequestResponse> SaveSysAdminAsync(Guid requestId, SysAdminDetailsModel model);
     Task<RequestResponse> SubmitDataCenterAsync(Guid requestId, DataCenterDetailsModel model);
+    Task<RequestResponse> SaveDataCenterAsync(Guid requestId, DataCenterDetailsModel model);
     Task<RequestResponse> SubmitNOCAsync(Guid requestId, NOCDetailsModel model);
+    Task<RequestResponse> SaveNOCAsync(Guid requestId, NOCDetailsModel model);
     Task<RequestResponse> SubmitSOCAsync(Guid requestId, SOCDetailsModel model);
+    Task<RequestResponse> SaveSOCAsync(Guid requestId, SOCDetailsModel model);
     Task<RequestResponse> ProcessApprovalAsync(Guid requestId, ApprovalModel model);
     Task<RequestResponse> ProcessCISOApprovalAsync(Guid requestId, ApprovalModel model);
     Task<RequestResponse> ProcessCTOApprovalAsync(Guid requestId, ApprovalModel model);
@@ -23,6 +27,12 @@ public interface IApiClient
     // Audit Logs
     Task<List<AuditLogEntry>> GetAuditLogsAsync(DateTime? from = null, DateTime? to = null, string? user = null);
     Task<List<StatusHistoryLogEntry>> GetStatusHistoryLogsAsync(DateTime? from = null, DateTime? to = null, string? user = null);
+
+    // Work Queue
+    Task<List<RequestResponse>> GetQueueAsync(string role);
+
+    // Resource Groups
+    Task<List<ResourceGroupModel>> GetResourceGroupsAsync();
 
     // Users
     Task<List<UserModel>> GetUsersAsync();

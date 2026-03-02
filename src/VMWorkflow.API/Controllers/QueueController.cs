@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VMWorkflow.Application.DTOs;
 using VMWorkflow.Application.Interfaces;
@@ -6,6 +7,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/queue")]
+[Authorize]
 public class QueueController : ControllerBase
 {
     private readonly IRequestService _requestService;

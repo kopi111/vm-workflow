@@ -1,0 +1,147 @@
+@page "/queue/{Role}"
+@inject IApiClient Api
+@inject NavigationManager Navigation
+
+@attribute [Authorize]
+
+<PageTitle>@RoleDisplayName Queue</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">@RoleDisplayName Queue</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests pending @RoleDisplayName review and action.</MudText>
+        </MudStack>
+        <MudChip T="string" Size="Size.Medium" Color="Color.Primary" Variant="Variant.Filled" Style="border-radius: 20px; font-weight: 600;">
+            @requests.Count pending
+        </MudChip>
+    </MudStack>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="border-radius: 8px;" />
+    }
+    else if (!requests.Any())
+    {
+        <MudPaper Elevation="0" Class="premium-card pa-8 text-center" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Style="opacity: 0.2;" />
+            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">Queue is empty</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+                No requests are currently pending @RoleDisplayName review.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid Class="stagger-in">
+            @foreach (var req in requests)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default); cursor: pointer;"
+                              @onclick="@(() => Navigation.NavigateTo($"/request/{req.RequestId}"))">
+                        <MudStack Spacing="2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                                    @req.ObjectSlug
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(req.Status)" Variant="Variant.Filled" Style="border-radius: 8px;">
+                                    @FormatStatus(req.Status)
+                                </MudChip>
+                            </MudStack>
+
+                            <MudText Typo="Typo.h6" Style="font-weight: 600;">@req.ApplicationName</MudText>
+
+                            <MudStack Row="true" Spacing="2">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                    @req.Environment
+                                </MudChip>
+                                @if (!string.IsNullOrEmpty(req.Framework))
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                        @req.Framework
+                                    </MudChip>
+                                }
+                            </MudStack>
+
+                            <MudDivider Class="my-1" />
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
+                                    @req.CreatedBy — @req.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                                </MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Size="Size.Small" Color="Color.Primary"
+                                               Href="@($"/request/{req.RequestId}")" />
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    [Parameter] public string Role { get; set; } = string.Empty;
+
+    private List<RequestResponse> requests = new();
+    private bool isLoading = true;
+
+    private string RoleDisplayName => Role?.ToLower() switch
+    {
+        "sysadmin" => "SysAdmin",
+        "datacenter" => "Data Center",
+        "noc" => "NOC",
+        "soc" => "SOC",
+        "ioc" => "IOC",
+        "ciso" => "CISO",
+        "cto" => "CTO",
+        "ops" => "Ops",
+        _ => Role ?? "Unknown"
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadQueue();
+    }
+
+    private async Task LoadQueue()
+    {
+        isLoading = true;
+        try
+        {
+            requests = await Api.GetQueueAsync(Role);
+        }
+        catch
+        {
+            requests = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "Draft" => Color.Default,
+        "Submitted" or "PendingSysAdmin" => Color.Info,
+        "DataCenterReview" => Color.Secondary,
+        "PendingNOC" or "PendingSOC" => Color.Warning,
+        "PendingIOCApproval" => Color.Tertiary,
+        "PendingApproval" => Color.Primary,
+        "Approved" => Color.Success,
+        "Rejected" => Color.Error,
+        _ => Color.Default
+    };
+
+    private static string FormatStatus(string status) => status switch
+    {
+        "PendingSysAdmin" => "Pending SysAdmin",
+        "DataCenterReview" => "DC Review",
+        "PendingNOC" => "Pending NOC",
+        "PendingSOC" => "Pending SOC",
+        "PendingIOCApproval" => "Pending IOC",
+        "PendingApproval" => "Pending Approval",
+        _ => status
+    };
+}

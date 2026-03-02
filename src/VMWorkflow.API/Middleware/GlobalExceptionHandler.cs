@@ -7,13 +7,11 @@ public class GlobalExceptionHandler
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionHandler> _logger;
-    private readonly IHostEnvironment _env;
 
-    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger, IHostEnvironment env)
+    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
     {
         _next = next;
         _logger = logger;
-        _env = env;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -21,6 +19,11 @@ public class GlobalExceptionHandler
         try
         {
             await _next(context);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access");
+            await WriteErrorResponse(context, HttpStatusCode.Unauthorized, "Unauthorized.");
         }
         catch (KeyNotFoundException ex)
         {
@@ -40,15 +43,7 @@ public class GlobalExceptionHandler
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
-
-            if (_env.IsDevelopment())
-            {
-                await WriteDetailedErrorResponse(context, ex);
-            }
-            else
-            {
-                await WriteErrorResponse(context, HttpStatusCode.InternalServerError, "An unexpected error occurred.");
-            }
+            await WriteErrorResponse(context, HttpStatusCode.InternalServerError, "An unexpected error occurred.");
         }
     }
 
@@ -57,23 +52,6 @@ public class GlobalExceptionHandler
         context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
         var response = JsonSerializer.Serialize(new { error = message, statusCode = (int)statusCode });
-        await context.Response.WriteAsync(response);
-    }
-
-    private static async Task WriteDetailedErrorResponse(HttpContext context, Exception ex)
-    {
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-
-        var response = JsonSerializer.Serialize(new
-        {
-            error = ex.Message,
-            type = ex.GetType().Name,
-            stackTrace = ex.StackTrace,
-            inner = ex.InnerException?.Message,
-            statusCode = 500
-        }, new JsonSerializerOptions { WriteIndented = true });
-
         await context.Response.WriteAsync(response);
     }
 }

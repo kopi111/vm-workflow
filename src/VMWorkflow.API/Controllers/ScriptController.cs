@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VMWorkflow.Application.Interfaces;
@@ -7,6 +8,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/requests/{id:guid}/generate-script")]
+[Authorize(Roles = "SOC,IOCManager,SysAdmin,PlatformAdmin")]
 public class ScriptController : ControllerBase
 {
     private readonly WorkflowDbContext _db;

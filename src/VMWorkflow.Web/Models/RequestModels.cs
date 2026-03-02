@@ -106,6 +106,9 @@ public class SysAdminDetailsModel
     public string DatabaseName { get; set; } = string.Empty;
     public string DatabaseUsername { get; set; } = string.Empty;
     public string Hostname { get; set; } = string.Empty;
+    public Guid? ResourceGroupId { get; set; }
+    public string? ResourceGroupSummary { get; set; }
+    public List<ServiceEntryModel> Services { get; set; } = new();
 }
 
 public class DataCenterDetailsModel
@@ -129,6 +132,7 @@ public class NOCDetailsModel
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
     public string FQDN { get; set; } = string.Empty;
+    public string VirtualIP { get; set; } = string.Empty;
     public string VirtualPort { get; set; } = string.Empty;
     public string VirtualFQDN { get; set; } = string.Empty;
     public List<NetworkPathEntryModel> NetworkPaths { get; set; } = new();
@@ -166,6 +170,15 @@ public class ServiceEntryModel
     public string Port { get; set; } = string.Empty;
     public string Protocol { get; set; } = "TCP";
     public string? ServiceName { get; set; }
+}
+
+public class ResourceGroupModel
+{
+    public Guid ResourceGroupId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int VCpu { get; set; }
+    public string Ram { get; set; } = string.Empty;
+    public string Hdd { get; set; } = string.Empty;
 }
 
 public class ApprovalModel

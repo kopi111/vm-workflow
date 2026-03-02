@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VMWorkflow.Application.DTOs;
 using VMWorkflow.Application.Interfaces;
@@ -6,6 +7,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class RequestsController : ControllerBase
 {
     private readonly IRequestService _requestService;
@@ -56,6 +58,6 @@ public class RequestsController : ControllerBase
 
     private string GetCurrentUser()
     {
-        return User.Identity?.Name ?? "dev-user";
+        return User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
     }
 }

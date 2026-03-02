@@ -51,6 +51,10 @@ builder.Services.AddScoped<IFortiGateService, StubFortiGateService>();
 
 // --- JWT Authentication ---
 var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+    ?? jwtSection["Key"]
+    ?? throw new InvalidOperationException("JWT key not configured. Set JWT_SECRET_KEY environment variable.");
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -66,7 +70,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSection["Issuer"],
         ValidAudience = jwtSection["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
@@ -88,11 +92,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// --- CORS (dev mode) ---
+// --- CORS ---
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5186", "https://localhost:5186" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DevCors", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("AppCors", policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials());
 });
 
 var app = builder.Build();
@@ -105,6 +115,21 @@ if (app.Environment.IsDevelopment())
     db.Database.EnsureCreated();
 }
 
+// --- Security Headers ---
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+    if (!app.Environment.IsDevelopment())
+    {
+        context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+    }
+    await next();
+});
+
 // --- Middleware Pipeline ---
 app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionHandler>();
@@ -116,7 +141,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "VM Workflow API v1"));
 }
 
-app.UseCors("DevCors");
+app.UseCors("AppCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<UserBlockingMiddleware>();

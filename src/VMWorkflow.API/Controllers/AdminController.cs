@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VMWorkflow.Application.DTOs;
@@ -8,6 +9,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/admin")]
+[Authorize(Roles = "SysAdmin,PlatformAdmin")]
 public class AdminController : ControllerBase
 {
     private readonly WorkflowDbContext _db;
@@ -20,6 +22,7 @@ public class AdminController : ControllerBase
     // ===== Resource Groups =====
 
     [HttpGet("resource-groups")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<ResourceGroupDto>>> GetResourceGroups()
     {
         var groups = await _db.ResourceGroups.OrderBy(r => r.Name).ToListAsync();
@@ -43,7 +46,7 @@ public class AdminController : ControllerBase
             VCpu = dto.VCpu,
             Ram = dto.Ram,
             Hdd = dto.Hdd,
-            CreatedBy = User.Identity?.Name ?? "dev-user",
+            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
             CreatedAt = DateTime.UtcNow
         };
         _db.ResourceGroups.Add(entity);
@@ -78,6 +81,7 @@ public class AdminController : ControllerBase
     // ===== Security Profiles =====
 
     [HttpGet("security-profiles")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<SecurityProfileDto>>> GetSecurityProfiles()
     {
         var profiles = await _db.SecurityProfiles.OrderBy(s => s.Name).ToListAsync();
@@ -95,7 +99,7 @@ public class AdminController : ControllerBase
         {
             SecurityProfileId = Guid.NewGuid(),
             Name = dto.Name,
-            CreatedBy = User.Identity?.Name ?? "dev-user",
+            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
             CreatedAt = DateTime.UtcNow
         };
         _db.SecurityProfiles.Add(entity);
