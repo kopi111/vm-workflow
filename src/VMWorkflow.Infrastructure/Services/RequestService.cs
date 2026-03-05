@@ -13,50 +13,69 @@ public class RequestService : IRequestService
 {
     private readonly WorkflowDbContext _db;
     private readonly IWorkflowEngine _workflow;
+    private readonly IScriptGenerationService _scriptService;
     private readonly ILogger<RequestService> _logger;
 
-    public RequestService(WorkflowDbContext db, IWorkflowEngine workflow, ILogger<RequestService> logger)
+    public RequestService(WorkflowDbContext db, IWorkflowEngine workflow, IScriptGenerationService scriptService, ILogger<RequestService> logger)
     {
         _db = db;
         _workflow = workflow;
+        _scriptService = scriptService;
         _logger = logger;
     }
 
     public async Task<RequestResponseDto> CreateAsync(CreateRequestDto dto, string createdBy)
     {
-        var sequenceNumber = await _db.Requests
-            .CountAsync(r => r.ApplicationName == dto.ApplicationName && r.Environment == dto.Environment) + 1;
-
-        var slug = ObjectSlugGenerator.Generate(dto.ApplicationName, dto.Environment, sequenceNumber);
-
-        var request = new Request
+        // Retry loop to handle slug uniqueness constraint violations from concurrent requests
+        const int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++)
         {
-            RequestId = Guid.NewGuid(),
-            ApplicationName = dto.ApplicationName,
-            Environment = dto.Environment,
-            ObjectSlug = slug,
-            ProgrammingLanguage = dto.ProgrammingLanguage,
-            Framework = dto.Framework,
-            Purpose = dto.Purpose,
-            ExpectedUsers = dto.ExpectedUsers,
-            DBMS = dto.DBMS,
-            GitRepoLink = dto.GitRepoLink,
-            AccessGroup = dto.AccessGroup,
-            SLA = dto.SLA,
-            FQDNSuggestion = dto.FQDNSuggestion,
-            AuthenticationMethod = dto.AuthenticationMethod,
-            Status = RequestStatus.Draft,
-            CreatedBy = createdBy,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            var sequenceNumber = await _db.Requests
+                .CountAsync(r => r.ApplicationName == dto.ApplicationName && r.Environment == dto.Environment) + 1 + attempt;
 
-        _db.Requests.Add(request);
-        AddStatusHistory(request, RequestStatus.Draft, RequestStatus.Draft, createdBy, "Request created");
-        await _db.SaveChangesAsync();
+            var slug = ObjectSlugGenerator.Generate(dto.ApplicationName, dto.Environment, sequenceNumber);
 
-        _logger.LogInformation("Request {RequestId} created with slug {Slug} by {User}", request.RequestId, slug, createdBy);
-        return MapToDto(request);
+            var now = DateTime.UtcNow;
+            var request = new Request
+            {
+                RequestId = Guid.NewGuid(),
+                ApplicationName = dto.ApplicationName,
+                Environment = dto.Environment,
+                ObjectSlug = slug,
+                ProgrammingLanguage = dto.ProgrammingLanguage,
+                Framework = dto.Framework,
+                Purpose = dto.Purpose,
+                ExpectedUsers = dto.ExpectedUsers,
+                DBMS = dto.DBMS,
+                GitRepoLink = dto.GitRepoLink,
+                AccessGroup = dto.AccessGroup,
+                SLA = dto.SLA,
+                FQDNSuggestion = dto.FQDNSuggestion,
+                AuthenticationMethod = dto.AuthenticationMethod,
+                Status = RequestStatus.Draft,
+                CreatedBy = createdBy,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            _db.Requests.Add(request);
+            AddStatusHistory(request, RequestStatus.Draft, RequestStatus.Draft, createdBy, "Request created");
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Request {RequestId} created with slug {Slug} by {User}", request.RequestId, slug, createdBy);
+                return MapToDto(request);
+            }
+            catch (DbUpdateException) when (attempt < maxRetries - 1)
+            {
+                // Unique constraint violation on ObjectSlug — detach and retry with next sequence
+                _db.ChangeTracker.Clear();
+                _logger.LogWarning("Slug collision on {Slug}, retrying (attempt {Attempt})", slug, attempt + 1);
+            }
+        }
+
+        throw new InvalidOperationException("Failed to generate unique request slug after multiple attempts.");
     }
 
     public async Task<RequestResponseDto?> GetByIdAsync(Guid requestId)
@@ -150,8 +169,8 @@ public class RequestService : IRequestService
             SysAdminDetailsId = Guid.NewGuid(),
             RequestId = requestId,
             SensitivityLevel = dto.SensitivityLevel,
-            ServerResources = Enum.Parse<ServerResourceSize>(dto.ServerResources, true),
-            WebServer = Enum.Parse<WebServerType>(dto.WebServer, true),
+            ServerResources = string.IsNullOrWhiteSpace(dto.ServerResources) ? "Micro" : dto.ServerResources,
+            WebServer = dto.WebServer,
             DatabaseNameType = dto.DatabaseNameType ?? "none",
             DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
                 ? $"{request.ApplicationName}-db"
@@ -202,14 +221,14 @@ public class RequestService : IRequestService
         {
             DataCenterDetailsId = Guid.NewGuid(),
             RequestId = requestId,
-            Environment = Enum.Parse<ServerEnvironment>(dto.Environment, true),
+            Environment = dto.Environment,
             UplinkSpeed = dto.UplinkSpeed,
-            BareMetalType = Enum.Parse<BareMetalType>(dto.BareMetalType, true),
+            BareMetalType = dto.BareMetalType,
             PortNumber = dto.PortNumber,
             DC = dto.DC,
             RackRoom = dto.RackRoom,
             RackNumber = dto.RackNumber,
-            Cluster = Enum.Parse<ClusterType>(dto.Cluster, true),
+            Cluster = dto.Cluster,
             SubmittedBy = submittedBy,
             SubmittedAt = DateTime.UtcNow
         };
@@ -241,8 +260,8 @@ public class RequestService : IRequestService
             SysAdminDetailsId = Guid.NewGuid(),
             RequestId = requestId,
             SensitivityLevel = dto.SensitivityLevel,
-            ServerResources = Enum.Parse<ServerResourceSize>(dto.ServerResources, true),
-            WebServer = Enum.Parse<WebServerType>(dto.WebServer, true),
+            ServerResources = string.IsNullOrWhiteSpace(dto.ServerResources) ? "Micro" : dto.ServerResources,
+            WebServer = dto.WebServer,
             DatabaseNameType = dto.DatabaseNameType ?? "none",
             DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
                 ? $"{request.ApplicationName}-db"
@@ -290,14 +309,14 @@ public class RequestService : IRequestService
         {
             DataCenterDetailsId = Guid.NewGuid(),
             RequestId = requestId,
-            Environment = Enum.Parse<ServerEnvironment>(dto.Environment, true),
+            Environment = dto.Environment,
             UplinkSpeed = dto.UplinkSpeed,
-            BareMetalType = Enum.Parse<BareMetalType>(dto.BareMetalType, true),
+            BareMetalType = dto.BareMetalType,
             PortNumber = dto.PortNumber,
             DC = dto.DC,
             RackRoom = dto.RackRoom,
             RackNumber = dto.RackNumber,
-            Cluster = Enum.Parse<ClusterType>(dto.Cluster, true),
+            Cluster = dto.Cluster,
             SubmittedBy = savedBy,
             SubmittedAt = DateTime.UtcNow
         };
@@ -596,6 +615,29 @@ public class RequestService : IRequestService
         request.Status = RequestStatus.PendingApproval;
         request.UpdatedAt = DateTime.UtcNow;
         AddStatusHistory(request, oldStatus, request.Status, approvedBy, dto.Comments ?? "IOC Manager submitted for approval");
+
+        // Auto-generate FortiGate script on IOC approval
+        try
+        {
+            var scriptContent = _scriptService.GenerateFortiGateScript(request);
+            var script = new Script
+            {
+                ScriptId = Guid.NewGuid(),
+                RequestId = request.RequestId,
+                ScriptType = "FortiGate",
+                Content = scriptContent,
+                FileName = $"{request.ObjectSlug}-fortigate.conf",
+                GeneratedBy = approvedBy,
+                GeneratedAt = DateTime.UtcNow
+            };
+            _db.Scripts.Add(script);
+            _logger.LogInformation("FortiGate script auto-generated for {RequestId} by {User}", requestId, approvedBy);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to auto-generate FortiGate script for {RequestId}", requestId);
+        }
+
         await _db.SaveChangesAsync();
 
         _logger.LogInformation("IOC approval processed for {RequestId} by {User}", requestId, approvedBy);
@@ -610,6 +652,31 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingApproval)
             throw new InvalidOperationException($"Cannot process approval when status is {request.Status}. Must be PendingApproval.");
 
+        // Handle send-back (Return) — sends request back to IOC Manager
+        if (dto.Decision == ApprovalDecision.Return)
+        {
+            var oldSt = request.Status;
+            var previousStatus = _workflow.GetPreviousStatus(request.Status);
+            request.Status = previousStatus;
+
+            // Clear all approval decisions so approvers can re-vote after corrections
+            request.CisoDecision = null;
+            request.CisoComments = null;
+            request.CisoApprovedBy = null;
+            request.CisoApprovedAt = null;
+            request.OpsDecision = null;
+            request.OpsComments = null;
+            request.OpsApprovedBy = null;
+            request.OpsApprovedAt = null;
+
+            request.UpdatedAt = DateTime.UtcNow;
+            AddStatusHistory(request, oldSt, previousStatus, approvedBy, $"{role.ToUpper()} sent back: {dto.Comments}");
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("{Role} sent back request {RequestId}: {Comments} by {User}", role, requestId, dto.Comments, approvedBy);
+            return MapToDto(request);
+        }
+
         var decision = dto.Decision == ApprovalDecision.Approve ? "Approved" : "Rejected";
 
         // Record the individual approval
@@ -621,12 +688,6 @@ public class RequestService : IRequestService
                 request.CisoApprovedBy = approvedBy;
                 request.CisoApprovedAt = DateTime.UtcNow;
                 break;
-            case "cto":
-                request.CtoDecision = decision;
-                request.CtoComments = dto.Comments;
-                request.CtoApprovedBy = approvedBy;
-                request.CtoApprovedAt = DateTime.UtcNow;
-                break;
             case "ops":
                 request.OpsDecision = decision;
                 request.OpsComments = dto.Comments;
@@ -634,26 +695,26 @@ public class RequestService : IRequestService
                 request.OpsApprovedAt = DateTime.UtcNow;
                 break;
             default:
-                throw new ArgumentException($"Invalid approval role: {role}. Must be ciso, cto, or ops.");
+                throw new ArgumentException($"Invalid approval role: {role}. Must be ciso or ops.");
         }
 
         var oldStatus = request.Status;
 
         // Check if any approver rejected
-        if (_workflow.HasRejection(request.CisoDecision, request.CtoDecision, request.OpsDecision))
+        if (_workflow.HasRejection(request.CisoDecision, request.OpsDecision))
         {
             request.Status = RequestStatus.Rejected;
             AddStatusHistory(request, oldStatus, request.Status, approvedBy, $"{role.ToUpper()} rejected: {dto.Comments}");
         }
-        // Check if we have quorum (2 of 3 approved)
-        else if (_workflow.HasQuorumApproval(request.CisoDecision, request.CtoDecision, request.OpsDecision))
+        // Check if both CISO and Ops Manager approved
+        else if (_workflow.HasFullApproval(request.CisoDecision, request.OpsDecision))
         {
             request.Status = RequestStatus.Approved;
-            AddStatusHistory(request, oldStatus, request.Status, approvedBy, $"Quorum reached (2 of 3 approved). {role.ToUpper()} decision: {decision}");
+            AddStatusHistory(request, oldStatus, request.Status, approvedBy, $"Both CISO and Ops Manager approved. {role.ToUpper()} decision: {decision}");
         }
         else
         {
-            AddStatusHistory(request, oldStatus, oldStatus, approvedBy, $"{role.ToUpper()} decision: {decision}. Awaiting more approvals.");
+            AddStatusHistory(request, oldStatus, oldStatus, approvedBy, $"{role.ToUpper()} decision: {decision}. Awaiting other approval.");
         }
 
         request.UpdatedAt = DateTime.UtcNow;
@@ -668,31 +729,119 @@ public class RequestService : IRequestService
         var request = await GetRequestWithIncludes(requestId)
             ?? throw new KeyNotFoundException($"Request {requestId} not found.");
 
-        var previousStatus = _workflow.GetPreviousStatus(request.Status);
+        RequestStatus targetStatus;
+        if (!string.IsNullOrWhiteSpace(dto.TargetStatus)
+            && Enum.TryParse<RequestStatus>(dto.TargetStatus, out var parsed))
+        {
+            targetStatus = parsed;
+        }
+        else
+        {
+            targetStatus = _workflow.GetPreviousStatus(request.Status);
+        }
 
-        if (!_workflow.CanTransition(request.Status, previousStatus))
-            throw new InvalidOperationException($"Cannot send back from {request.Status}.");
+        if (!_workflow.CanTransition(request.Status, targetStatus))
+            throw new InvalidOperationException($"Cannot send back from {request.Status} to {targetStatus}.");
 
         var oldStatus = request.Status;
-        request.Status = previousStatus;
+        request.Status = targetStatus;
         request.UpdatedAt = DateTime.UtcNow;
-        AddStatusHistory(request, oldStatus, previousStatus, sentBackBy, $"Sent back: {dto.Comments}");
+        AddStatusHistory(request, oldStatus, targetStatus, sentBackBy, $"Sent back: {dto.Comments}");
         await _db.SaveChangesAsync();
 
-        _logger.LogInformation("Request {RequestId} sent back from {OldStatus} to {NewStatus} by {User}", requestId, oldStatus, previousStatus, sentBackBy);
+        _logger.LogInformation("Request {RequestId} sent back from {OldStatus} to {NewStatus} by {User}", requestId, oldStatus, targetStatus, sentBackBy);
         return MapToDto(request);
+    }
+
+    public async Task<RequestResponseDto> RejectAsync(Guid requestId, SendBackDto dto, string rejectedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        var oldStatus = request.Status;
+        request.Status = RequestStatus.Rejected;
+        request.UpdatedAt = DateTime.UtcNow;
+        AddStatusHistory(request, oldStatus, RequestStatus.Rejected, rejectedBy, $"Rejected: {dto.Comments}");
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Request {RequestId} rejected from {OldStatus} by {User}", requestId, oldStatus, rejectedBy);
+        return MapToDto(request);
+    }
+
+    public async Task<RequestResponseDto> UnrejectAsync(Guid requestId, string unrejectedBy)
+    {
+        var request = await GetRequestWithIncludes(requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.Rejected)
+            throw new InvalidOperationException("Only rejected requests can be unrejected.");
+
+        request.Status = RequestStatus.PendingIOCApproval;
+        request.UpdatedAt = DateTime.UtcNow;
+        AddStatusHistory(request, RequestStatus.Rejected, RequestStatus.PendingIOCApproval, unrejectedBy, "Unrejected: restored to IOC Approval");
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Request {RequestId} unrejected by {User}", requestId, unrejectedBy);
+        return MapToDto(request);
+    }
+
+    public async Task<List<RequestResponseDto>> GetRejectedByUserAsync(string username)
+    {
+        var rejectedRequestIds = await _db.StatusHistories
+            .Where(h => h.ChangedBy == username && h.Comments != null && h.Comments.StartsWith("Rejected:"))
+            .Select(h => h.RequestId)
+            .Distinct()
+            .ToListAsync();
+
+        if (!rejectedRequestIds.Any())
+            return new List<RequestResponseDto>();
+
+        var requests = await _db.Requests
+            .Include(r => r.SysAdminDetails).ThenInclude(s => s!.Services)
+            .Include(r => r.DataCenterDetails)
+            .Include(r => r.NOCDetails).ThenInclude(n => n!.NetworkPaths)
+            .Include(r => r.SOCDetails).ThenInclude(s => s!.FirewallEntries).ThenInclude(f => f.Services)
+            .Include(r => r.SOCDetails).ThenInclude(s => s!.FirewallEntries).ThenInclude(f => f.SecurityProfiles).ThenInclude(sp => sp.SecurityProfile)
+            .Include(r => r.StatusHistories)
+            .Where(r => rejectedRequestIds.Contains(r.RequestId) && r.Status == RequestStatus.Rejected)
+            .OrderByDescending(r => r.UpdatedAt)
+            .ToListAsync();
+
+        return requests.Select(MapToDto).ToList();
+    }
+
+    public async Task DeleteAsync(Guid requestId, string deletedBy)
+    {
+        var request = await _db.Requests
+            .Include(r => r.SysAdminDetails).ThenInclude(d => d!.Services)
+            .Include(r => r.DataCenterDetails)
+            .Include(r => r.NOCDetails).ThenInclude(d => d!.NetworkPaths)
+            .Include(r => r.SOCDetails).ThenInclude(d => d!.FirewallEntries)!.ThenInclude(f => f.Services)
+            .Include(r => r.SOCDetails).ThenInclude(d => d!.FirewallEntries)!.ThenInclude(f => f.SecurityProfiles)
+            .Include(r => r.StatusHistories)
+            .FirstOrDefaultAsync(r => r.RequestId == requestId)
+            ?? throw new KeyNotFoundException($"Request {requestId} not found.");
+
+        if (request.Status != RequestStatus.Draft)
+            throw new InvalidOperationException("Only draft requests can be deleted.");
+
+        _db.Requests.Remove(request);
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Request {RequestId} deleted by {User}", requestId, deletedBy);
     }
 
     public async Task<List<RequestResponseDto>> GetPendingByRoleAsync(string role)
     {
-        var targetStatus = role.ToLower() switch
+        // NOC and SOC work in parallel — both should see requests at either PendingNOC or PendingSOC
+        var targetStatuses = role.ToLower() switch
         {
-            "sysadmin" => RequestStatus.PendingSysAdmin,
-            "datacenter" => RequestStatus.DataCenterReview,
-            "noc" => RequestStatus.PendingNOC,
-            "soc" => RequestStatus.PendingSOC,
-            "ioc" => RequestStatus.PendingIOCApproval,
-            "ciso" or "cto" or "ops" => RequestStatus.PendingApproval,
+            "sysadmin" => new[] { RequestStatus.PendingSysAdmin },
+            "datacenter" => new[] { RequestStatus.DataCenterReview },
+            "noc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC },
+            "soc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC },
+            "ioc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC, RequestStatus.PendingIOCApproval },
+            "ciso" or "ops" => new[] { RequestStatus.PendingApproval },
             _ => throw new ArgumentException($"Invalid role: {role}")
         };
 
@@ -710,17 +859,41 @@ public class RequestService : IRequestService
                     .ThenInclude(f => f.SecurityProfiles)
                         .ThenInclude(sp => sp.SecurityProfile)
             .Include(r => r.StatusHistories)
-            .Where(r => r.Status == targetStatus);
+            .Where(r => targetStatuses.Contains(r.Status));
 
         // For approvers, filter out requests already decided by this role
         if (role.ToLower() == "ciso")
             query = query.Where(r => r.CisoDecision == null);
-        else if (role.ToLower() == "cto")
-            query = query.Where(r => r.CtoDecision == null);
         else if (role.ToLower() == "ops")
             query = query.Where(r => r.OpsDecision == null);
 
         var requests = await query.OrderBy(r => r.CreatedAt).ToListAsync();
+        return requests.Select(MapToDto).ToList();
+    }
+
+    public async Task<List<RequestResponseDto>> GetSentBackByUserAsync(string username)
+    {
+        // Find request IDs where this user performed a send-back (status history comments start with "Sent back:")
+        var sentBackRequestIds = await _db.StatusHistories
+            .Where(h => h.ChangedBy == username && h.Comments != null && h.Comments.StartsWith("Sent back:"))
+            .Select(h => h.RequestId)
+            .Distinct()
+            .ToListAsync();
+
+        if (!sentBackRequestIds.Any())
+            return new List<RequestResponseDto>();
+
+        var requests = await _db.Requests
+            .Include(r => r.SysAdminDetails).ThenInclude(s => s!.Services)
+            .Include(r => r.DataCenterDetails)
+            .Include(r => r.NOCDetails).ThenInclude(n => n!.NetworkPaths)
+            .Include(r => r.SOCDetails).ThenInclude(s => s!.FirewallEntries).ThenInclude(f => f.Services)
+            .Include(r => r.SOCDetails).ThenInclude(s => s!.FirewallEntries).ThenInclude(f => f.SecurityProfiles).ThenInclude(sp => sp.SecurityProfile)
+            .Include(r => r.StatusHistories)
+            .Where(r => sentBackRequestIds.Contains(r.RequestId))
+            .OrderByDescending(r => r.UpdatedAt)
+            .ToListAsync();
+
         return requests.Select(MapToDto).ToList();
     }
 
@@ -784,9 +957,6 @@ public class RequestService : IRequestService
             CisoDecision = r.CisoDecision,
             CisoComments = r.CisoComments,
             CisoApprovedBy = r.CisoApprovedBy,
-            CtoDecision = r.CtoDecision,
-            CtoComments = r.CtoComments,
-            CtoApprovedBy = r.CtoApprovedBy,
             OpsDecision = r.OpsDecision,
             OpsComments = r.OpsComments,
             OpsApprovedBy = r.OpsApprovedBy,
@@ -796,8 +966,8 @@ public class RequestService : IRequestService
             SysAdminDetails = r.SysAdminDetails == null ? null : new SysAdminDetailsDto
             {
                 SensitivityLevel = r.SysAdminDetails.SensitivityLevel,
-                ServerResources = r.SysAdminDetails.ServerResources.ToString(),
-                WebServer = r.SysAdminDetails.WebServer.ToString(),
+                ServerResources = r.SysAdminDetails.ServerResources,
+                WebServer = r.SysAdminDetails.WebServer,
                 DatabaseNameType = r.SysAdminDetails.DatabaseNameType,
                 DatabaseName = r.SysAdminDetails.DatabaseName,
                 DatabaseUsername = r.SysAdminDetails.DatabaseUsername,
@@ -811,14 +981,14 @@ public class RequestService : IRequestService
             },
             DataCenterDetails = r.DataCenterDetails == null ? null : new DataCenterDetailsDto
             {
-                Environment = r.DataCenterDetails.Environment.ToString(),
+                Environment = r.DataCenterDetails.Environment,
                 UplinkSpeed = r.DataCenterDetails.UplinkSpeed,
-                BareMetalType = r.DataCenterDetails.BareMetalType.ToString(),
+                BareMetalType = r.DataCenterDetails.BareMetalType,
                 PortNumber = r.DataCenterDetails.PortNumber,
                 DC = r.DataCenterDetails.DC,
                 RackRoom = r.DataCenterDetails.RackRoom,
                 RackNumber = r.DataCenterDetails.RackNumber,
-                Cluster = r.DataCenterDetails.Cluster.ToString()
+                Cluster = r.DataCenterDetails.Cluster
             },
             NOCDetails = r.NOCDetails == null ? null : new NOCDetailsDto
             {

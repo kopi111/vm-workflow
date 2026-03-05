@@ -19,10 +19,15 @@ public interface IApiClient
     Task<RequestResponse> SubmitSOCAsync(Guid requestId, SOCDetailsModel model);
     Task<RequestResponse> SaveSOCAsync(Guid requestId, SOCDetailsModel model);
     Task<RequestResponse> ProcessApprovalAsync(Guid requestId, ApprovalModel model);
+    Task<RequestResponse> ProcessIOCSubmitAsync(Guid requestId, string? comments);
     Task<RequestResponse> ProcessCISOApprovalAsync(Guid requestId, ApprovalModel model);
-    Task<RequestResponse> ProcessCTOApprovalAsync(Guid requestId, ApprovalModel model);
     Task<RequestResponse> ProcessOpsApprovalAsync(Guid requestId, ApprovalModel model);
     Task<RequestResponse> SendBackAsync(Guid requestId, SendBackModel model);
+    Task<RequestResponse> IOCSendBackAsync(Guid requestId, SendBackModel model);
+    Task<RequestResponse> RejectRequestAsync(Guid requestId, SendBackModel model);
+    Task<RequestResponse> UnrejectRequestAsync(Guid requestId);
+    Task<List<RequestResponse>> GetRejectedRequestsAsync();
+    Task DeleteRequestAsync(Guid requestId);
 
     // Audit Logs
     Task<List<AuditLogEntry>> GetAuditLogsAsync(DateTime? from = null, DateTime? to = null, string? user = null);
@@ -30,6 +35,7 @@ public interface IApiClient
 
     // Work Queue
     Task<List<RequestResponse>> GetQueueAsync(string role);
+    Task<List<RequestResponse>> GetSentBackRequestsAsync();
 
     // Resource Groups
     Task<List<ResourceGroupModel>> GetResourceGroupsAsync();
@@ -48,6 +54,16 @@ public interface IApiClient
     Task<VdomModel> CreateVdomAsync(VdomModel model);
     Task UpdateVdomAsync(Guid id, VdomModel model);
     Task DeleteVdomAsync(Guid id);
+
+    // Dropdown Options
+    Task<List<DropdownOptionModel>> GetDropdownOptionsAsync(string category);
+    Task<DropdownOptionModel> CreateDropdownOptionAsync(DropdownOptionModel model);
+    Task UpdateDropdownOptionAsync(Guid id, DropdownOptionModel model);
+    Task DeleteDropdownOptionAsync(Guid id);
+
+    // Scripts
+    Task<List<ScriptModel>> GetScriptsAsync();
+    Task<byte[]> DownloadScriptAsync(Guid scriptId);
 
     // Users
     Task<List<UserModel>> GetUsersAsync();

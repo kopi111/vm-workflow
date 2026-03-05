@@ -4,10 +4,10 @@ namespace VMWorkflow.Application.DTOs;
 
 public class FirewallServiceEntryDto
 {
-    [Required, StringLength(20)]
+    [Required(ErrorMessage = "Port is required."), StringLength(20)]
     public string Port { get; set; } = string.Empty;
 
-    [Required, StringLength(20)]
+    [Required(ErrorMessage = "Protocol is required."), StringLength(20)]
     public string Protocol { get; set; } = string.Empty;
 
     [StringLength(200)]

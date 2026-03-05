@@ -9,7 +9,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/admin")]
-[Authorize(Roles = "SysAdmin,PlatformAdmin")]
+[Authorize(Roles = "SysAdmin,IOCManager,PlatformAdmin")]
 public class AdminController : ControllerBase
 {
     private readonly WorkflowDbContext _db;
@@ -174,6 +174,64 @@ public class AdminController : ControllerBase
         var entity = await _db.Vdoms.FindAsync(id);
         if (entity == null) return NotFound();
         _db.Vdoms.Remove(entity);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // ===== Dropdown Options =====
+
+    [HttpGet("dropdown-options/{category}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<DropdownOptionDto>>> GetDropdownOptions(string category)
+    {
+        var options = await _db.DropdownOptions
+            .Where(d => d.Category == category)
+            .OrderBy(d => d.SortOrder)
+            .ToListAsync();
+        return Ok(options.Select(d => new DropdownOptionDto
+        {
+            DropdownOptionId = d.DropdownOptionId,
+            Category = d.Category,
+            Value = d.Value,
+            SortOrder = d.SortOrder
+        }));
+    }
+
+    [HttpPost("dropdown-options")]
+    public async Task<ActionResult<DropdownOptionDto>> CreateDropdownOption([FromBody] DropdownOptionDto dto)
+    {
+        var entity = new DropdownOption
+        {
+            DropdownOptionId = Guid.NewGuid(),
+            Category = dto.Category,
+            Value = dto.Value,
+            SortOrder = dto.SortOrder,
+            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.DropdownOptions.Add(entity);
+        await _db.SaveChangesAsync();
+        dto.DropdownOptionId = entity.DropdownOptionId;
+        return CreatedAtAction(nameof(GetDropdownOptions), new { category = dto.Category }, dto);
+    }
+
+    [HttpPut("dropdown-options/{id:guid}")]
+    public async Task<ActionResult> UpdateDropdownOption(Guid id, [FromBody] DropdownOptionDto dto)
+    {
+        var entity = await _db.DropdownOptions.FindAsync(id);
+        if (entity == null) return NotFound();
+        entity.Value = dto.Value;
+        entity.SortOrder = dto.SortOrder;
+        await _db.SaveChangesAsync();
+        return Ok(dto);
+    }
+
+    [HttpDelete("dropdown-options/{id:guid}")]
+    public async Task<ActionResult> DeleteDropdownOption(Guid id)
+    {
+        var entity = await _db.DropdownOptions.FindAsync(id);
+        if (entity == null) return NotFound();
+        _db.DropdownOptions.Remove(entity);
         await _db.SaveChangesAsync();
         return NoContent();
     }

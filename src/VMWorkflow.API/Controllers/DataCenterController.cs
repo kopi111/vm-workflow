@@ -21,9 +21,15 @@ public class DataCenterController : ControllerBase
     public async Task<ActionResult<RequestResponseDto>> SubmitDataCenter(Guid id, [FromBody] DataCenterDetailsDto dto, [FromQuery] string? action = null)
     {
         var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
-        var result = action?.ToLower() == "save"
-            ? await _requestService.SaveDataCenterAsync(id, dto, user)
-            : await _requestService.SubmitDataCenterAsync(id, dto, user);
+
+        if (action?.ToLower() == "save")
+        {
+            ModelState.Clear();
+            var saveResult = await _requestService.SaveDataCenterAsync(id, dto, user);
+            return Ok(saveResult);
+        }
+
+        var result = await _requestService.SubmitDataCenterAsync(id, dto, user);
         return Ok(result);
     }
 }

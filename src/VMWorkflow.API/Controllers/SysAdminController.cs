@@ -21,9 +21,16 @@ public class SysAdminController : ControllerBase
     public async Task<ActionResult<RequestResponseDto>> SubmitSysAdmin(Guid id, [FromBody] SysAdminDetailsDto dto, [FromQuery] string? action = null)
     {
         var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
-        var result = action?.ToLower() == "save"
-            ? await _requestService.SaveSysAdminAsync(id, dto, user)
-            : await _requestService.SubmitSysAdminAsync(id, dto, user);
+
+        if (action?.ToLower() == "save")
+        {
+            // Skip validation for save (partial progress)
+            ModelState.Clear();
+            var saveResult = await _requestService.SaveSysAdminAsync(id, dto, user);
+            return Ok(saveResult);
+        }
+
+        var result = await _requestService.SubmitSysAdminAsync(id, dto, user);
         return Ok(result);
     }
 }

@@ -7,7 +7,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/requests/{id:guid}/approve")]
-[Authorize(Roles = "CISO,CTO,Ops,PlatformAdmin")]
+[Authorize(Roles = "CISO,Ops,PlatformAdmin")]
 public class ApprovalController : ControllerBase
 {
     private readonly IRequestService _requestService;
@@ -19,7 +19,7 @@ public class ApprovalController : ControllerBase
 
     /// <summary>
     /// Generic approval endpoint. Derives role from authenticated user's claims.
-    /// Prefer role-specific endpoints: /ciso-approve, /cto-approve, /ops-approve
+    /// Prefer role-specific endpoints: /ciso-approve, /ops-approve
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> ProcessApproval(Guid id, [FromBody] ApprovalDto dto)

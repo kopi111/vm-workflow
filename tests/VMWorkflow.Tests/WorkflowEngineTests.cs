@@ -134,37 +134,35 @@ public class WorkflowEngineTests
         Assert.True(_engine.CanTransition(from, to));
     }
 
-    // ===== Quorum Approval Tests =====
+    // ===== Approval Tests (CISO + Ops Manager) =====
 
     [Fact]
-    public void HasQuorumApproval_TwoOfThreeApproved_ReturnsTrue()
+    public void HasFullApproval_BothApproved_ReturnsTrue()
     {
-        Assert.True(_engine.HasQuorumApproval("Approved", "Approved", null));
-        Assert.True(_engine.HasQuorumApproval("Approved", null, "Approved"));
-        Assert.True(_engine.HasQuorumApproval(null, "Approved", "Approved"));
-        Assert.True(_engine.HasQuorumApproval("Approved", "Approved", "Approved"));
+        Assert.True(_engine.HasFullApproval("Approved", "Approved"));
     }
 
     [Fact]
-    public void HasQuorumApproval_LessThanTwo_ReturnsFalse()
+    public void HasFullApproval_NotBoth_ReturnsFalse()
     {
-        Assert.False(_engine.HasQuorumApproval("Approved", null, null));
-        Assert.False(_engine.HasQuorumApproval(null, null, "Approved"));
-        Assert.False(_engine.HasQuorumApproval(null, null, null));
+        Assert.False(_engine.HasFullApproval("Approved", null));
+        Assert.False(_engine.HasFullApproval(null, "Approved"));
+        Assert.False(_engine.HasFullApproval(null, null));
     }
 
     [Fact]
     public void HasRejection_AnyRejected_ReturnsTrue()
     {
-        Assert.True(_engine.HasRejection("Rejected", null, null));
-        Assert.True(_engine.HasRejection(null, "Rejected", null));
-        Assert.True(_engine.HasRejection(null, null, "Rejected"));
+        Assert.True(_engine.HasRejection("Rejected", null));
+        Assert.True(_engine.HasRejection(null, "Rejected"));
+        Assert.True(_engine.HasRejection("Rejected", "Rejected"));
     }
 
     [Fact]
     public void HasRejection_NoneRejected_ReturnsFalse()
     {
-        Assert.False(_engine.HasRejection("Approved", "Approved", null));
-        Assert.False(_engine.HasRejection(null, null, null));
+        Assert.False(_engine.HasRejection("Approved", "Approved"));
+        Assert.False(_engine.HasRejection("Approved", null));
+        Assert.False(_engine.HasRejection(null, null));
     }
 }

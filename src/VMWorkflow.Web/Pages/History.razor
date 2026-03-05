@@ -1,0 +1,424 @@
+@page "/history"
+@attribute [Authorize]
+@inject IApiClient Api
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Request History</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="mb-4">
+        <MudAvatar Size="Size.Medium" Style="background: var(--gradient-primary);">
+            <MudIcon Icon="@Icons.Material.Filled.History" Style="color: white;" />
+        </MudAvatar>
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h5" Style="font-weight: 700;">Request History</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">
+                View all pending and approved applications.
+            </MudText>
+        </MudStack>
+    </MudStack>
+
+    @* Summary Cards *@
+    <MudGrid Class="mb-4">
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <MudIcon Icon="@Icons.Material.Filled.ListAlt" Size="Size.Small" Style="color: white;" />
+                    </MudAvatar>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">Total</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">@allRequests.Count</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <MudIcon Icon="@Icons.Material.Filled.HourglassTop" Size="Size.Small" Style="color: white;" />
+                    </MudAvatar>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">In Progress</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">@allRequests.Count(r => IsPending(r.Status))</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Style="color: white;" />
+                    </MudAvatar>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">Approved</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">@allRequests.Count(r => r.Status is "Approved" or "Implemented")</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                        <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Style="color: white;" />
+                    </MudAvatar>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">Rejected</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">@allRequests.Count(r => r.Status == "Rejected")</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    @* Filter Bar *@
+    <MudPaper Elevation="0" Class="premium-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <MudGrid>
+            <MudItem xs="12" sm="4">
+                <MudTextField @bind-Value="searchString" Placeholder="Search by name, ID, or user..."
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudSelect @bind-Value="statusFilter" Label="Status" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Clearable="true" T="string">
+                    <MudSelectItem Value="@("All")">All Statuses</MudSelectItem>
+                    <MudSelectItem Value="@("Pending")">In Progress</MudSelectItem>
+                    <MudSelectItem Value="@("Approved")">Approved</MudSelectItem>
+                    <MudSelectItem Value="@("Rejected")">Rejected</MudSelectItem>
+                    <MudSelectItem Value="@("Draft")">Draft</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudSelect @bind-Value="environmentFilter" Label="Environment" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" Clearable="true" T="string">
+                    <MudSelectItem Value="@("All")">All Environments</MudSelectItem>
+                    @foreach (var env in allRequests.Select(r => r.Environment).Where(e => !string.IsNullOrEmpty(e)).Distinct().OrderBy(e => e))
+                    {
+                        <MudSelectItem Value="@env">@env</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="2" Class="d-flex align-center">
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ClearFilters"
+                           StartIcon="@Icons.Material.Filled.FilterListOff"
+                           Style="border-radius: 10px; text-transform: none;">
+                    Clear
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @* Requests Table *@
+    <MudPaper Elevation="0" Class="premium-card" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <div class="premium-table-wrapper">
+            <MudTable Items="@filteredRequests" Hover="true" Dense="true" Loading="@isLoading"
+                      T="RequestResponse" Style="border-radius: 16px;">
+                <HeaderContent>
+                    <MudTh Style="width: 50px;"></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.ObjectSlug)">Request #</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.ApplicationName)">Application</MudTableSortLabel></MudTh>
+                    <MudTh>Environment</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.Status)">Status</MudTableSortLabel></MudTh>
+                    <MudTh>Current Stage</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<RequestResponse, object>(x => x.CreatedBy)">Requester</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<RequestResponse, object>(x => x.UpdatedAt)">Last Updated</MudTableSortLabel></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudIconButton Icon="@(IsExpanded(context.RequestId) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                                       Size="Size.Small" OnClick="@(() => ToggleExpand(context.RequestId))" />
+                    </MudTd>
+                    <MudTd>
+                        <MudLink Href="@($"/request/{context.RequestId}")" Underline="Underline.Hover" Color="Color.Primary"
+                                 Style="font-weight: 600;">
+                            @context.ObjectSlug
+                        </MudLink>
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudAvatar Size="Size.Small" Style="background: var(--gradient-card); width: 28px; height: 28px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Apps" Size="Size.Small" Color="Color.Primary" />
+                            </MudAvatar>
+                            @context.ApplicationName
+                        </MudStack>
+                    </MudTd>
+                    <MudTd>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                            @context.Environment
+                        </MudChip>
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <span class="pulse-dot @GetPulseClass(context.Status)"></span>
+                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled"
+                                     Style="border-radius: 8px; font-weight: 500;">
+                                @FormatStatus(context.Status)
+                            </MudChip>
+                        </MudStack>
+                    </MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">
+                            @GetStageSummary(context.Status)
+                        </MudText>
+                    </MudTd>
+                    <MudTd>@context.CreatedBy</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@context.UpdatedAt.ToString("yyyy-MM-dd hh:mm tt")">
+                            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">
+                                @GetTimeAgo(context.UpdatedAt)
+                            </MudText>
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <ChildRowContent>
+                    @if (IsExpanded(context.RequestId))
+                    {
+                        <MudTr>
+                            <td colspan="8" style="padding: 0;">
+                                <MudPaper Elevation="0" Class="pa-4 ma-3" Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; background: var(--mud-palette-background-grey);">
+                                    <MudGrid>
+                                        @* Application Info — visible to ALL users *@
+                                        <MudItem xs="12" md="@(CanSeeTechnical ? 4 : 12)">
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                                <MudAvatar Size="Size.Small" Style="background: var(--gradient-primary);">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Apps" Size="Size.Small" Style="color: white;" />
+                                                </MudAvatar>
+                                                <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">Application Info</MudText>
+                                            </MudStack>
+                                            <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 10px;">
+                                                <tbody>
+                                                    <tr><th style="width:160px">Application</th><td>@context.ApplicationName</td></tr>
+                                                    <tr><th>Environment</th><td>@context.Environment</td></tr>
+                                                    <tr><th>Language</th><td>@(context.ProgrammingLanguage ?? "—")</td></tr>
+                                                    <tr><th>Framework</th><td>@(context.Framework ?? "—")</td></tr>
+                                                    <tr><th>Purpose</th><td>@(context.Purpose ?? "—")</td></tr>
+                                                    <tr><th>Users</th><td>@(context.ExpectedUsers?.ToString() ?? "—")</td></tr>
+                                                    <tr><th>DBMS</th><td>@(context.DBMS ?? "—")</td></tr>
+                                                    <tr><th>SLA</th><td>@context.SLA</td></tr>
+                                                    <tr><th>FQDN</th><td>@(context.FQDNSuggestion ?? "—")</td></tr>
+                                                    <tr><th>Auth Method</th><td>@(context.AuthenticationMethod ?? "—")</td></tr>
+                                                    <tr><th>Created By</th><td>@context.CreatedBy</td></tr>
+                                                    <tr><th>Created At</th><td>@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td></tr>
+                                                </tbody>
+                                            </MudSimpleTable>
+                                        </MudItem>
+
+                                        @* SysAdmin Details — visible to SysAdmin+ roles *@
+                                        @if (CanSeeTechnical && context.SysAdminDetails != null)
+                                        {
+                                            <MudItem xs="12" md="4">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                                        <MudIcon Icon="@Icons.Material.Filled.Computer" Size="Size.Small" Style="color: white;" />
+                                                    </MudAvatar>
+                                                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">SysAdmin Details</MudText>
+                                                </MudStack>
+                                                <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 10px;">
+                                                    <tbody>
+                                                        <tr><th style="width:160px">Sensitivity</th><td>@(context.SysAdminDetails.SensitivityLevel ?? "—")</td></tr>
+                                                        <tr><th>Web Server</th><td>@(context.SysAdminDetails.WebServer ?? "—")</td></tr>
+                                                        <tr><th>Hostname</th><td>@(context.SysAdminDetails.Hostname ?? "—")</td></tr>
+                                                        <tr><th>Database</th><td>@(context.SysAdminDetails.DatabaseNameType ?? "—")</td></tr>
+                                                        <tr><th>DB Name</th><td>@(context.SysAdminDetails.DatabaseName ?? "—")</td></tr>
+                                                        <tr><th>DB User</th><td>@(context.SysAdminDetails.DatabaseUsername ?? "—")</td></tr>
+                                                    </tbody>
+                                                </MudSimpleTable>
+                                            </MudItem>
+                                        }
+
+                                        @* DataCenter Details — visible to DataCenter+ roles *@
+                                        @if (CanSeeTechnical && context.DataCenterDetails != null)
+                                        {
+                                            <MudItem xs="12" md="4">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                                    <MudAvatar Size="Size.Small" Style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                                        <MudIcon Icon="@Icons.Material.Filled.Storage" Size="Size.Small" Style="color: white;" />
+                                                    </MudAvatar>
+                                                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">DataCenter Details</MudText>
+                                                </MudStack>
+                                                <MudSimpleTable Dense="true" Hover="true" Style="border-radius: 10px;">
+                                                    <tbody>
+                                                        <tr><th style="width:160px">Environment</th><td>@Val(context.DataCenterDetails.Environment)</td></tr>
+                                                        <tr><th>Uplink Speed</th><td>@Val(context.DataCenterDetails.UplinkSpeed)</td></tr>
+                                                        <tr><th>Bare Metal</th><td>@Val(context.DataCenterDetails.BareMetalType)</td></tr>
+                                                        <tr><th>Port</th><td>@Val(context.DataCenterDetails.PortNumber)</td></tr>
+                                                        <tr><th>DC</th><td>@Val(context.DataCenterDetails.DC)</td></tr>
+                                                        <tr><th>Rack Room</th><td>@Val(context.DataCenterDetails.RackRoom)</td></tr>
+                                                        <tr><th>Rack #</th><td>@Val(context.DataCenterDetails.RackNumber)</td></tr>
+                                                        <tr><th>Cluster</th><td>@Val(context.DataCenterDetails.Cluster)</td></tr>
+                                                    </tbody>
+                                                </MudSimpleTable>
+                                            </MudItem>
+                                        }
+                                    </MudGrid>
+
+                                    @* View Full Request link *@
+                                    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-3">
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                   Href="@($"/request/{context.RequestId}")"
+                                                   EndIcon="@Icons.Material.Filled.OpenInNew"
+                                                   Style="text-transform: none;">
+                                            View Full Request
+                                        </MudButton>
+                                    </MudStack>
+                                </MudPaper>
+                            </td>
+                        </MudTr>
+                    }
+                </ChildRowContent>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }" />
+                </PagerContent>
+                <NoRecordsContent>
+                    <MudStack AlignItems="AlignItems.Center" Class="pa-8" Spacing="3">
+                        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Style="opacity: 0.3;" />
+                        <MudText Typo="Typo.body1" Style="color: var(--mud-palette-text-secondary);">
+                            No requests match the current filters.
+                        </MudText>
+                    </MudStack>
+                </NoRecordsContent>
+            </MudTable>
+        </div>
+    </MudPaper>
+</div>
+
+@code {
+    private List<RequestResponse> allRequests = new();
+    private bool isLoading = true;
+    private string searchString = string.Empty;
+    private string? statusFilter = "All";
+    private string? environmentFilter = "All";
+    private string? _userRole;
+    private HashSet<Guid> expandedRows = new();
+
+    // Requester only sees Application Info; all other roles also see SysAdmin/DataCenter
+    private bool CanSeeTechnical => _userRole is not null and not "Requester";
+
+    private IEnumerable<RequestResponse> filteredRequests => allRequests
+        .Where(r => MatchesSearch(r))
+        .Where(r => MatchesStatusFilter(r))
+        .Where(r => MatchesEnvironmentFilter(r))
+        .OrderByDescending(r => r.UpdatedAt);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userRole = state.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+        try
+        {
+            allRequests = await Api.GetRequestsAsync();
+        }
+        catch { }
+        finally { isLoading = false; }
+    }
+
+    private bool IsExpanded(Guid id) => expandedRows.Contains(id);
+
+    private void ToggleExpand(Guid id)
+    {
+        if (!expandedRows.Remove(id))
+            expandedRows.Add(id);
+    }
+
+    private void ClearFilters()
+    {
+        searchString = string.Empty;
+        statusFilter = "All";
+        environmentFilter = "All";
+    }
+
+    private bool MatchesSearch(RequestResponse r)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        var s = searchString.Trim();
+        return r.ObjectSlug.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.ApplicationName.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.CreatedBy.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || r.Status.Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesStatusFilter(RequestResponse r) => statusFilter switch
+    {
+        null or "All" => true,
+        "Pending" => IsPending(r.Status),
+        "Approved" => r.Status is "Approved" or "Implemented",
+        "Rejected" => r.Status == "Rejected",
+        "Draft" => r.Status == "Draft",
+        _ => true
+    };
+
+    private bool MatchesEnvironmentFilter(RequestResponse r) =>
+        environmentFilter is null or "All" || r.Environment == environmentFilter;
+
+    private static bool IsPending(string status) => status is
+        "PendingSysAdmin" or "DataCenterReview" or "PendingNOC" or "PendingSOC"
+        or "PendingIOCApproval" or "PendingApproval";
+
+    private static string GetStageSummary(string status) => status switch
+    {
+        "Draft" => "Not submitted",
+        "PendingSysAdmin" => "Awaiting SysAdmin review",
+        "DataCenterReview" => "Awaiting Data Center review",
+        "PendingNOC" => "Awaiting NOC configuration",
+        "PendingSOC" => "Awaiting SOC configuration",
+        "PendingIOCApproval" => "Awaiting IOC Manager",
+        "PendingApproval" => "Awaiting CISO / Ops approval",
+        "Approved" => "Fully approved",
+        "Rejected" => "Request rejected",
+        "Implemented" => "Deployed",
+        "Closed" => "Closed",
+        _ => status
+    };
+
+    private static string GetTimeAgo(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 1) return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return dt.ToString("MMM dd, yyyy");
+    }
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "Draft" => Color.Default,
+        "PendingSysAdmin" => Color.Info,
+        "DataCenterReview" => Color.Info,
+        "PendingNOC" => Color.Warning,
+        "PendingSOC" => Color.Warning,
+        "PendingIOCApproval" => Color.Secondary,
+        "PendingApproval" => Color.Secondary,
+        "Approved" => Color.Success,
+        "Rejected" => Color.Error,
+        "Implemented" => Color.Success,
+        "Closed" => Color.Dark,
+        _ => Color.Default
+    };
+
+    private static string FormatStatus(string status) => status switch
+    {
+        "PendingSysAdmin" => "Pending SysAdmin",
+        "DataCenterReview" => "DC Review",
+        "PendingNOC" => "Pending NOC",
+        "PendingSOC" => "Pending SOC",
+        "PendingIOCApproval" => "IOC Approval",
+        "PendingApproval" => "Pending Approval",
+        _ => status
+    };
+
+    private static string GetPulseClass(string status) => status switch
+    {
+        "Approved" or "Implemented" or "Closed" => "pulse-active",
+        "Rejected" => "pulse-error",
+        _ => "pulse-pending"
+    };
+
+    private static string Val(string? v) => string.IsNullOrWhiteSpace(v) ? "—" : v;
+}

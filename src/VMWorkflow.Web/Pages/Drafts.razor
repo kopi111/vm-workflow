@@ -1,6 +1,7 @@
 @page "/drafts"
 @inject IApiClient Api
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
 
@@ -72,11 +73,13 @@
 
                             <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                 <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
-                                    @draft.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                                    @draft.CreatedBy — @draft.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
                                 </MudText>
                                 <MudStack Row="true" Spacing="1">
                                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
                                                    Href="@($"/request/{draft.RequestId}")" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                                   OnClick="@(() => DeleteDraft(draft.RequestId))" />
                                 </MudStack>
                             </MudStack>
                         </MudStack>
@@ -90,31 +93,41 @@
 @code {
     private List<RequestResponse> drafts = new();
     private bool isLoading = true;
-    private string? _currentUser;
-
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthState { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadDrafts();
+    }
+
+    private async Task LoadDrafts()
+    {
+        isLoading = true;
         try
         {
-            if (AuthState != null)
-            {
-                var state = await AuthState;
-                _currentUser = state.User.Identity?.Name;
-            }
-
             var all = await Api.GetRequestsAsync();
             drafts = all
-                .Where(r => r.Status == "Draft" && r.CreatedBy.Equals(_currentUser, StringComparison.OrdinalIgnoreCase))
+                .Where(r => r.Status == "Draft")
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
         }
-        catch { }
+        catch { drafts = new(); }
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task DeleteDraft(Guid requestId)
+    {
+        try
+        {
+            await Api.DeleteRequestAsync(requestId);
+            Snackbar.Add("Draft deleted.", Severity.Success);
+            await LoadDrafts();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 }

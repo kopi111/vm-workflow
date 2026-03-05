@@ -15,5 +15,7 @@ public class StatusHistoryConfiguration : IEntityTypeConfiguration<StatusHistory
         builder.Property(s => s.NewStatus).HasConversion<string>().HasMaxLength(50);
         builder.Property(s => s.ChangedBy).IsRequired().HasMaxLength(100);
         builder.Property(s => s.Comments).HasMaxLength(1000);
+
+        builder.HasIndex(s => new { s.RequestId, s.Timestamp });
     }
 }

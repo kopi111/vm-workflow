@@ -1,19 +1,19 @@
-@page "/queue/{Role}"
+@page "/sent-back"
 @inject IApiClient Api
 @inject NavigationManager Navigation
 
 @attribute [Authorize]
 
-<PageTitle>@RoleDisplayName Queue</PageTitle>
+<PageTitle>Sent Back Requests</PageTitle>
 
 <div class="page-content">
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
         <MudStack Spacing="0">
-            <MudText Typo="Typo.h4" Style="font-weight: 700;">@RoleDisplayName Queue</MudText>
-            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests pending @RoleDisplayName review and action.</MudText>
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Sent Back Requests</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests you have sent back for review.</MudText>
         </MudStack>
-        <MudChip T="string" Size="Size.Medium" Color="Color.Primary" Variant="Variant.Filled" Style="border-radius: 20px; font-weight: 600;">
-            @requests.Count pending
+        <MudChip T="string" Size="Size.Medium" Color="Color.Warning" Variant="Variant.Filled" Style="border-radius: 20px; font-weight: 600;">
+            @requests.Count request@(requests.Count != 1 ? "s" : "")
         </MudChip>
     </MudStack>
 
@@ -25,9 +25,9 @@
     {
         <MudPaper Elevation="0" Class="premium-card pa-8 text-center" Style="border: 1px solid var(--mud-palette-lines-default);">
             <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Style="opacity: 0.2;" />
-            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">Queue is empty</MudText>
+            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">No sent back requests</MudText>
             <MudText Typo="Typo.body2" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
-                No requests are currently pending @RoleDisplayName review.
+                You have not sent back any requests.
             </MudText>
         </MudPaper>
     }
@@ -63,11 +63,22 @@
                                 }
                             </MudStack>
 
+                            @{
+                                var sendBackComment = GetLastSendBackComment(req);
+                            }
+                            @if (!string.IsNullOrEmpty(sendBackComment))
+                            {
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true" NoIcon="true"
+                                          Style="font-size: 0.75rem; padding: 4px 8px;">
+                                    @sendBackComment
+                                </MudAlert>
+                            }
+
                             <MudDivider Class="my-1" />
 
                             <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                 <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
-                                    @req.CreatedBy — @req.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                    @req.CreatedBy — @req.UpdatedAt.ToString("MMM dd, yyyy hh:mm tt")
                                 </MudText>
                                 <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Size="Size.Small" Color="Color.Primary"
                                                Href="@($"/request/{req.RequestId}")" />
@@ -81,34 +92,14 @@
 </div>
 
 @code {
-    [Parameter] public string Role { get; set; } = string.Empty;
-
     private List<RequestResponse> requests = new();
     private bool isLoading = true;
 
-    private string RoleDisplayName => Role?.ToLower() switch
+    protected override async Task OnInitializedAsync()
     {
-        "sysadmin" => "SysAdmin",
-        "datacenter" => "Data Center",
-        "noc" => "NOC",
-        "soc" => "SOC",
-        "ioc" => "IOC",
-        "ciso" => "CISO",
-        "ops" => "Ops Manager",
-        _ => Role ?? "Unknown"
-    };
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await LoadQueue();
-    }
-
-    private async Task LoadQueue()
-    {
-        isLoading = true;
         try
         {
-            requests = await Api.GetQueueAsync(Role);
+            requests = await Api.GetSentBackRequestsAsync();
         }
         catch
         {
@@ -118,6 +109,15 @@
         {
             isLoading = false;
         }
+    }
+
+    private string? GetLastSendBackComment(RequestResponse req)
+    {
+        var entry = req.StatusHistories?
+            .Where(h => h.Comments != null && h.Comments.StartsWith("Sent back:"))
+            .OrderByDescending(h => h.Timestamp)
+            .FirstOrDefault();
+        return entry?.Comments;
     }
 
     private static Color GetStatusColor(string status) => status switch

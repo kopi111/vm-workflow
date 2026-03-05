@@ -23,12 +23,43 @@ public class AuditLoggingMiddleware
         _logger.LogInformation("[AUDIT] {Method} {Path} by {User} at {Timestamp}",
             method, path, user, DateTime.UtcNow);
 
-        await _next(context);
+        // Buffer response body so we can read it for error logging
+        var originalBody = context.Response.Body;
+        var memoryStream = new MemoryStream();
+        context.Response.Body = memoryStream;
+
+        try
+        {
+            await _next(context);
+        }
+        catch
+        {
+            // Restore original body before re-throwing so GlobalExceptionHandler can write
+            context.Response.Body = originalBody;
+            memoryStream.Dispose();
+            throw;
+        }
+
+        // Read response body for logging
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        var responseBody = await new StreamReader(memoryStream).ReadToEndAsync();
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        await memoryStream.CopyToAsync(originalBody);
+        context.Response.Body = originalBody;
+        memoryStream.Dispose();
 
         var statusCode = context.Response.StatusCode;
 
-        _logger.LogInformation("[AUDIT] {Method} {Path} responded {StatusCode}",
-            method, path, statusCode);
+        if (statusCode >= 400 && !string.IsNullOrWhiteSpace(responseBody))
+        {
+            _logger.LogWarning("[AUDIT] {Method} {Path} by {User} responded {StatusCode} — {ResponseBody}",
+                method, path, user, statusCode, responseBody);
+        }
+        else
+        {
+            _logger.LogInformation("[AUDIT] {Method} {Path} responded {StatusCode}",
+                method, path, statusCode);
+        }
 
         try
         {

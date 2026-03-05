@@ -12,7 +12,7 @@ public class WorkflowEngine : IWorkflowEngine
         [RequestStatus.DataCenterReview] = new() { RequestStatus.PendingNOC, RequestStatus.PendingSOC, RequestStatus.PendingSysAdmin },
         [RequestStatus.PendingNOC] = new() { RequestStatus.PendingSOC, RequestStatus.PendingIOCApproval, RequestStatus.DataCenterReview },
         [RequestStatus.PendingSOC] = new() { RequestStatus.PendingNOC, RequestStatus.PendingIOCApproval, RequestStatus.DataCenterReview },
-        [RequestStatus.PendingIOCApproval] = new() { RequestStatus.PendingApproval, RequestStatus.Rejected, RequestStatus.Draft, RequestStatus.PendingNOC },
+        [RequestStatus.PendingIOCApproval] = new() { RequestStatus.PendingApproval, RequestStatus.Rejected, RequestStatus.Draft, RequestStatus.PendingNOC, RequestStatus.PendingSOC },
         [RequestStatus.PendingApproval] = new() { RequestStatus.Approved, RequestStatus.Rejected, RequestStatus.Draft, RequestStatus.PendingIOCApproval },
         [RequestStatus.Approved] = new() { RequestStatus.Implemented },
         [RequestStatus.Implemented] = new() { RequestStatus.Closed },
@@ -63,21 +63,19 @@ public class WorkflowEngine : IWorkflowEngine
     }
 
     /// <summary>
-    /// Check if request has enough approvals (2 of 3: CISO, CTO, Ops Officer)
+    /// Check if both approvers (CISO + Ops Manager) have approved
     /// </summary>
-    public bool HasQuorumApproval(string? cisoDecision, string? ctoDecision, string? opsDecision)
+    public bool HasFullApproval(string? cisoDecision, string? opsDecision)
     {
-        var approvedCount = new[] { cisoDecision, ctoDecision, opsDecision }
-            .Count(d => d == "Approved");
-        return approvedCount >= 2;
+        return cisoDecision == "Approved" && opsDecision == "Approved";
     }
 
     /// <summary>
     /// Check if any approver has rejected
     /// </summary>
-    public bool HasRejection(string? cisoDecision, string? ctoDecision, string? opsDecision)
+    public bool HasRejection(string? cisoDecision, string? opsDecision)
     {
-        return new[] { cisoDecision, ctoDecision, opsDecision }
+        return new[] { cisoDecision, opsDecision }
             .Any(d => d == "Rejected");
     }
 

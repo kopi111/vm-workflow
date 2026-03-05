@@ -21,16 +21,30 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
 
         builder.Property(r => r.ProgrammingLanguage).HasMaxLength(100);
         builder.Property(r => r.Framework).HasMaxLength(200);
-        builder.Property(r => r.Purpose).HasMaxLength(2000);
+        builder.Property(r => r.Purpose).HasColumnType("text");
         builder.Property(r => r.DBMS).HasMaxLength(100);
         builder.Property(r => r.GitRepoLink).HasMaxLength(500);
         builder.Property(r => r.AccessGroup).HasMaxLength(200);
         builder.Property(r => r.FQDNSuggestion).HasMaxLength(300);
         builder.Property(r => r.AuthenticationMethod).HasMaxLength(200);
 
+        // Approval tracking
+        builder.Property(r => r.IocComments).HasColumnType("text");
+        builder.Property(r => r.CisoDecision).HasMaxLength(50);
+        builder.Property(r => r.CisoComments).HasColumnType("text");
+        builder.Property(r => r.CisoApprovedBy).HasMaxLength(100);
+        builder.Property(r => r.OpsDecision).HasMaxLength(50);
+        builder.Property(r => r.OpsComments).HasColumnType("text");
+        builder.Property(r => r.OpsApprovedBy).HasMaxLength(100);
+
         builder.Property(r => r.NetBoxId).HasMaxLength(100);
         builder.Property(r => r.FortiGatePolicyId).HasMaxLength(100);
         builder.Property(r => r.CreatedBy).IsRequired().HasMaxLength(100);
+
+        // Performance indexes
+        builder.HasIndex(r => r.Status);
+        builder.HasIndex(r => r.CreatedBy);
+        builder.HasIndex(r => r.CreatedAt);
 
         builder.HasOne(r => r.SysAdminDetails).WithOne(s => s.Request).HasForeignKey<SysAdminDetails>(s => s.RequestId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(r => r.DataCenterDetails).WithOne(d => d.Request).HasForeignKey<DataCenterDetails>(d => d.RequestId).OnDelete(DeleteBehavior.Cascade);

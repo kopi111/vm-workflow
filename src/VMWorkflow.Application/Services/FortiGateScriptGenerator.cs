@@ -9,8 +9,11 @@ public class FortiGateScriptGenerator : IScriptGenerationService
 {
     public string GenerateFortiGateScript(Request request)
     {
-        if (request.Status != RequestStatus.Approved && request.Status != RequestStatus.Implemented && request.Status != RequestStatus.Closed)
-            throw new InvalidOperationException($"Script generation requires Approved status or later. Current: {request.Status}");
+        if (request.Status != RequestStatus.PendingApproval
+            && request.Status != RequestStatus.Approved
+            && request.Status != RequestStatus.Implemented
+            && request.Status != RequestStatus.Closed)
+            throw new InvalidOperationException($"Script generation requires PendingApproval status or later. Current: {request.Status}");
 
         if (request.NOCDetails == null)
             throw new InvalidOperationException("NOC details are required for script generation.");

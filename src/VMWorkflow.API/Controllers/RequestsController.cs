@@ -56,6 +56,14 @@ public class RequestsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var user = GetCurrentUser();
+        await _requestService.DeleteAsync(id, user);
+        return NoContent();
+    }
+
     private string GetCurrentUser()
     {
         return User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");

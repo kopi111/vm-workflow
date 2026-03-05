@@ -51,27 +51,55 @@
             </MudText>
             <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
             <MudNavLink Href="/create-request" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddCircleOutline">New Request</MudNavLink>
+            <MudNavLink Href="/history" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.History">History</MudNavLink>
 
             <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"
                      Style="color: var(--mud-palette-text-secondary); font-weight: 600; letter-spacing: 1px; font-size: 0.65rem;">
                 WORK QUEUES
             </MudText>
-            <MudNavLink Href="/drafts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Drafts">Drafts</MudNavLink>
-            <MudNavLink Href="/queue/sysadmin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Computer">SysAdmin</MudNavLink>
-            <MudNavLink Href="/queue/datacenter" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Data Center</MudNavLink>
-            <MudNavLink Href="/queue/noc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lan">NOC</MudNavLink>
-            <MudNavLink Href="/queue/soc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Security">SOC</MudNavLink>
-            <MudNavLink Href="/queue/ioc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.VerifiedUser">IOC</MudNavLink>
-            <MudNavLink Href="/queue/ciso" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Shield">CISO</MudNavLink>
-            <MudNavLink Href="/queue/cto" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Engineering">CTO</MudNavLink>
-            <MudNavLink Href="/queue/ops" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Ops</MudNavLink>
-
+            <AuthorizeView Roles="Requester,PlatformAdmin">
+                <MudNavLink Href="/drafts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Drafts">Drafts</MudNavLink>
+            </AuthorizeView>
             <AuthorizeView Roles="SysAdmin,PlatformAdmin">
+                <MudNavLink Href="/queue/sysadmin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Computer">SysAdmin</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="DataCenter,PlatformAdmin">
+                <MudNavLink Href="/queue/datacenter" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Data Center</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="NOC,PlatformAdmin">
+                <MudNavLink Href="/queue/noc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lan">NOC</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="SOC,PlatformAdmin">
+                <MudNavLink Href="/queue/soc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Security">SOC</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="IOCManager,PlatformAdmin">
+                <MudNavLink Href="/queue/ioc" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.VerifiedUser">IOC</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="CISO,PlatformAdmin">
+                <MudNavLink Href="/queue/ciso" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Shield">CISO</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="Ops,PlatformAdmin">
+                <MudNavLink Href="/queue/ops" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Ops Manager</MudNavLink>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="SysAdmin,DataCenter,NOC,SOC,IOCManager,CISO,Ops,PlatformAdmin">
+                <MudNavLink Href="/sent-back" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Replay">Sent Back</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="IOCManager,PlatformAdmin">
+                <MudNavLink Href="/rejected" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Cancel">Rejected</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="NOC,SOC,IOCManager,PlatformAdmin">
+                <MudNavLink Href="/scripts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Code">Scripts</MudNavLink>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="SysAdmin,IOCManager,PlatformAdmin">
                 <MudText Typo="Typo.caption" Class="px-4 mt-4 mb-2"
                          Style="color: var(--mud-palette-text-secondary); font-weight: 600; letter-spacing: 1px; font-size: 0.65rem;">
                     ADMIN
                 </MudText>
                 <MudNavLink Href="/admin/settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="SysAdmin,PlatformAdmin">
                 <MudNavLink Href="/logs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ListAlt">Logs</MudNavLink>
                 <MudNavLink Href="/users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">User Control</MudNavLink>
             </AuthorizeView>

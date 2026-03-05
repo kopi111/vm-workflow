@@ -30,13 +30,35 @@ public class IOCManagerController : ControllerBase
     }
 
     /// <summary>
-    /// IOC Manager can reject and send back to NOC/SOC.
+    /// IOC Manager can send back to NOC/SOC.
+    /// </summary>
+    [HttpPost("send-back")]
+    public async Task<ActionResult<RequestResponseDto>> SendBack(Guid id, [FromBody] SendBackDto dto)
+    {
+        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var result = await _requestService.SendBackAsync(id, dto, user);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// IOC Manager can reject the request entirely.
     /// </summary>
     [HttpPost("reject")]
     public async Task<ActionResult<RequestResponseDto>> Reject(Guid id, [FromBody] SendBackDto dto)
     {
         var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
-        var result = await _requestService.SendBackAsync(id, dto, user);
+        var result = await _requestService.RejectAsync(id, dto, user);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// IOC Manager can unreject and restore to PendingIOCApproval.
+    /// </summary>
+    [HttpPost("unreject")]
+    public async Task<ActionResult<RequestResponseDto>> Unreject(Guid id)
+    {
+        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var result = await _requestService.UnrejectAsync(id, user);
         return Ok(result);
     }
 }

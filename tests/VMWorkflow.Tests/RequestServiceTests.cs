@@ -23,8 +23,9 @@ public class RequestServiceTests : IDisposable
 
         _db = new WorkflowDbContext(options);
         var workflow = new WorkflowEngine();
+        var scriptService = new FortiGateScriptGenerator();
         var logger = NullLogger<RequestService>.Instance;
-        _service = new RequestService(_db, workflow, logger);
+        _service = new RequestService(_db, workflow, scriptService, logger);
     }
 
     public void Dispose()
@@ -237,32 +238,32 @@ public class RequestServiceTests : IDisposable
             "ioc-manager");
         Assert.Equal(RequestStatus.PendingApproval, iocApproved.Status);
 
-        // CISO Approve (1 of 3 — not enough for quorum yet)
+        // CISO Approve (1 of 2 — awaiting Ops Manager)
         var cisoApproved = await _service.ProcessApprovalAsync(created.RequestId,
             new ApprovalDto { Decision = ApprovalDecision.Approve, Comments = "CISO approved" },
             "ciso", "ciso");
         Assert.Equal(RequestStatus.PendingApproval, cisoApproved.Status);
 
-        // CTO Approve (2 of 3 — quorum reached → Approved)
-        var ctoApproved = await _service.ProcessApprovalAsync(created.RequestId,
-            new ApprovalDto { Decision = ApprovalDecision.Approve, Comments = "CTO approved" },
-            "cto", "cto");
-        Assert.Equal(RequestStatus.Approved, ctoApproved.Status);
+        // Ops Manager Approve (2 of 2 — both approved → Approved)
+        var opsApproved = await _service.ProcessApprovalAsync(created.RequestId,
+            new ApprovalDto { Decision = ApprovalDecision.Approve, Comments = "Ops Manager approved" },
+            "ops", "ops");
+        Assert.Equal(RequestStatus.Approved, opsApproved.Status);
     }
 
     [Fact]
-    public async Task QuorumApproval_TwoOfThree_SetsApproved()
+    public async Task BothApproval_CISOAndOps_SetsApproved()
     {
         // Setup: get to PendingApproval
         var created = await SetupToPendingApproval();
 
-        // CISO approves (1 of 3)
+        // CISO approves (1 of 2)
         var r1 = await _service.ProcessApprovalAsync(created.RequestId,
             new ApprovalDto { Decision = ApprovalDecision.Approve, Comments = "CISO ok" },
             "ciso", "ciso");
         Assert.Equal(RequestStatus.PendingApproval, r1.Status);
 
-        // Ops approves (2 of 3 — quorum)
+        // Ops Manager approves (2 of 2 — both approved)
         var r2 = await _service.ProcessApprovalAsync(created.RequestId,
             new ApprovalDto { Decision = ApprovalDecision.Approve, Comments = "Ops ok" },
             "ops-officer", "ops");
@@ -270,16 +271,16 @@ public class RequestServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task QuorumApproval_OneReject_SetsRejected()
+    public async Task QuorumApproval_OneReject_ReturnsToDraft()
     {
         // Setup: get to PendingApproval
         var created = await SetupToPendingApproval();
 
-        // CISO rejects
+        // CISO rejects — should return to Draft
         var result = await _service.ProcessApprovalAsync(created.RequestId,
             new ApprovalDto { Decision = ApprovalDecision.Reject, Comments = "Security concerns" },
             "ciso", "ciso");
-        Assert.Equal(RequestStatus.Rejected, result.Status);
+        Assert.Equal(RequestStatus.Draft, result.Status);
     }
 
     [Fact]
@@ -295,14 +296,14 @@ public class RequestServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task ApprovalReject_FromPendingApproval_SetsRejected()
+    public async Task ApprovalReject_FromPendingApproval_ReturnsToDraft()
     {
         var created = await SetupToPendingApproval();
 
         var rejected = await _service.ProcessApprovalAsync(created.RequestId,
             new ApprovalDto { Decision = ApprovalDecision.Reject, Comments = "Missing info" }, "ciso", "ciso");
 
-        Assert.Equal(RequestStatus.Rejected, rejected.Status);
+        Assert.Equal(RequestStatus.Draft, rejected.Status);
     }
 
     [Fact]

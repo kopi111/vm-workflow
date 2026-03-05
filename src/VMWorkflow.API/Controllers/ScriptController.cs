@@ -8,7 +8,7 @@ namespace VMWorkflow.API.Controllers;
 
 [ApiController]
 [Route("api/requests/{id:guid}/generate-script")]
-[Authorize(Roles = "SOC,IOCManager,SysAdmin,PlatformAdmin")]
+[Authorize(Roles = "NOC,SOC,IOCManager,SysAdmin,PlatformAdmin")]
 public class ScriptController : ControllerBase
 {
     private readonly WorkflowDbContext _db;
@@ -26,6 +26,8 @@ public class ScriptController : ControllerBase
         var request = await _db.Requests
             .Include(r => r.NOCDetails)
             .Include(r => r.SOCDetails)
+                .ThenInclude(s => s!.FirewallEntries)
+                    .ThenInclude(f => f.Services)
             .FirstOrDefaultAsync(r => r.RequestId == id);
 
         if (request == null) return NotFound();

@@ -4,25 +4,25 @@ namespace VMWorkflow.Application.DTOs;
 
 public class NOCDetailsDto
 {
-    [Required, StringLength(50)]
+    [Required(ErrorMessage = "Real IP Address is required."), StringLength(50)]
     public string IPAddress { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required(ErrorMessage = "Real Subnet Mask is required."), StringLength(50)]
     public string SubnetMask { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required(ErrorMessage = "Real VLAN ID is required."), StringLength(50)]
     public string VLANID { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required(ErrorMessage = "Real Gateway is required."), StringLength(50)]
     public string Gateway { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required(ErrorMessage = "Uplink Port is required."), StringLength(50)]
     public string Port { get; set; } = string.Empty;
 
     [StringLength(50)]
     public string VIP { get; set; } = string.Empty;
 
-    [Required, StringLength(500)]
+    [Required(ErrorMessage = "FQDN is required."), StringLength(500)]
     public string FQDN { get; set; } = string.Empty;
 
     [StringLength(50)]

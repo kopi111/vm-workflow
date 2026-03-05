@@ -1,5 +1,3 @@
-using VMWorkflow.Domain.Enums;
-
 namespace VMWorkflow.Domain.Entities;
 
 public class SysAdminDetails
@@ -8,8 +6,8 @@ public class SysAdminDetails
     public Guid RequestId { get; set; }
 
     public string SensitivityLevel { get; set; } = string.Empty;
-    public ServerResourceSize ServerResources { get; set; }
-    public WebServerType WebServer { get; set; }
+    public string ServerResources { get; set; } = string.Empty;
+    public string WebServer { get; set; } = string.Empty;
     public string DatabaseNameType { get; set; } = "none";
     public string DatabaseName { get; set; } = string.Empty;
     public string DatabaseUsername { get; set; } = string.Empty;

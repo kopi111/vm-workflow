@@ -4,13 +4,13 @@ namespace VMWorkflow.Application.DTOs;
 
 public class SysAdminDetailsDto
 {
-    [Required, StringLength(100)]
+    [Required(ErrorMessage = "Sensitivity Level is required."), StringLength(100)]
     public string SensitivityLevel { get; set; } = string.Empty;
 
-    [Required, StringLength(100)]
+    [StringLength(100)]
     public string ServerResources { get; set; } = string.Empty;
 
-    [Required, StringLength(100)]
+    [Required(ErrorMessage = "Web Server is required."), StringLength(100)]
     public string WebServer { get; set; } = string.Empty;
 
     [StringLength(20)]
@@ -19,10 +19,10 @@ public class SysAdminDetailsDto
     [StringLength(200)]
     public string DatabaseName { get; set; } = string.Empty;
 
-    [Required, StringLength(200)]
+    [StringLength(200)]
     public string DatabaseUsername { get; set; } = string.Empty;
 
-    [Required, StringLength(200)]
+    [Required(ErrorMessage = "Hostname is required."), StringLength(200)]
     public string Hostname { get; set; } = string.Empty;
 
     public List<ServiceEntryDto> Services { get; set; } = new();

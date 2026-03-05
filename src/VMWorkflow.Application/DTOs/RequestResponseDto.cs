@@ -28,13 +28,10 @@ public class RequestResponseDto
     // IOC Manager
     public string? IocComments { get; set; }
 
-    // Approval tracking
+    // Approval tracking (CISO + Ops Manager)
     public string? CisoDecision { get; set; }
     public string? CisoComments { get; set; }
     public string? CisoApprovedBy { get; set; }
-    public string? CtoDecision { get; set; }
-    public string? CtoComments { get; set; }
-    public string? CtoApprovedBy { get; set; }
     public string? OpsDecision { get; set; }
     public string? OpsComments { get; set; }
     public string? OpsApprovedBy { get; set; }

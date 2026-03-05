@@ -1,4 +1,5 @@
 @page "/logs"
+@attribute [Authorize]
 @using VMWorkflow.Web.Models
 @using VMWorkflow.Web.Services
 @inject IApiClient ApiClient
@@ -29,7 +30,7 @@
                     <MudTh>Comments</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd hh:mm:ss tt")</MudTd>
                     <MudTd DataLabel="Request">
                         <MudLink Href="@($"/requests/{context.RequestId}")">@context.RequestNumber</MudLink>
                     </MudTd>
@@ -60,7 +61,7 @@
                     <MudTh>Status</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                    <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd hh:mm:ss tt")</MudTd>
                     <MudTd DataLabel="User">@context.User</MudTd>
                     <MudTd DataLabel="Method">
                         <MudChip T="string" Size="Size.Small" Color="@GetMethodColor(context.HttpMethod)">@context.HttpMethod</MudChip>

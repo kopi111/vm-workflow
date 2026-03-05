@@ -21,7 +21,7 @@ builder.Services.AddScoped(sp =>
 {
     var handler = sp.GetRequiredService<JwtAuthorizationHandler>();
     handler.InnerHandler = new HttpClientHandler();
-    var apiBase = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5028";
+    var apiBase = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
     return new HttpClient(handler) { BaseAddress = new Uri(apiBase) };
 });
 

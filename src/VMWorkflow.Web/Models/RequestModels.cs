@@ -173,7 +173,7 @@ public class FirewallEntryModel
     public string DestinationIP { get; set; } = string.Empty;
     public List<ServiceEntryModel> Services { get; set; } = new();
     public string Schedule { get; set; } = string.Empty;
-    public string Action { get; set; } = string.Empty;
+    public string Action { get; set; } = "Accept";
     public List<Guid> SecurityProfileIds { get; set; } = new();
     public List<string> SecurityProfileNames { get; set; } = new();
 }
@@ -183,6 +183,14 @@ public class ServiceEntryModel
     public string Port { get; set; } = string.Empty;
     public string Protocol { get; set; } = "TCP";
     public string? ServiceName { get; set; }
+}
+
+public class DropdownOptionModel
+{
+    public Guid DropdownOptionId { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
 }
 
 public class ResourceGroupModel
@@ -203,6 +211,19 @@ public class ApprovalModel
 public class SendBackModel
 {
     public string Comments { get; set; } = string.Empty;
+    public string? TargetStatus { get; set; }
+}
+
+public class ScriptModel
+{
+    public Guid ScriptId { get; set; }
+    public Guid RequestId { get; set; }
+    public string RequestSlug { get; set; } = string.Empty;
+    public string ApplicationName { get; set; } = string.Empty;
+    public string ScriptType { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string GeneratedBy { get; set; } = string.Empty;
+    public DateTime GeneratedAt { get; set; }
 }
 
 public class StatusHistoryEntry
@@ -235,13 +256,10 @@ public class RequestResponse
     // IOC Manager
     public string? IocComments { get; set; }
 
-    // Approval tracking
+    // Approval tracking (CISO + Ops Manager)
     public string? CisoDecision { get; set; }
     public string? CisoComments { get; set; }
     public string? CisoApprovedBy { get; set; }
-    public string? CtoDecision { get; set; }
-    public string? CtoComments { get; set; }
-    public string? CtoApprovedBy { get; set; }
     public string? OpsDecision { get; set; }
     public string? OpsComments { get; set; }
     public string? OpsApprovedBy { get; set; }

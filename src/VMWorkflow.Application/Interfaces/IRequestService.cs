@@ -20,5 +20,10 @@ public interface IRequestService
     Task<RequestResponseDto> ProcessIOCApprovalAsync(Guid requestId, IOCSubmitDto dto, string approvedBy);
     Task<RequestResponseDto> ProcessApprovalAsync(Guid requestId, ApprovalDto dto, string approvedBy, string role);
     Task<RequestResponseDto> SendBackAsync(Guid requestId, SendBackDto dto, string sentBackBy);
+    Task<RequestResponseDto> RejectAsync(Guid requestId, SendBackDto dto, string rejectedBy);
+    Task<RequestResponseDto> UnrejectAsync(Guid requestId, string unrejectedBy);
+    Task<List<RequestResponseDto>> GetRejectedByUserAsync(string username);
+    Task DeleteAsync(Guid requestId, string deletedBy);
     Task<List<RequestResponseDto>> GetPendingByRoleAsync(string role);
+    Task<List<RequestResponseDto>> GetSentBackByUserAsync(string username);
 }

@@ -1,0 +1,165 @@
+@page "/rejected"
+@inject IApiClient Api
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+@attribute [Authorize]
+
+<PageTitle>Rejected Requests</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Rejected Requests</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests you have rejected. You can unreject and approve.</MudText>
+        </MudStack>
+        <MudChip T="string" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Style="border-radius: 20px; font-weight: 600;">
+            @requests.Count request@(requests.Count != 1 ? "s" : "")
+        </MudChip>
+    </MudStack>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="border-radius: 8px;" />
+    }
+    else if (!requests.Any())
+    {
+        <MudPaper Elevation="0" Class="premium-card pa-8 text-center" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Style="opacity: 0.2;" />
+            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">No rejected requests</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+                You have not rejected any requests.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid Class="stagger-in">
+            @foreach (var req in requests)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <MudStack Spacing="2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                                    @req.ObjectSlug
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(req.Status)" Variant="Variant.Filled" Style="border-radius: 8px;">
+                                    @req.Status
+                                </MudChip>
+                            </MudStack>
+
+                            <MudText Typo="Typo.h6" Style="font-weight: 600;">@req.ApplicationName</MudText>
+
+                            <MudStack Row="true" Spacing="2">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                    @req.Environment
+                                </MudChip>
+                            </MudStack>
+
+                            @{
+                                var rejectComment = GetRejectComment(req);
+                            }
+                            @if (!string.IsNullOrEmpty(rejectComment))
+                            {
+                                <MudAlert Severity="Severity.Error" Variant="Variant.Text" Dense="true" NoIcon="true"
+                                          Style="font-size: 0.75rem; padding: 4px 8px;">
+                                    @rejectComment
+                                </MudAlert>
+                            }
+
+                            <MudDivider Class="my-1" />
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
+                                    @req.CreatedBy — @req.UpdatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                </MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" Size="Size.Small" Color="Color.Primary"
+                                               Href="@($"/request/{req.RequestId}")" />
+                            </MudStack>
+
+                            @if (req.Status == "Rejected")
+                            {
+                                <MudStack Row="true" Spacing="2">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.Undo" Style="border-radius: 10px; text-transform: none;"
+                                               Disabled="@isBusy" OnClick="@(() => HandleUnreject(req))">
+                                        Unreject & Restore
+                                    </MudButton>
+                                </MudStack>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary); font-style: italic;">
+                                    Already restored — currently at @req.Status
+                                </MudText>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    private List<RequestResponse> requests = new();
+    private bool isLoading = true;
+    private bool isBusy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRequests();
+    }
+
+    private async Task LoadRequests()
+    {
+        isLoading = true;
+        try
+        {
+            requests = await Api.GetRejectedRequestsAsync();
+        }
+        catch
+        {
+            requests = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleUnreject(RequestResponse req)
+    {
+        isBusy = true;
+        try
+        {
+            await Api.UnrejectRequestAsync(req.RequestId);
+            Snackbar.Add($"{req.ObjectSlug} restored to IOC Approval", Severity.Success);
+            await LoadRequests();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private string? GetRejectComment(RequestResponse req)
+    {
+        return req.StatusHistories?
+            .Where(h => h.Comments != null && h.Comments.StartsWith("Rejected:"))
+            .OrderByDescending(h => h.Timestamp)
+            .FirstOrDefault()?.Comments;
+    }
+
+    private static Color GetStatusColor(string status) => status switch
+    {
+        "Rejected" => Color.Error,
+        "PendingIOCApproval" => Color.Tertiary,
+        _ => Color.Default
+    };
+}

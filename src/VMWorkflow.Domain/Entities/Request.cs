@@ -29,16 +29,11 @@ public class Request
     // IOC Manager
     public string? IocComments { get; set; }
 
-    // Approval tracking (any 2 of 3: CISO, CTO, Ops Officer)
+    // Approval tracking (CISO + Ops Manager — both must approve)
     public string? CisoDecision { get; set; }
     public string? CisoComments { get; set; }
     public string? CisoApprovedBy { get; set; }
     public DateTime? CisoApprovedAt { get; set; }
-
-    public string? CtoDecision { get; set; }
-    public string? CtoComments { get; set; }
-    public string? CtoApprovedBy { get; set; }
-    public DateTime? CtoApprovedAt { get; set; }
 
     public string? OpsDecision { get; set; }
     public string? OpsComments { get; set; }

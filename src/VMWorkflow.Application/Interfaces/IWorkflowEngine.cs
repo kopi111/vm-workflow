@@ -10,7 +10,7 @@ public interface IWorkflowEngine
     RequestStatus GetNextStatusAfterNOC(RequestStatus currentStatus);
     RequestStatus GetNextStatusAfterSOC(RequestStatus currentStatus);
     bool IsIOCReady(bool nocCompleted, bool socCompleted);
-    bool HasQuorumApproval(string? cisoDecision, string? ctoDecision, string? opsDecision);
-    bool HasRejection(string? cisoDecision, string? ctoDecision, string? opsDecision);
+    bool HasFullApproval(string? cisoDecision, string? opsDecision);
+    bool HasRejection(string? cisoDecision, string? opsDecision);
     RequestStatus GetPreviousStatus(RequestStatus currentStatus);
 }

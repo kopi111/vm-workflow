@@ -27,18 +27,12 @@ builder.Host.UseSerilog((ctx, config) =>
 });
 
 // --- EF Core ---
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (connectionString != null && connectionString.Contains("Server="))
-{
-    builder.Services.AddDbContext<WorkflowDbContext>(options =>
-        options.UseSqlServer(connectionString,
-            b => b.MigrationsAssembly("VMWorkflow.Infrastructure")));
-}
-else
-{
-    builder.Services.AddDbContext<WorkflowDbContext>(options =>
-        options.UseSqlite(connectionString ?? "Data Source=vmworkflow.db"));
-}
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not configured.");
+var serverVersion = ServerVersion.AutoDetect(connectionString);
+builder.Services.AddDbContext<WorkflowDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion,
+        b => b.MigrationsAssembly("VMWorkflow.Infrastructure")));
 
 // --- Application Services ---
 builder.Services.AddScoped<IRequestService, RequestService>();
@@ -94,7 +88,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // --- CORS ---
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? new[] { "http://localhost:5186", "https://localhost:5186" };
+    ?? new[] { "http://localhost:5028", "https://localhost:5028", "http://localhost:5186", "https://localhost:5186", "http://localhost:5173", "https://localhost:5173" };
 
 builder.Services.AddCors(options =>
 {
@@ -107,12 +101,31 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// --- Ensure DB Created (dev) ---
-if (app.Environment.IsDevelopment())
+// --- Ensure DB Created + Seed ---
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<WorkflowDbContext>();
     db.Database.EnsureCreated();
+
+    // Ensure Scripts table exists (EnsureCreated won't add new tables to an existing DB)
+    await db.Database.ExecuteSqlRawAsync(@"
+        CREATE TABLE IF NOT EXISTS `Scripts` (
+            `ScriptId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `RequestId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `ScriptType` varchar(50) NOT NULL,
+            `Content` text NOT NULL,
+            `FileName` varchar(250) NOT NULL,
+            `GeneratedBy` varchar(100) NOT NULL,
+            `GeneratedAt` datetime(6) NOT NULL,
+            PRIMARY KEY (`ScriptId`),
+            KEY `IX_Scripts_RequestId` (`RequestId`),
+            KEY `IX_Scripts_GeneratedAt` (`GeneratedAt`),
+            CONSTRAINT `FK_Scripts_Requests_RequestId` FOREIGN KEY (`RequestId`) REFERENCES `Requests` (`RequestId`) ON DELETE CASCADE
+        ) CHARACTER SET utf8mb4;");
+
+    await db.SeedDefaultUsersAsync();
+    await db.SeedDefaultDropdownOptionsAsync();
+    await db.SeedDefaultAdminDataAsync();
 }
 
 // --- Security Headers ---
@@ -141,10 +154,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "VM Workflow API v1"));
 }
 
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+
 app.UseCors("AppCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<UserBlockingMiddleware>();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
-app.Run();
+await app.RunAsync();

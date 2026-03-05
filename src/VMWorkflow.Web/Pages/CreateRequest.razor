@@ -1,4 +1,5 @@
 @page "/create-request"
+@attribute [Authorize]
 @inject IApiClient Api
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -69,10 +70,10 @@
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudSelect @bind-Value="model.Environment" Label="Environment" Required="true" Variant="Variant.Outlined">
-                        <MudSelectItem Value="@("Development")">Development</MudSelectItem>
-                        <MudSelectItem Value="@("Staging")">Staging</MudSelectItem>
-                        <MudSelectItem Value="@("Production")">Production</MudSelectItem>
-                        <MudSelectItem Value="@("DR")">DR</MudSelectItem>
+                        @foreach (var opt in _environments)
+                        {
+                            <MudSelectItem Value="@opt.Value">@opt.Value</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" sm="6">
@@ -116,14 +117,10 @@
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudSelect @bind-Value="model.DBMS" Label="DBMS" Variant="Variant.Outlined" T="string" Clearable="true">
-                        <MudSelectItem Value="@("PostgreSQL")">PostgreSQL</MudSelectItem>
-                        <MudSelectItem Value="@("MySQL")">MySQL</MudSelectItem>
-                        <MudSelectItem Value="@("SQL Server")">SQL Server</MudSelectItem>
-                        <MudSelectItem Value="@("Oracle")">Oracle</MudSelectItem>
-                        <MudSelectItem Value="@("MongoDB")">MongoDB</MudSelectItem>
-                        <MudSelectItem Value="@("MariaDB")">MariaDB</MudSelectItem>
-                        <MudSelectItem Value="@("SQLite")">SQLite</MudSelectItem>
-                        <MudSelectItem Value="@("None")">None</MudSelectItem>
+                        @foreach (var opt in _dbmsList)
+                        {
+                            <MudSelectItem Value="@opt.Value">@opt.Value</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12">
@@ -135,9 +132,10 @@
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudSelect @bind-Value="model.SLA" Label="SLA Level" Variant="Variant.Outlined">
-                        <MudSelectItem Value="@("Standard")">Standard</MudSelectItem>
-                        <MudSelectItem Value="@("Critical")">Critical</MudSelectItem>
-                        <MudSelectItem Value="@("MissionCritical")">Mission Critical</MudSelectItem>
+                        @foreach (var opt in _slaLevels)
+                        {
+                            <MudSelectItem Value="@opt.Value">@opt.Value</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" sm="6">
@@ -224,6 +222,28 @@
     private bool isSubmitting;
     private bool isSavingDraft;
 
+    private List<DropdownOptionModel> _environments = new();
+    private List<DropdownOptionModel> _dbmsList = new();
+    private List<DropdownOptionModel> _slaLevels = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var tasks = new[]
+            {
+                Api.GetDropdownOptionsAsync("Environment"),
+                Api.GetDropdownOptionsAsync("DBMS"),
+                Api.GetDropdownOptionsAsync("SLA"),
+            };
+            var results = await Task.WhenAll(tasks);
+            _environments = results[0];
+            _dbmsList = results[1];
+            _slaLevels = results[2];
+        }
+        catch { /* fallback: dropdowns will be empty */ }
+    }
+
     private void NextStep()
     {
         if (currentStep == 1 && string.IsNullOrWhiteSpace(model.ApplicationName))
@@ -259,7 +279,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Failed to save draft: {ex.Message}";
+            errorMessage = ex.Message;
         }
         finally
         {
@@ -278,7 +298,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Failed to create request: {ex.Message}";
+            errorMessage = ex.Message;
         }
         finally
         {

@@ -33,12 +33,12 @@ public class GlobalExceptionHandler
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Invalid operation");
-            await WriteErrorResponse(context, HttpStatusCode.BadRequest, ex.Message);
+            await WriteErrorResponse(context, HttpStatusCode.BadRequest, "The request could not be processed. Please check your inputs and try again.");
         }
         catch (ArgumentException ex)
         {
             _logger.LogWarning(ex, "Bad argument");
-            await WriteErrorResponse(context, HttpStatusCode.BadRequest, ex.Message);
+            await WriteErrorResponse(context, HttpStatusCode.BadRequest, "Invalid input provided. Please check your data and try again.");
         }
         catch (Exception ex)
         {

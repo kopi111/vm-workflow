@@ -12,14 +12,14 @@ public class DataCenterDetailsConfiguration : IEntityTypeConfiguration<DataCente
 
         builder.HasIndex(d => d.RequestId).IsUnique();
 
-        builder.Property(d => d.Environment).HasConversion<string>().HasMaxLength(50);
+        builder.Property(d => d.Environment).IsRequired().HasMaxLength(50);
         builder.Property(d => d.UplinkSpeed).IsRequired().HasMaxLength(50);
-        builder.Property(d => d.BareMetalType).HasConversion<string>().HasMaxLength(50);
+        builder.Property(d => d.BareMetalType).IsRequired().HasMaxLength(50);
         builder.Property(d => d.PortNumber).IsRequired().HasMaxLength(50);
         builder.Property(d => d.DC).IsRequired().HasMaxLength(100);
         builder.Property(d => d.RackRoom).IsRequired().HasMaxLength(100);
         builder.Property(d => d.RackNumber).IsRequired().HasMaxLength(100);
-        builder.Property(d => d.Cluster).HasConversion<string>().HasMaxLength(50);
+        builder.Property(d => d.Cluster).IsRequired().HasMaxLength(50);
         builder.Property(d => d.SubmittedBy).IsRequired().HasMaxLength(100);
     }
 }

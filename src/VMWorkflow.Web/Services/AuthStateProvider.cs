@@ -1,5 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -23,7 +23,7 @@ public class AuthStateProvider : AuthenticationStateProvider
             return new AuthenticationState(_anonymous);
 
         var claims = ParseClaimsFromJwt(token);
-        if (claims == null)
+        if (claims == null || !claims.Any())
             return new AuthenticationState(_anonymous);
 
         var identity = new ClaimsIdentity(claims, "jwt");
@@ -34,6 +34,9 @@ public class AuthStateProvider : AuthenticationStateProvider
     public void NotifyUserAuthentication(string token)
     {
         var claims = ParseClaimsFromJwt(token);
+        if (claims == null || !claims.Any())
+            return;
+
         var identity = new ClaimsIdentity(claims, "jwt");
         var user = new ClaimsPrincipal(identity);
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -44,25 +47,49 @@ public class AuthStateProvider : AuthenticationStateProvider
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
     }
 
-    private static IEnumerable<Claim>? ParseClaimsFromJwt(string token)
+    private static List<Claim>? ParseClaimsFromJwt(string token)
     {
         try
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
+            var parts = token.Split('.');
+            if (parts.Length != 3)
+                return null;
 
-            // Map standard JWT claims to ClaimTypes for Blazor auth
-            var claims = new List<Claim>(jwt.Claims);
+            var payload = parts[1];
+            // Fix base64url padding
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+            var bytes = Convert.FromBase64String(payload.Replace('-', '+').Replace('_', '/'));
+            var json = System.Text.Encoding.UTF8.GetString(bytes);
+            var doc = JsonDocument.Parse(json);
 
-            var roleClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)
-                         ?? jwt.Claims.FirstOrDefault(c => c.Type == "role");
-            if (roleClaim != null && !claims.Any(c => c.Type == ClaimTypes.Role))
-                claims.Add(new Claim(ClaimTypes.Role, roleClaim.Value));
+            var claims = new List<Claim>();
 
-            var nameClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)
-                         ?? jwt.Claims.FirstOrDefault(c => c.Type == "name");
-            if (nameClaim != null && !claims.Any(c => c.Type == ClaimTypes.Name))
-                claims.Add(new Claim(ClaimTypes.Name, nameClaim.Value));
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                var type = prop.Name switch
+                {
+                    "sub" => ClaimTypes.NameIdentifier,
+                    "name" => ClaimTypes.Name,
+                    "role" => ClaimTypes.Role,
+                    _ when prop.Name == ClaimTypes.Name => ClaimTypes.Name,
+                    _ when prop.Name == ClaimTypes.Role => ClaimTypes.Role,
+                    _ => prop.Name
+                };
+
+                if (prop.Value.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in prop.Value.EnumerateArray())
+                        claims.Add(new Claim(type, item.GetString() ?? ""));
+                }
+                else
+                {
+                    claims.Add(new Claim(type, prop.Value.ToString()));
+                }
+            }
 
             return claims;
         }
