@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class RequestsController : ControllerBase
+public class RequestsController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class RequestsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> Create([FromBody] CreateRequestDto dto)
     {
-        var user = GetCurrentUser();
+        var user = RequireAuthenticatedUsername();
         var result = await _requestService.CreateAsync(dto, user);
         return CreatedAtAction(nameof(GetById), new { id = result.RequestId }, result);
     }
@@ -40,10 +39,18 @@ public class RequestsController : ControllerBase
         return Ok(results);
     }
 
+    [HttpGet("drafts/mine")]
+    public async Task<ActionResult<List<RequestResponseDto>>> GetMyDrafts()
+    {
+        var user = RequireAuthenticatedUsername();
+        var results = await _requestService.GetDraftsByUserAsync(user);
+        return Ok(results);
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<RequestResponseDto>> Update(Guid id, [FromBody] UpdateRequestDto dto)
     {
-        var user = GetCurrentUser();
+        var user = RequireAuthenticatedUsername();
         var result = await _requestService.UpdateAsync(id, dto, user);
         return Ok(result);
     }
@@ -51,7 +58,7 @@ public class RequestsController : ControllerBase
     [HttpPost("{id:guid}/submit")]
     public async Task<ActionResult<RequestResponseDto>> Submit(Guid id)
     {
-        var user = GetCurrentUser();
+        var user = RequireAuthenticatedUsername();
         var result = await _requestService.SubmitAsync(id, user);
         return Ok(result);
     }
@@ -59,13 +66,9 @@ public class RequestsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> Delete(Guid id)
     {
-        var user = GetCurrentUser();
+        var user = RequireAuthenticatedUsername();
         await _requestService.DeleteAsync(id, user);
         return NoContent();
     }
 
-    private string GetCurrentUser()
-    {
-        return User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
-    }
 }

@@ -17,6 +17,7 @@ public class FortiGateScriptGeneratorTests
             ApplicationName = "Payroll",
             ObjectSlug = "payroll-prod-01",
             Status = RequestStatus.Approved,
+            FQDNSuggestion = "payroll.corp.local",
             NOCDetails = new NOCDetails
             {
                 IPAddress = "10.0.1.50",
@@ -24,8 +25,7 @@ public class FortiGateScriptGeneratorTests
                 VLANID = "100",
                 Gateway = "10.0.1.1",
                 Port = "443",
-                VIP = "10.0.1.100",
-                FQDN = "payroll.corp.local"
+                VIP = "10.0.1.100"
             },
             SOCDetails = new SOCDetails
             {

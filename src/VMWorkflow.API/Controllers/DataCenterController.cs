@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/datacenter")]
-[Authorize(Roles = "DataCenter,IOCManager,PlatformAdmin")]
-public class DataCenterController : ControllerBase
+[Authorize(Roles = "DataCenter,PlatformAdmin")]
+public class DataCenterController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class DataCenterController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> SubmitDataCenter(Guid id, [FromBody] DataCenterDetailsDto dto, [FromQuery] string? action = null)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
 
         if (action?.ToLower() == "save")
         {

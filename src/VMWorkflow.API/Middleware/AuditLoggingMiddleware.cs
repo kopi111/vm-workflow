@@ -16,14 +16,9 @@ public class AuditLoggingMiddleware
 
     public async Task InvokeAsync(HttpContext context, IServiceScopeFactory scopeFactory)
     {
-        var user = context.User.Identity?.Name ?? "anonymous";
         var method = context.Request.Method;
         var path = context.Request.Path.ToString();
 
-        _logger.LogInformation("[AUDIT] {Method} {Path} by {User} at {Timestamp}",
-            method, path, user, DateTime.UtcNow);
-
-        // Buffer response body so we can read it for error logging
         var originalBody = context.Response.Body;
         var memoryStream = new MemoryStream();
         context.Response.Body = memoryStream;
@@ -34,13 +29,13 @@ public class AuditLoggingMiddleware
         }
         catch
         {
-            // Restore original body before re-throwing so GlobalExceptionHandler can write
             context.Response.Body = originalBody;
             memoryStream.Dispose();
             throw;
         }
 
-        // Read response body for logging
+        var user = context.User.Identity?.Name ?? "anonymous";
+
         memoryStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(memoryStream).ReadToEndAsync();
         memoryStream.Seek(0, SeekOrigin.Begin);
@@ -49,6 +44,9 @@ public class AuditLoggingMiddleware
         memoryStream.Dispose();
 
         var statusCode = context.Response.StatusCode;
+
+        _logger.LogInformation("[AUDIT] {Method} {Path} by {User} at {Timestamp}",
+            method, path, user, DateTime.UtcNow);
 
         if (statusCode >= 400 && !string.IsNullOrWhiteSpace(responseBody))
         {

@@ -12,7 +12,7 @@ public class SOCDetailsConfiguration : IEntityTypeConfiguration<SOCDetails>
 
         builder.HasIndex(s => s.RequestId).IsUnique();
 
-        builder.Property(s => s.SubmittedBy).IsRequired().HasMaxLength(100);
+        builder.Property(s => s.SubmittedBy).IsRequired().HasMaxLength(64);
 
         builder.HasMany(s => s.FirewallEntries).WithOne(f => f.SOCDetails).HasForeignKey(f => f.SOCDetailsId).OnDelete(DeleteBehavior.Cascade);
     }

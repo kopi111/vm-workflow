@@ -7,10 +7,9 @@ using VMWorkflow.Infrastructure.Data;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "SysAdmin,PlatformAdmin")]
-public class UsersController : ControllerBase
+public class UsersController : ApiControllerBase
 {
     private readonly WorkflowDbContext _db;
 
@@ -25,20 +24,9 @@ public class UsersController : ControllerBase
         var users = await _db.Users
             .AsNoTracking()
             .OrderBy(u => u.Username)
-            .Select(u => new UserDto
-            {
-                UserId = u.UserId,
-                Username = u.Username,
-                DisplayName = u.DisplayName,
-                Email = u.Email,
-                Role = u.Role,
-                IsBlocked = u.IsBlocked,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt
-            })
             .ToListAsync();
 
-        return Ok(users);
+        return Ok(users.Select(MapToDto));
     }
 
     [HttpPost]
@@ -64,17 +52,7 @@ public class UsersController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetAll), new UserDto
-        {
-            UserId = user.UserId,
-            Username = user.Username,
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            Role = user.Role,
-            IsBlocked = user.IsBlocked,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        });
+        return CreatedAtAction(nameof(GetAll), MapToDto(user));
     }
 
     [HttpPut("{id:guid}/role")]
@@ -88,17 +66,7 @@ public class UsersController : ControllerBase
         user.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        return Ok(new UserDto
-        {
-            UserId = user.UserId,
-            Username = user.Username,
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            Role = user.Role,
-            IsBlocked = user.IsBlocked,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        });
+        return Ok(MapToDto(user));
     }
 
     [HttpPut("{id:guid}/block")]
@@ -112,16 +80,18 @@ public class UsersController : ControllerBase
         user.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        return Ok(new UserDto
-        {
-            UserId = user.UserId,
-            Username = user.Username,
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            Role = user.Role,
-            IsBlocked = user.IsBlocked,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        });
+        return Ok(MapToDto(user));
     }
+
+    private static UserDto MapToDto(User user) => new()
+    {
+        UserId = user.UserId,
+        Username = user.Username,
+        DisplayName = user.DisplayName,
+        Email = user.Email,
+        Role = user.Role,
+        IsBlocked = user.IsBlocked,
+        CreatedAt = user.CreatedAt,
+        UpdatedAt = user.UpdatedAt
+    };
 }

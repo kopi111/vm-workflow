@@ -16,19 +16,19 @@ public class UserDto
 
 public class CreateUserDto
 {
-    [Required, StringLength(100, MinimumLength = 3)]
+    [Required, StringLength(64, MinimumLength = 3)]
     public string Username { get; set; } = string.Empty;
 
-    [Required, StringLength(200, MinimumLength = 2)]
+    [Required, StringLength(100, MinimumLength = 2)]
     public string DisplayName { get; set; } = string.Empty;
 
-    [Required, EmailAddress, StringLength(200)]
+    [Required, EmailAddress, StringLength(254)]
     public string Email { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(30)]
     public string Role { get; set; } = string.Empty;
 
-    [StringLength(200, MinimumLength = 6)]
+    [StringLength(100, MinimumLength = 6)]
     public string? Password { get; set; }
 }
 
@@ -39,6 +39,6 @@ public class ToggleBlockDto
 
 public class UpdateRoleDto
 {
-    [Required, StringLength(50)]
+    [Required, StringLength(30)]
     public string Role { get; set; } = string.Empty;
 }

@@ -104,11 +104,8 @@
         isLoading = true;
         try
         {
-            var all = await Api.GetRequestsAsync();
-            drafts = all
-                .Where(r => r.Status == "Draft")
-                .OrderByDescending(r => r.CreatedAt)
-                .ToList();
+            var all = await Api.GetMyDraftsAsync();
+            drafts = all.Where(d => !HasEverBeenSentBack(d)).ToList();
         }
         catch { drafts = new(); }
         finally
@@ -116,6 +113,9 @@
             isLoading = false;
         }
     }
+
+    private static bool HasEverBeenSentBack(RequestResponse r) =>
+        r.StatusHistories?.Any(h => h.Comments != null && h.Comments.StartsWith("Sent back:")) == true;
 
     private async Task DeleteDraft(Guid requestId)
     {

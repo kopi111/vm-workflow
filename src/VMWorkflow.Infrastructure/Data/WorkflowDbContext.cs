@@ -23,6 +23,7 @@ public class WorkflowDbContext : DbContext
     public DbSet<ResourceGroup> ResourceGroups => Set<ResourceGroup>();
     public DbSet<SecurityProfile> SecurityProfiles => Set<SecurityProfile>();
     public DbSet<Vdom> Vdoms => Set<Vdom>();
+    public DbSet<Schedule> Schedules => Set<Schedule>();
     public DbSet<FirewallEntrySecurityProfile> FirewallEntrySecurityProfiles => Set<FirewallEntrySecurityProfile>();
     public DbSet<DropdownOption> DropdownOptions => Set<DropdownOption>();
     public DbSet<Script> Scripts => Set<Script>();
@@ -45,6 +46,7 @@ public class WorkflowDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SecurityProfileConfiguration());
         modelBuilder.ApplyConfiguration(new FirewallEntrySecurityProfileConfiguration());
         modelBuilder.ApplyConfiguration(new VdomConfiguration());
+        modelBuilder.ApplyConfiguration(new ScheduleConfiguration());
         modelBuilder.ApplyConfiguration(new DropdownOptionConfiguration());
         modelBuilder.ApplyConfiguration(new ScriptConfiguration());
 
@@ -146,6 +148,20 @@ public class WorkflowDbContext : DbContext
                 new ResourceGroup { ResourceGroupId = Guid.NewGuid(), Name = "Staging-RG", CreatedBy = "system", CreatedAt = DateTime.UtcNow },
                 new ResourceGroup { ResourceGroupId = Guid.NewGuid(), Name = "Development-RG", CreatedBy = "system", CreatedAt = DateTime.UtcNow }
             );
+            await SaveChangesAsync();
+        }
+
+        if (!await Schedules.AnyAsync(s => s.Name == "always"))
+        {
+            Schedules.Add(new Schedule
+            {
+                ScheduleId = Guid.NewGuid(),
+                Name = "always",
+                Type = Domain.Enums.ScheduleType.Always,
+                Color = "#43e97b",
+                CreatedBy = "system",
+                CreatedAt = DateTime.UtcNow
+            });
             await SaveChangesAsync();
         }
     }

@@ -305,14 +305,20 @@
         .Where(r => MatchesEnvironmentFilter(r))
         .OrderByDescending(r => r.UpdatedAt);
 
+    private string? _username;
+
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthStateProvider.GetAuthenticationStateAsync();
         _userRole = state.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        _username = state.User.Identity?.Name;
 
         try
         {
-            allRequests = await Api.GetRequestsAsync();
+            var all = await Api.GetRequestsAsync();
+            allRequests = (_userRole == "Requester" && !string.IsNullOrEmpty(_username))
+                ? all.Where(r => string.Equals(r.CreatedBy, _username, StringComparison.OrdinalIgnoreCase)).ToList()
+                : all;
         }
         catch { }
         finally { isLoading = false; }

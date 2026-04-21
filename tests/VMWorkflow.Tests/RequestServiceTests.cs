@@ -33,6 +33,22 @@ public class RequestServiceTests : IDisposable
         _db.Dispose();
     }
 
+    private static CreateRequestDto FullDraftDto(string appName, EnvironmentType env = EnvironmentType.Production) => new()
+    {
+        ApplicationName = appName,
+        Environment = env,
+        ProgrammingLanguage = "C#",
+        Framework = ".NET 8",
+        Purpose = "Test purpose",
+        ExpectedUsers = 100,
+        DBMS = "PostgreSQL",
+        GitRepoLink = "https://example.com/repo.git",
+        AccessGroup = "dev-team",
+        SLA = SLALevel.Standard,
+        FQDNSuggestion = "app.corp.local",
+        AuthenticationMethod = "LDAP"
+    };
+
     [Fact]
     public async Task CreateAsync_SetsStatusToDraft()
     {
@@ -85,7 +101,7 @@ public class RequestServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_DuplicateAppEnv_IncrementsSlug()
     {
-        var dto = new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production };
+        var dto = FullDraftDto("App");
 
         var r1 = await _service.CreateAsync(dto, "admin");
         var r2 = await _service.CreateAsync(dto, "admin");
@@ -97,7 +113,7 @@ public class RequestServiceTests : IDisposable
     [Fact]
     public async Task GetByIdAsync_ExistingRequest_ReturnsDto()
     {
-        var dto = new CreateRequestDto { ApplicationName = "Test", Environment = EnvironmentType.Staging };
+        var dto = FullDraftDto("Test", EnvironmentType.Staging);
         var created = await _service.CreateAsync(dto, "admin");
 
         var result = await _service.GetByIdAsync(created.RequestId);
@@ -116,7 +132,7 @@ public class RequestServiceTests : IDisposable
     [Fact]
     public async Task UpdateAsync_DraftRequest_Succeeds()
     {
-        var dto = new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production };
+        var dto = FullDraftDto("App");
         var created = await _service.CreateAsync(dto, "admin");
 
         var update = new UpdateRequestDto { ProgrammingLanguage = "C#", Framework = ".NET 8" };
@@ -129,7 +145,7 @@ public class RequestServiceTests : IDisposable
     [Fact]
     public async Task SubmitAsync_DraftRequest_TransitionsToPendingSysAdmin()
     {
-        var dto = new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production };
+        var dto = FullDraftDto("App");
         var created = await _service.CreateAsync(dto, "admin");
 
         var result = await _service.SubmitAsync(created.RequestId, "admin");
@@ -141,7 +157,7 @@ public class RequestServiceTests : IDisposable
     public async Task SubmitSysAdminAsync_SetsDataCenterReview()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "TestApp", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("TestApp"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
 
         var result = await _service.SubmitSysAdminAsync(created.RequestId,
@@ -167,7 +183,7 @@ public class RequestServiceTests : IDisposable
     {
         // Create
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "Payroll", Environment = EnvironmentType.Production },
+            FullDraftDto("Payroll"),
             "sysadmin");
         Assert.Equal(RequestStatus.Draft, created.Status);
 
@@ -213,7 +229,6 @@ public class RequestServiceTests : IDisposable
                 Gateway = "10.0.1.1",
                 Port = "443",
                 VIP = "10.0.1.100",
-                FQDN = "payroll.corp.local",
                 NetworkPaths = new List<NetworkPathEntryDto>
                 {
                     new() { SwitchName = "SW-Core-01", Port = "Gi0/1", LinkSpeed = "10Gbps" }
@@ -310,7 +325,7 @@ public class RequestServiceTests : IDisposable
     public async Task UpdateAsync_NonDraftRequest_Throws()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -321,7 +336,7 @@ public class RequestServiceTests : IDisposable
     public async Task SendBack_FromPendingSysAdmin_GoesToDraft()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
 
         var result = await _service.SendBackAsync(created.RequestId,
@@ -334,7 +349,7 @@ public class RequestServiceTests : IDisposable
     public async Task SendBack_FromDataCenterReview_GoesToPendingSysAdmin()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
         await _service.SubmitSysAdminAsync(created.RequestId,
             new SysAdminDetailsDto { SensitivityLevel = "Low", ServerResources = "Small", WebServer = "IIS", Hostname = "h1" }, "sa");
@@ -349,7 +364,7 @@ public class RequestServiceTests : IDisposable
     public async Task SendBack_FromPendingNOC_GoesToDataCenterReview()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
         await _service.SubmitSysAdminAsync(created.RequestId,
             new SysAdminDetailsDto { SensitivityLevel = "Low", ServerResources = "Small", WebServer = "IIS", Hostname = "h1" }, "sa");
@@ -378,7 +393,7 @@ public class RequestServiceTests : IDisposable
     {
         // Create and submit
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
 
         // SysAdmin sends back to Dev
@@ -400,7 +415,7 @@ public class RequestServiceTests : IDisposable
     public async Task SendBack_FromDraft_Throws()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _service.SendBackAsync(created.RequestId, new SendBackDto { Comments = "test" }, "admin"));
@@ -410,7 +425,7 @@ public class RequestServiceTests : IDisposable
     public async Task SendBack_RecordsCommentInStatusHistory()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
 
         var result = await _service.SendBackAsync(created.RequestId,
@@ -435,14 +450,14 @@ public class RequestServiceTests : IDisposable
     private async Task<RequestResponseDto> SetupToPendingIOCApproval()
     {
         var created = await _service.CreateAsync(
-            new CreateRequestDto { ApplicationName = "App", Environment = EnvironmentType.Production }, "admin");
+            FullDraftDto("App"), "admin");
         await _service.SubmitAsync(created.RequestId, "admin");
         await _service.SubmitSysAdminAsync(created.RequestId,
             new SysAdminDetailsDto { SensitivityLevel = "Low", ServerResources = "Small", WebServer = "Apache", Hostname = "h1" }, "sa");
         await _service.SubmitDataCenterAsync(created.RequestId,
             new DataCenterDetailsDto { Environment = "Dell", UplinkSpeed = "1Gbps", BareMetalType = "VM", PortNumber = "80", DC = "DC1", RackRoom = "R1", RackNumber = "R01", Cluster = "HyperFlex" }, "dc");
         await _service.SubmitNOCAsync(created.RequestId,
-            new NOCDetailsDto { IPAddress = "10.0.0.5", SubnetMask = "255.255.255.0", VLANID = "10", Gateway = "10.0.0.1", Port = "80", VIP = "10.0.0.100", FQDN = "app.local" }, "noc");
+            new NOCDetailsDto { IPAddress = "10.0.0.5", SubnetMask = "255.255.255.0", VLANID = "10", Gateway = "10.0.0.1", Port = "80", VIP = "10.0.0.100" }, "noc");
         await _service.SubmitSOCAsync(created.RequestId,
             new SOCDetailsDto { FirewallEntries = new List<FirewallEntryDto> { new() { PolicyName = "Allow-HTTP", VDOM = "root", Action = "Accept" } } }, "soc");
         return created;

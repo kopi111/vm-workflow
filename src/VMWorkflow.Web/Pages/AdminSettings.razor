@@ -34,25 +34,26 @@
                     <tbody>
                         @foreach (var v in vdoms)
                         {
+                            var vdom = v;
                             <tr>
                                 <td>
-                                    @if (editingVdomId == v.VdomId)
+                                    @if (editingVdomId == vdom.VdomId)
                                     {
                                         <MudTextField @bind-Value="editVdomName" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                            @onkeydown="@(async (e) => { if (e.Key == "Enter") await UpdateVdom(v.VdomId); })" />
+                                            @onkeydown="@(async (e) => { if (e.Key == "Enter") await UpdateVdom(vdom.VdomId); })" />
                                     }
-                                    else { @v.Name }
+                                    else { @vdom.Name }
                                 </td>
                                 <td>
-                                    @if (editingVdomId == v.VdomId)
+                                    @if (editingVdomId == vdom.VdomId)
                                     {
-                                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="@(() => UpdateVdom(v.VdomId))" />
-                                        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" Size="Size.Small" OnClick="@(() => editingVdomId = null)" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="@(async () => await UpdateVdom(vdom.VdomId))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" Size="Size.Small" OnClick="@(() => { editingVdomId = null; StateHasChanged(); })" />
                                     }
                                     else
                                     {
-                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => { editingVdomId = v.VdomId; editVdomName = v.Name; })" />
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteVdom(v.VdomId))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => { editingVdomId = vdom.VdomId; editVdomName = vdom.Name; StateHasChanged(); })" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(async () => await DeleteVdom(vdom.VdomId))" />
                                     }
                                 </td>
                             </tr>

@@ -12,7 +12,7 @@ public class ResourceGroupConfiguration : IEntityTypeConfiguration<ResourceGroup
         builder.Property(r => r.Name).IsRequired().HasMaxLength(50);
         builder.Property(r => r.Ram).IsRequired().HasMaxLength(20);
         builder.Property(r => r.Hdd).IsRequired().HasMaxLength(20);
-        builder.Property(r => r.CreatedBy).HasMaxLength(200);
+        builder.Property(r => r.CreatedBy).HasMaxLength(64);
         builder.HasIndex(r => r.Name).IsUnique();
     }
 }

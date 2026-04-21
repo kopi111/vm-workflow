@@ -1,0 +1,157 @@
+2026-03-20 08:56:23.982 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE WHEN COUNT(*) = 0 THEN FALSE ELSE TRUE END
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE' AND table_schema = 'VMWorkflow'
+2026-03-20 08:56:24.027 -05:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+        CREATE TABLE IF NOT EXISTS `Scripts` (
+            `ScriptId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `RequestId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `ScriptType` varchar(50) NOT NULL,
+            `Content` text NOT NULL,
+            `FileName` varchar(250) NOT NULL,
+            `GeneratedBy` varchar(100) NOT NULL,
+            `GeneratedAt` datetime(6) NOT NULL,
+            PRIMARY KEY (`ScriptId`),
+            KEY `IX_Scripts_RequestId` (`RequestId`),
+            KEY `IX_Scripts_GeneratedAt` (`GeneratedAt`),
+            CONSTRAINT `FK_Scripts_Requests_RequestId` FOREIGN KEY (`RequestId`) REFERENCES `Requests` (`RequestId`) ON DELETE CASCADE
+        ) CHARACTER SET utf8mb4;
+2026-03-20 08:56:24.151 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Users` AS `u`)
+2026-03-20 08:56:24.166 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `DropdownOptions` AS `d`)
+2026-03-20 08:56:24.170 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Vdoms` AS `v`)
+2026-03-20 08:56:24.173 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `SecurityProfiles` AS `s`)
+2026-03-20 08:56:24.176 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `ResourceGroups` AS `r`)
+2026-03-20 08:56:24.229 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-03-20 08:56:24.263 -05:00 [INF] Now listening on: http://localhost:5028
+2026-03-20 08:56:24.264 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-20 08:56:24.264 -05:00 [INF] Hosting environment: Development
+2026-03-20 08:56:24.264 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-03-20 08:56:37.911 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/health - null null
+2026-03-20 08:56:37.957 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-03-20 08:56:37.967 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-03-20 08:56:37.967 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-03-20 08:56:37.972 -05:00 [INF] [AUDIT] GET /health by anonymous at "2026-03-20T13:56:37.9727246Z"
+2026-03-20 08:56:37.974 -05:00 [INF] [AUDIT] GET /health responded 200
+2026-03-20 08:56:38.097 -05:00 [INF] Executed DbCommand (18ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:56:38.103 -05:00 [INF] HTTP GET /index.html responded 200 in 169.0438 ms
+2026-03-20 08:56:38.105 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 194.211ms
+2026-03-20 08:57:13.366 -05:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5028/api/requests - null null
+2026-03-20 08:57:13.370 -05:00 [INF] CORS policy execution successful.
+2026-03-20 08:57:13.371 -05:00 [INF] [AUDIT] OPTIONS /api/requests by anonymous at "2026-03-20T13:57:13.3710726Z"
+2026-03-20 08:57:13.371 -05:00 [INF] [AUDIT] OPTIONS /api/requests responded 204
+2026-03-20 08:57:13.419 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:57:13.419 -05:00 [INF] HTTP OPTIONS /api/requests responded 204 in 51.5963 ms
+2026-03-20 08:57:13.420 -05:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5028/api/requests - 204 null null 53.5495ms
+2026-03-20 08:57:13.422 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-20 08:57:13.423 -05:00 [INF] CORS policy execution successful.
+2026-03-20 08:57:13.449 -05:00 [INF] Failed to validate the token.
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException: IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '3/20/2026 3:24:15 AM', Current time (UTC): '3/20/2026 1:57:13 PM'.
+   at Microsoft.IdentityModel.Tokens.Validators.ValidateLifetime(Nullable`1 notBefore, Nullable`1 expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenPayloadAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+2026-03-20 08:57:13.454 -05:00 [INF] Bearer was not authenticated. Failure message: IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '3/20/2026 3:24:15 AM', Current time (UTC): '3/20/2026 1:57:13 PM'.
+2026-03-20 08:57:13.460 -05:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-03-20 08:57:13.464 -05:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-03-20 08:57:13.464 -05:00 [INF] [AUDIT] GET /api/requests by anonymous at "2026-03-20T13:57:13.4647525Z"
+2026-03-20 08:57:13.464 -05:00 [INF] [AUDIT] GET /api/requests responded 401
+2026-03-20 08:57:13.470 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:57:13.470 -05:00 [INF] HTTP GET /api/requests responded 401 in 47.8683 ms
+2026-03-20 08:57:13.471 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 401 0 null 49.5094ms
+2026-03-20 08:57:16.788 -05:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5028/api/auth/login - null null
+2026-03-20 08:57:16.789 -05:00 [INF] CORS policy execution successful.
+2026-03-20 08:57:16.789 -05:00 [INF] [AUDIT] OPTIONS /api/auth/login by anonymous at "2026-03-20T13:57:16.7891747Z"
+2026-03-20 08:57:16.789 -05:00 [INF] [AUDIT] OPTIONS /api/auth/login responded 204
+2026-03-20 08:57:16.794 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:57:16.795 -05:00 [INF] HTTP OPTIONS /api/auth/login responded 204 in 6.2715 ms
+2026-03-20 08:57:16.795 -05:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5028/api/auth/login - 204 null null 6.9307ms
+2026-03-20 08:57:16.797 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json; charset=utf-8 46
+2026-03-20 08:57:16.798 -05:00 [INF] CORS policy execution successful.
+2026-03-20 08:57:16.799 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-03-20 08:57:16.813 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-03-20 08:57:16.875 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-03-20 08:57:17.098 -05:00 [INF] Executing OkObjectResult, writing value of type 'VMWorkflow.Application.DTOs.AuthResponseDto'.
+2026-03-20 08:57:17.107 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 290.9566ms
+2026-03-20 08:57:17.107 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-03-20 08:57:17.107 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-03-20T13:57:17.1074215Z"
+2026-03-20 08:57:17.107 -05:00 [INF] [AUDIT] POST /api/auth/login responded 200
+2026-03-20 08:57:17.112 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:57:17.112 -05:00 [INF] HTTP POST /api/auth/login responded 200 in 314.6709 ms
+2026-03-20 08:57:17.115 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 200 null application/json; charset=utf-8 317.8134ms
+2026-03-20 08:57:17.834 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-03-20 08:57:17.834 -05:00 [INF] CORS policy execution successful.
+2026-03-20 08:57:17.845 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[@__username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__username_0
+LIMIT 1
+2026-03-20 08:57:17.845 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-20 08:57:17.848 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-03-20 08:57:17.939 -05:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-03-20 08:57:17.962 -05:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `r`.`RequestId`, `r`.`AccessGroup`, `r`.`ApplicationName`, `r`.`AuthenticationMethod`, `r`.`CisoApprovedAt`, `r`.`CisoApprovedBy`, `r`.`CisoComments`, `r`.`CisoDecision`, `r`.`CreatedAt`, `r`.`CreatedBy`, `r`.`DBMS`, `r`.`Environment`, `r`.`ExpectedUsers`, `r`.`ExternalSyncStatus`, `r`.`FQDNSuggestion`, `r`.`FortiGatePolicyId`, `r`.`Framework`, `r`.`GitRepoLink`, `r`.`IocComments`, `r`.`NetBoxId`, `r`.`ObjectSlug`, `r`.`OpsApprovedAt`, `r`.`OpsApprovedBy`, `r`.`OpsComments`, `r`.`OpsDecision`, `r`.`ProgrammingLanguage`, `r`.`Purpose`, `r`.`SLA`, `r`.`Status`, `r`.`UpdatedAt`, `s`.`SysAdminDetailsId`, `s`.`DatabaseName`, `s`.`DatabaseNameType`, `s`.`DatabaseUsername`, `s`.`Hostname`, `s`.`RequestId`, `s`.`SensitivityLevel`, `s`.`ServerResources`, `s`.`SubmittedAt`, `s`.`SubmittedBy`, `s`.`WebServer`, `d`.`DataCenterDetailsId`, `n`.`NOCDetailsId`, `s0`.`SOCDetailsId`, `s1`.`ServiceEntryId`, `s1`.`Port`, `s1`.`Protocol`, `s1`.`ServiceName`, `s1`.`SysAdminDetailsId`, `d`.`BareMetalType`, `d`.`Cluster`, `d`.`DC`, `d`.`Environment`, `d`.`PortNumber`, `d`.`RackNumber`, `d`.`RackRoom`, `d`.`RequestId`, `d`.`SubmittedAt`, `d`.`SubmittedBy`, `d`.`UplinkSpeed`, `n`.`FQDN`, `n`.`Gateway`, `n`.`IPAddress`, `n`.`Port`, `n`.`RequestId`, `n`.`SubmittedAt`, `n`.`SubmittedBy`, `n`.`SubnetMask`, `n`.`VIP`, `n`.`VLANID`, `n`.`VirtualFQDN`, `n`.`VirtualIP`, `n`.`VirtualPort`, `n0`.`NetworkPathEntryId`, `n0`.`LinkSpeed`, `n0`.`NOCDetailsId`, `n0`.`Port`, `n0`.`SwitchName`, `s0`.`RequestId`, `s0`.`SubmittedAt`, `s0`.`SubmittedBy`, `t0`.`FirewallEntryId`, `t0`.`Action`, `t0`.`DestinationIP`, `t0`.`DestinationInterface`, `t0`.`PolicyName`, `t0`.`SOCDetailsId`, `t0`.`Schedule`, `t0`.`SourceIP`, `t0`.`SourceInterface`, `t0`.`VDOM`, `t0`.`FirewallServiceEntryId`, `t0`.`FirewallEntryId0`, `t0`.`Port`, `t0`.`Protocol`, `t0`.`ServiceName`, `t0`.`FirewallEntryId1`, `t0`.`SecurityProfileId`, `t0`.`SecurityProfileId0`, `t0`.`CreatedAt`, `t0`.`CreatedBy`, `t0`.`Name`, `s3`.`StatusHistoryId`, `s3`.`ChangedBy`, `s3`.`Comments`, `s3`.`NewStatus`, `s3`.`OldStatus`, `s3`.`RequestId`, `s3`.`Timestamp`
+FROM `Requests` AS `r`
+LEFT JOIN `SysAdminDetails` AS `s` ON `r`.`RequestId` = `s`.`RequestId`
+LEFT JOIN `DataCenterDetails` AS `d` ON `r`.`RequestId` = `d`.`RequestId`
+LEFT JOIN `NOCDetails` AS `n` ON `r`.`RequestId` = `n`.`RequestId`
+LEFT JOIN `SOCDetails` AS `s0` ON `r`.`RequestId` = `s0`.`RequestId`
+LEFT JOIN `ServiceEntry` AS `s1` ON `s`.`SysAdminDetailsId` = `s1`.`SysAdminDetailsId`
+LEFT JOIN `NetworkPathEntries` AS `n0` ON `n`.`NOCDetailsId` = `n0`.`NOCDetailsId`
+LEFT JOIN (
+    SELECT `f`.`FirewallEntryId`, `f`.`Action`, `f`.`DestinationIP`, `f`.`DestinationInterface`, `f`.`PolicyName`, `f`.`SOCDetailsId`, `f`.`Schedule`, `f`.`SourceIP`, `f`.`SourceInterface`, `f`.`VDOM`, `f0`.`FirewallServiceEntryId`, `f0`.`FirewallEntryId` AS `FirewallEntryId0`, `f0`.`Port`, `f0`.`Protocol`, `f0`.`ServiceName`, `t`.`FirewallEntryId` AS `FirewallEntryId1`, `t`.`SecurityProfileId`, `t`.`SecurityProfileId0`, `t`.`CreatedAt`, `t`.`CreatedBy`, `t`.`Name`
+    FROM `FirewallEntries` AS `f`
+    LEFT JOIN `FirewallServiceEntries` AS `f0` ON `f`.`FirewallEntryId` = `f0`.`FirewallEntryId`
+    LEFT JOIN (
+        SELECT `f1`.`FirewallEntryId`, `f1`.`SecurityProfileId`, `s2`.`SecurityProfileId` AS `SecurityProfileId0`, `s2`.`CreatedAt`, `s2`.`CreatedBy`, `s2`.`Name`
+        FROM `FirewallEntrySecurityProfiles` AS `f1`
+        INNER JOIN `SecurityProfiles` AS `s2` ON `f1`.`SecurityProfileId` = `s2`.`SecurityProfileId`
+    ) AS `t` ON `f`.`FirewallEntryId` = `t`.`FirewallEntryId`
+) AS `t0` ON `s0`.`SOCDetailsId` = `t0`.`SOCDetailsId`
+LEFT JOIN `StatusHistories` AS `s3` ON `r`.`RequestId` = `s3`.`RequestId`
+ORDER BY `r`.`CreatedAt` DESC, `r`.`RequestId`, `s`.`SysAdminDetailsId`, `d`.`DataCenterDetailsId`, `n`.`NOCDetailsId`, `s0`.`SOCDetailsId`, `s1`.`ServiceEntryId`, `n0`.`NetworkPathEntryId`, `t0`.`FirewallEntryId`, `t0`.`FirewallServiceEntryId`, `t0`.`FirewallEntryId1`, `t0`.`SecurityProfileId`, `t0`.`SecurityProfileId0`
+2026-03-20 08:57:18.131 -05:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[VMWorkflow.Application.DTOs.RequestResponseDto, VMWorkflow.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-03-20 08:57:18.165 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 317.0573ms
+2026-03-20 08:57:18.165 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-03-20 08:57:18.165 -05:00 [INF] [AUDIT] GET /api/requests by admin at "2026-03-20T13:57:18.1657105Z"
+2026-03-20 08:57:18.165 -05:00 [INF] [AUDIT] GET /api/requests responded 200
+2026-03-20 08:57:18.171 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-03-20 08:57:18.172 -05:00 [INF] HTTP GET /api/requests responded 200 in 337.4262 ms
+2026-03-20 08:57:18.172 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 200 null application/json; charset=utf-8 337.8119ms

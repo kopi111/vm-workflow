@@ -11,7 +11,7 @@ public class AutomationLogConfiguration : IEntityTypeConfiguration<AutomationLog
         builder.HasKey(a => a.AutomationLogId);
 
 
-        builder.Property(a => a.Action).IsRequired().HasMaxLength(200);
+        builder.Property(a => a.Action).IsRequired().HasMaxLength(100);
         builder.Property(a => a.Payload);
         builder.Property(a => a.Response);
     }

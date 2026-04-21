@@ -10,8 +10,8 @@ public class ServiceEntryConfiguration : IEntityTypeConfiguration<ServiceEntry>
     {
         builder.HasKey(s => s.ServiceEntryId);
 
-        builder.Property(s => s.ServiceName).IsRequired().HasMaxLength(100);
-        builder.Property(s => s.Port).IsRequired().HasMaxLength(50);
-        builder.Property(s => s.Protocol).IsRequired().HasMaxLength(50);
+        builder.Property(s => s.ServiceName).IsRequired().HasMaxLength(50);
+        builder.Property(s => s.Port).IsRequired().HasMaxLength(5);
+        builder.Property(s => s.Protocol).IsRequired().HasMaxLength(10);
     }
 }

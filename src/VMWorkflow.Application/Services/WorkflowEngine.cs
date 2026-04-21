@@ -62,17 +62,11 @@ public class WorkflowEngine : IWorkflowEngine
         return nocCompleted && socCompleted;
     }
 
-    /// <summary>
-    /// Check if both approvers (CISO + Ops Manager) have approved
-    /// </summary>
     public bool HasFullApproval(string? cisoDecision, string? opsDecision)
     {
         return cisoDecision == "Approved" && opsDecision == "Approved";
     }
 
-    /// <summary>
-    /// Check if any approver has rejected
-    /// </summary>
     public bool HasRejection(string? cisoDecision, string? opsDecision)
     {
         return new[] { cisoDecision, opsDecision }

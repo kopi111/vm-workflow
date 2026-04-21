@@ -1,0 +1,952 @@
+2026-04-07 09:22:35.386 -05:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE WHEN COUNT(*) = 0 THEN FALSE ELSE TRUE END
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE' AND table_schema = 'VMWorkflow'
+2026-04-07 09:22:35.468 -05:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+        CREATE TABLE IF NOT EXISTS `Scripts` (
+            `ScriptId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `RequestId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `ScriptType` varchar(50) NOT NULL,
+            `Content` text NOT NULL,
+            `FileName` varchar(250) NOT NULL,
+            `GeneratedBy` varchar(100) NOT NULL,
+            `GeneratedAt` datetime(6) NOT NULL,
+            PRIMARY KEY (`ScriptId`),
+            KEY `IX_Scripts_RequestId` (`RequestId`),
+            KEY `IX_Scripts_GeneratedAt` (`GeneratedAt`),
+            CONSTRAINT `FK_Scripts_Requests_RequestId` FOREIGN KEY (`RequestId`) REFERENCES `Requests` (`RequestId`) ON DELETE CASCADE
+        ) CHARACTER SET utf8mb4;
+2026-04-07 09:22:35.693 -05:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Users` AS `u`)
+2026-04-07 09:22:35.710 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `DropdownOptions` AS `d`)
+2026-04-07 09:22:35.717 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Vdoms` AS `v`)
+2026-04-07 09:22:35.724 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `SecurityProfiles` AS `s`)
+2026-04-07 09:22:35.730 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `ResourceGroups` AS `r`)
+2026-04-07 09:22:35.831 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-04-07 09:22:35.891 -05:00 [INF] Now listening on: http://localhost:5028
+2026-04-07 09:22:35.893 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-07 09:22:35.893 -05:00 [INF] Hosting environment: Development
+2026-04-07 09:22:35.893 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-04-07 16:39:09.207 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - null null
+2026-04-07 16:39:09.296 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:39:09.315 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Th2026-04-07 16:39:09.321 -05:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+        CREATE TABLE IF NOT EXISTS `Scripts` (
+            `ScriptId` char(36) NOT NULL COLLATE ascii_2026-04-07 16:39:09.334 -05:00 [INF] Executing ObjectResult, writing value of type 'Microsoft.AspNetCore.Mvc.ProblemDetails'.
+2026-04-07 16:39:09.368 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 49.7673ms
+2026-04-07 16:39:09.370 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:39:09.372 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:39:09.3726267Z"
+2026-04-07 16:39:09.373 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 415 — {"type":"https://tools.ietf.org/html2026-04-07 16:39:09.550 -05:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    2026-04-07 16:39:09.753 -05:00 [INF] Executed DbCommand (37ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:39:09.766 -05:00 [INF] HTTP POST /api/auth/login responded 415 in 516.3157 ms
+2026-04-07 16:39:09.770 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 415 null application/problem+json; charset=utf-8 565.4903ms
+2026-04-07 16:39:44.197 -05:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5028/api/auth/login - null null
+2026-04-07 16:39:44.203 -05:00 [INF] CORS policy execution failed.
+2026-04-07 16:39:44.204 -05:00 [INF] Request origin http://localhost:5029 does not have permission to access the resource.
+2026-04-07 16:39:44.204 -05:00 [INF] [AUDIT] OPTIONS /api/auth/login by anonymous at "2026-04-07T21:39:44.2049437Z"
+2026-04-07 16:39:44.205 -05:00 [INF] [AUDIT] OPTIONS /api/auth/login responded 204
+2026-04-07 16:39:44.306 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:39:44.306 -05:00 [INF] HTTP OPTIONS /api/auth/login responded 204 in 107.1719 ms
+2026-04-07 16:39:44.307 -05:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5028/api/auth/login - 204 null null 109.3493ms
+2026-04-07 16:41:59.832 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 39
+2026-04-07 16:41:59.838 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:41:59.838 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:41:59.860 -05:00 [INF] Executing BadRequestObjectResult, writing value of type 'Microsoft.AspNetCore.Mvc.ValidationProblemDetails'.
+2026-04-07 16:41:59.868 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 29.5846ms
+2026-04-07 16:41:59.868 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:41:59.869 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:41:59.8692527Z"
+2026-04-07 16:41:59.869 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 400 — {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Password":["The field Password must be a string with a minimum length of 6 and a maximum length of 200."]},"traceId":"00-bd47a4bd9f87a99b4ee1ed1ff89b7c8f-395cd469bf63e962-00"}
+2026-04-07 16:41:59.882 -05:00 [INF] Executed DbCommand (9ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:41:59.882 -05:00 [INF] HTTP POST /api/auth/login responded 400 in 48.8730 ms
+2026-04-07 16:41:59.883 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 400 null application/problem+json; charset=utf-8 51.0031ms
+2026-04-07 16:42:28.159 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 43
+2026-04-07 16:42:28.162 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:28.163 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:42:28.261 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:42:28.660 -05:00 [INF] Executing UnauthorizedObjectResult, writing value of type '<>f__AnonymousType1`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-04-07 16:42:28.664 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 500.9726ms
+2026-04-07 16:42:28.664 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:28.665 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:42:28.6658043Z"
+2026-04-07 16:42:28.665 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 401 — {"error":"Invalid username or password."}
+2026-04-07 16:42:28.673 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:42:28.674 -05:00 [INF] HTTP POST /api/auth/login responded 401 in 513.9479 ms
+2026-04-07 16:42:28.679 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 401 null application/json; charset=utf-8 519.2771ms
+2026-04-07 16:42:34.386 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 42
+2026-04-07 16:42:34.387 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:34.387 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:42:34.394 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:42:34.728 -05:00 [INF] Executing UnauthorizedObjectResult, writing value of type '<>f__AnonymousType1`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-04-07 16:42:34.728 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 341.0482ms
+2026-04-07 16:42:34.728 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:34.728 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:42:34.7287672Z"
+2026-04-07 16:42:34.728 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 401 — {"error":"Invalid username or password."}
+2026-04-07 16:42:34.736 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:42:34.736 -05:00 [INF] HTTP POST /api/auth/login responded 401 in 349.9361 ms
+2026-04-07 16:42:34.737 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 401 null application/json; charset=utf-8 350.6178ms
+2026-04-07 16:42:34.746 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 46
+2026-04-07 16:42:34.746 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:34.746 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:42:34.752 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:42:35.027 -05:00 [INF] Executing OkObjectResult, writing value of type 'VMWorkflow.Application.DTOs.AuthResponseDto'.
+2026-04-07 16:42:35.034 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 287.962ms
+2026-04-07 16:42:35.035 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:42:35.035 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:42:35.0353297Z"
+2026-04-07 16:42:35.035 -05:00 [INF] [AUDIT] POST /api/auth/login responded 200
+2026-04-07 16:42:35.041 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:42:35.041 -05:00 [INF] HTTP POST /api/auth/login responded 200 in 294.8778 ms
+2026-04-07 16:42:35.041 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 200 null application/json; charset=utf-8 295.295ms
+2026-04-07 16:48:01.733 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/ - null null
+2026-04-07 16:48:01.754 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:48:01.780 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-04-07 16:48:01.781 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:48:01.781 -05:00 [INF] [AUDIT] GET / by anonymous at "2026-04-07T21:48:01.7819251Z"
+2026-04-07 16:48:01.782 -05:00 [INF] [AUDIT] GET / responded 200
+2026-04-07 16:48:02.034 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:48:02.034 -05:00 [INF] HTTP GET /index.html responded 200 in 299.4885 ms
+2026-04-07 16:48:02.035 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 301.747ms
+2026-04-07 16:50:22.411 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/ - null null
+2026-04-07 16:50:22.413 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:50:22.422 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-04-07 16:50:22.422 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:50:22.422 -05:00 [INF] [AUDIT] GET / by anonymous at "2026-04-07T21:50:22.4229339Z"
+2026-04-07 16:50:22.422 -05:00 [INF] [AUDIT] GET / responded 200
+2026-04-07 16:50:22.430 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.430 -05:00 [INF] HTTP GET /index.html responded 200 in 18.3896 ms
+2026-04-07 16:50:22.431 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 18.9902ms
+2026-04-07 16:50:22.458 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.css - null null
+2026-04-07 16:50:22.458 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/css/app.css - null null
+2026-04-07 16:50:22.460 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 16:50:22.460 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.js - null null
+2026-04-07 16:50:22.461 -05:00 [INF] Sending file. Request path: '/css/app.css'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/css/app.css'
+2026-04-07 16:50:22.461 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/js/effects.js - null null
+2026-04-07 16:50:22.461 -05:00 [INF] [AUDIT] GET /css/app.css by anonymous at "2026-04-07T21:50:22.4617703Z"
+2026-04-07 16:50:22.461 -05:00 [INF] [AUDIT] GET /css/app.css responded 200
+2026-04-07 16:50:22.461 -05:00 [INF] Sending file. Request path: '/_content/MudBlazor/MudBlazor.min.js'. Physical path: '/home/kopi/.nuget/packages/mudblazor/7.16.0/staticwebassets/MudBlazor.min.js'
+2026-04-07 16:50:22.461 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T21:50:22.4618630Z"
+2026-04-07 16:50:22.461 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 16:50:22.462 -05:00 [INF] Sending file. Request path: '/js/effects.js'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/js/effects.js'
+2026-04-07 16:50:22.462 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.js by anonymous at "2026-04-07T21:50:22.4622399Z"
+2026-04-07 16:50:22.462 -05:00 [INF] [AUDIT] GET /js/effects.js by anonymous at "2026-04-07T21:50:22.4622452Z"
+2026-04-07 16:50:22.462 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.js responded 200
+2026-04-07 16:50:22.462 -05:00 [INF] [AUDIT] GET /js/effects.js responded 200
+2026-04-07 16:50:22.462 -05:00 [INF] Sending file. Request path: '/_content/MudBlazor/MudBlazor.min.css'. Physical path: '/home/kopi/.nuget/packages/mudblazor/7.16.0/staticwebassets/MudBlazor.min.css'
+2026-04-07 16:50:22.468 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.css by anonymous at "2026-04-07T21:50:22.4688292Z"
+2026-04-07 16:50:22.469 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.css responded 200
+2026-04-07 16:50:22.469 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.470 -05:00 [INF] HTTP GET /css/app.css responded 200 in 9.8390 ms
+2026-04-07 16:50:22.470 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/css/app.css - 200 21796 text/css 11.4602ms
+2026-04-07 16:50:22.476 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.476 -05:00 [INF] HTTP GET /_content/MudBlazor/MudBlazor.min.css responded 200 in 16.3896 ms
+2026-04-07 16:50:22.476 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.css - 200 580975 text/css 18.4653ms
+2026-04-07 16:50:22.477 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 16:50:22.483 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.484 -05:00 [INF] HTTP GET /js/effects.js responded 200 in 22.5793 ms
+2026-04-07 16:50:22.484 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/js/effects.js - 200 3591 text/javascript 22.8465ms
+2026-04-07 16:50:22.484 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.484 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.484 -05:00 [INF] HTTP GET /_content/MudBlazor/MudBlazor.min.js responded 200 in 23.4826 ms
+2026-04-07 16:50:22.484 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.js - 200 49824 text/javascript 23.8408ms
+2026-04-07 16:50:22.484 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 23.5981 ms
+2026-04-07 16:50:22.485 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 24.1612ms
+2026-04-07 16:50:22.485 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 16:50:22.492 -05:00 [INF] Sending file. Request path: '/_framework/blazor.webassembly.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js.gz'
+2026-04-07 16:50:22.494 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T21:50:22.4948513Z"
+2026-04-07 16:50:22.494 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 200
+2026-04-07 16:50:22.499 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.499 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 200 in 21.9507 ms
+2026-04-07 16:50:22.499 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 200 19025 text/javascript 22.3094ms
+2026-04-07 16:50:22.538 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 16:50:22.540 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.js.gz'
+2026-04-07 16:50:22.541 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T21:50:22.5417008Z"
+2026-04-07 16:50:22.541 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 200
+2026-04-07 16:50:22.546 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.547 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 200 in 8.0033 ms
+2026-04-07 16:50:22.547 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 200 11443 text/javascript 8.4373ms
+2026-04-07 16:50:22.552 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/favicon.png - null null
+2026-04-07 16:50:22.552 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 16:50:22.552 -05:00 [INF] Sending file. Request path: '/favicon.png'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/favicon.png'
+2026-04-07 16:50:22.552 -05:00 [INF] Sending file. Request path: '/_framework/blazor.boot.json.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/blazor.boot.json.gz'
+2026-04-07 16:50:22.553 -05:00 [INF] [AUDIT] GET /favicon.png by anonymous at "2026-04-07T21:50:22.5532375Z"
+2026-04-07 16:50:22.553 -05:00 [INF] [AUDIT] GET /favicon.png responded 200
+2026-04-07 16:50:22.553 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T21:50:22.5535517Z"
+2026-04-07 16:50:22.553 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 200
+2026-04-07 16:50:22.558 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.558 -05:00 [INF] HTTP GET /favicon.png responded 200 in 6.6019 ms
+2026-04-07 16:50:22.559 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.559 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/favicon.png - 200 1148 image/png 6.967ms
+2026-04-07 16:50:22.559 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 200 in 7.2104 ms
+2026-04-07 16:50:22.559 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 200 9097 application/json 7.5798ms
+2026-04-07 16:50:22.566 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 16:50:22.566 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 16:50:22.567 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz'
+2026-04-07 16:50:22.567 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz'
+2026-04-07 16:50:22.569 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T21:50:22.5692216Z"
+2026-04-07 16:50:22.569 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 200
+2026-04-07 16:50:22.570 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T21:50:22.5707186Z"
+2026-04-07 16:50:22.570 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 200
+2026-04-07 16:50:22.625 -05:00 [INF] Executed DbCommand (55ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.625 -05:00 [INF] Executed DbCommand (53ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.626 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 200 in 59.3526 ms
+2026-04-07 16:50:22.626 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 200 in 59.3526 ms
+2026-04-07 16:50:22.626 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 200 36159 text/javascript 59.72ms
+2026-04-07 16:50:22.626 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 200 64974 text/javascript 59.7855ms
+2026-04-07 16:50:22.626 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 16:50:22.627 -05:00 [INF] Sending file. Request path: '/appsettings.json'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/appsettings.json'
+2026-04-07 16:50:22.627 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T21:50:22.6276799Z"
+2026-04-07 16:50:22.627 -05:00 [INF] [AUDIT] GET /appsettings.json responded 200
+2026-04-07 16:50:22.632 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.632 -05:00 [INF] HTTP GET /appsettings.json responded 200 in 5.4208 ms
+2026-04-07 16:50:22.632 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 200 44 application/json 5.6748ms
+2026-04-07 16:50:22.683 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.wasm - null null
+2026-04-07 16:50:22.684 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.pdb - null null
+2026-04-07 16:50:22.685 -05:00 [INF] Sending file. Request path: '/_framework/VMWorkflow.Web.wasm.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/VMWorkflow.Web.wasm.gz'
+2026-04-07 16:50:22.685 -05:00 [INF] Sending file. Request path: '/_framework/VMWorkflow.Web.pdb.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/VMWorkflow.Web.pdb.gz'
+2026-04-07 16:50:22.697 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.wasm by anonymous at "2026-04-07T21:50:22.6976538Z"
+2026-04-07 16:50:22.697 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.pdb by anonymous at "2026-04-07T21:50:22.6976543Z"
+2026-04-07 16:50:22.697 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.wasm responded 200
+2026-04-07 16:50:22.697 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.pdb responded 200
+2026-04-07 16:50:22.703 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.703 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:22.703 -05:00 [INF] HTTP GET /_framework/VMWorkflow.Web.wasm.gz responded 200 in 19.9199 ms
+2026-04-07 16:50:22.703 -05:00 [INF] HTTP GET /_framework/VMWorkflow.Web.pdb.gz responded 200 in 19.6698 ms
+2026-04-07 16:50:22.704 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.wasm.gz - 200 171753 application/wasm 20.2454ms
+2026-04-07 16:50:22.704 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.pdb.gz - 200 178686 application/octet-stream 19.9519ms
+2026-04-07 16:50:23.788 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/login - null null
+2026-04-07 16:50:23.788 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:50:23.789 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-04-07 16:50:23.789 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-04-07 16:50:23.789 -05:00 [INF] [AUDIT] GET /login by anonymous at "2026-04-07T21:50:23.7892384Z"
+2026-04-07 16:50:23.789 -05:00 [INF] [AUDIT] GET /login responded 200
+2026-04-07 16:50:23.793 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.794 -05:00 [INF] HTTP GET /index.html responded 200 in 5.7587 ms
+2026-04-07 16:50:23.794 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 6.0897ms
+2026-04-07 16:50:23.896 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 16:50:23.896 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T21:50:23.8966720Z"
+2026-04-07 16:50:23.896 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 16:50:23.897 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 16:50:23.899 -05:00 [INF] The file /_framework/blazor.webassembly.js.gz was not modified
+2026-04-07 16:50:23.900 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T21:50:23.9002265Z"
+2026-04-07 16:50:23.900 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 304
+2026-04-07 16:50:23.901 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.901 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 5.4785 ms
+2026-04-07 16:50:23.901 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 5.7915ms
+2026-04-07 16:50:23.902 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 16:50:23.903 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.903 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 304 in 5.8003 ms
+2026-04-07 16:50:23.903 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 304 null text/javascript 6.0006ms
+2026-04-07 16:50:23.934 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 16:50:23.935 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T21:50:23.9350541Z"
+2026-04-07 16:50:23.935 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 16:50:23.939 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.939 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 4.5718 ms
+2026-04-07 16:50:23.939 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 4.9088ms
+2026-04-07 16:50:23.939 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 16:50:23.973 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 16:50:23.974 -05:00 [INF] The file /_framework/dotnet.js.gz was not modified
+2026-04-07 16:50:23.974 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T21:50:23.9745401Z"
+2026-04-07 16:50:23.974 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 304
+2026-04-07 16:50:23.981 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.981 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 304 in 7.7407 ms
+2026-04-07 16:50:23.982 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 304 null text/javascript 8.0535ms
+2026-04-07 16:50:23.989 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 16:50:23.989 -05:00 [INF] The file /_framework/blazor.boot.json.gz was not modified
+2026-04-07 16:50:23.989 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T21:50:23.9897490Z"
+2026-04-07 16:50:23.989 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 304
+2026-04-07 16:50:23.993 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:23.993 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 304 in 4.2332 ms
+2026-04-07 16:50:23.993 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 304 null application/json 4.5796ms
+2026-04-07 16:50:24.001 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 16:50:24.001 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 16:50:24.001 -05:00 [INF] The file /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz was not modified
+2026-04-07 16:50:24.001 -05:00 [INF] The file /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz was not modified
+2026-04-07 16:50:24.001 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T21:50:24.0019122Z"
+2026-04-07 16:50:24.001 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T21:50:24.0019450Z"
+2026-04-07 16:50:24.001 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 304
+2026-04-07 16:50:24.001 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 304
+2026-04-07 16:50:24.003 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 16:50:24.003 -05:00 [INF] The file /appsettings.json was not modified
+2026-04-07 16:50:24.003 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T21:50:24.0034557Z"
+2026-04-07 16:50:24.003 -05:00 [INF] [AUDIT] GET /appsettings.json responded 304
+2026-04-07 16:50:24.005 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:24.006 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:24.006 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 304 in 4.6101 ms
+2026-04-07 16:50:24.006 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 304 in 4.8941 ms
+2026-04-07 16:50:24.006 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 304 null text/javascript 4.9883ms
+2026-04-07 16:50:24.006 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 304 null text/javascript 5.2636ms
+2026-04-07 16:50:24.007 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:24.007 -05:00 [INF] HTTP GET /appsettings.json responded 304 in 4.7042 ms
+2026-04-07 16:50:24.008 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 304 null application/json 5.0166ms
+2026-04-07 16:50:24.085 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.wasm - null null
+2026-04-07 16:50:24.085 -05:00 [INF] The file /_framework/VMWorkflow.Web.wasm.gz was not modified
+2026-04-07 16:50:24.086 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.wasm by anonymous at "2026-04-07T21:50:24.0860362Z"
+2026-04-07 16:50:24.086 -05:00 [INF] [AUDIT] GET /_framework/VMWorkflow.Web.wasm responded 304
+2026-04-07 16:50:24.090 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:24.090 -05:00 [INF] HTTP GET /_framework/VMWorkflow.Web.wasm.gz responded 304 in 5.0968 ms
+2026-04-07 16:50:24.090 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/VMWorkflow.Web.wasm.gz - 304 null application/wasm 5.5342ms
+2026-04-07 16:50:34.252 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json; charset=utf-8 40
+2026-04-07 16:50:34.253 -05:00 [INF] CORS policy execution successful.
+2026-04-07 16:50:34.254 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:50:34.254 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:50:34.256 -05:00 [INF] Executing BadRequestObjectResult, writing value of type 'Microsoft.AspNetCore.Mvc.ValidationProblemDetails'.
+2026-04-07 16:50:34.256 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 2.1033ms
+2026-04-07 16:50:34.256 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:50:34.257 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:50:34.2572434Z"
+2026-04-07 16:50:34.257 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 400 — {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Password":["The field Password must be a string with a minimum length of 6 and a maximum length of 200."]},"traceId":"00-1478e1744e0761eb5cf35b6966a29492-dd0952ecf9279992-00"}
+2026-04-07 16:50:34.290 -05:00 [INF] Executed DbCommand (31ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:34.291 -05:00 [INF] HTTP POST /api/auth/login responded 400 in 38.6568 ms
+2026-04-07 16:50:34.291 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 400 null application/problem+json; charset=utf-8 39.1647ms
+2026-04-07 16:50:48.337 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json; charset=utf-8 47
+2026-04-07 16:50:48.338 -05:00 [INF] CORS policy execution successful.
+2026-04-07 16:50:48.339 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:50:48.339 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:50:48.343 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:50:48.344 -05:00 [INF] Executing UnauthorizedObjectResult, writing value of type '<>f__AnonymousType1`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-04-07 16:50:48.344 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 4.7385ms
+2026-04-07 16:50:48.344 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:50:48.344 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:50:48.3445552Z"
+2026-04-07 16:50:48.344 -05:00 [WRN] [AUDIT] POST /api/auth/login by anonymous responded 401 — {"error":"Invalid username or password."}
+2026-04-07 16:50:48.358 -05:00 [INF] Executed DbCommand (13ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.359 -05:00 [INF] HTTP POST /api/auth/login responded 401 in 21.3273 ms
+2026-04-07 16:50:48.359 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 401 null application/json; charset=utf-8 21.9328ms
+2026-04-07 16:50:48.422 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 16:50:48.423 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T21:50:48.4236586Z"
+2026-04-07 16:50:48.423 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 16:50:48.428 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 16:50:48.429 -05:00 [INF] The file /_framework/blazor.webassembly.js.gz was not modified
+2026-04-07 16:50:48.430 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T21:50:48.4300596Z"
+2026-04-07 16:50:48.430 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 304
+2026-04-07 16:50:48.434 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.434 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 11.3638 ms
+2026-04-07 16:50:48.434 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 11.9752ms
+2026-04-07 16:50:48.435 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 16:50:48.440 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.440 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 304 in 11.6348 ms
+2026-04-07 16:50:48.441 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 304 null text/javascript 12.3399ms
+2026-04-07 16:50:48.482 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 16:50:48.483 -05:00 [INF] The file /_framework/dotnet.js.gz was not modified
+2026-04-07 16:50:48.484 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T21:50:48.4842235Z"
+2026-04-07 16:50:48.484 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 304
+2026-04-07 16:50:48.497 -05:00 [INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.498 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 304 in 15.4267 ms
+2026-04-07 16:50:48.499 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 304 null text/javascript 16.7611ms
+2026-04-07 16:50:48.539 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 16:50:48.540 -05:00 [INF] The file /_framework/blazor.boot.json.gz was not modified
+2026-04-07 16:50:48.540 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T21:50:48.5409463Z"
+2026-04-07 16:50:48.541 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 304
+2026-04-07 16:50:48.550 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.550 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 304 in 10.6599 ms
+2026-04-07 16:50:48.550 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 304 null application/json 11.3423ms
+2026-04-07 16:50:48.574 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 16:50:48.575 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 16:50:48.575 -05:00 [INF] The file /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz was not modified
+2026-04-07 16:50:48.575 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T21:50:48.5759487Z"
+2026-04-07 16:50:48.576 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 304
+2026-04-07 16:50:48.576 -05:00 [INF] The file /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz was not modified
+2026-04-07 16:50:48.576 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T21:50:48.5764431Z"
+2026-04-07 16:50:48.576 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 304
+2026-04-07 16:50:48.580 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 16:50:48.581 -05:00 [INF] The file /appsettings.json was not modified
+2026-04-07 16:50:48.581 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T21:50:48.5811673Z"
+2026-04-07 16:50:48.581 -05:00 [INF] [AUDIT] GET /appsettings.json responded 304
+2026-04-07 16:50:48.588 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.589 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 304 in 13.6130 ms
+2026-04-07 16:50:48.589 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 304 null text/javascript 14.3031ms
+2026-04-07 16:50:48.590 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.590 -05:00 [INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:50:48.590 -05:00 [INF] HTTP GET /appsettings.json responded 304 in 9.8466 ms
+2026-04-07 16:50:48.590 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 304 in 15.8175 ms
+2026-04-07 16:50:48.591 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 304 null application/json 10.649ms
+2026-04-07 16:50:48.591 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 304 null text/javascript 16.6879ms
+2026-04-07 16:51:05.075 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 46
+2026-04-07 16:51:05.076 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:51:05.076 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:51:05.079 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:51:05.328 -05:00 [INF] Executing OkObjectResult, writing value of type 'VMWorkflow.Application.DTOs.AuthResponseDto'.
+2026-04-07 16:51:05.328 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 252.292ms
+2026-04-07 16:51:05.329 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:51:05.329 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:51:05.3291397Z"
+2026-04-07 16:51:05.329 -05:00 [INF] [AUDIT] POST /api/auth/login responded 200
+2026-04-07 16:51:05.333 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:51:05.333 -05:00 [INF] HTTP POST /api/auth/login responded 200 in 257.5903 ms
+2026-04-07 16:51:05.334 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 200 null application/json; charset=utf-8 258.4021ms
+2026-04-07 16:51:10.928 -05:00 [INF] Application is shutting down...
+2026-04-07 16:51:38.011 -05:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE WHEN COUNT(*) = 0 THEN FALSE ELSE TRUE END
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE' AND table_schema = 'VMWorkflow'
+2026-04-07 16:51:38.101 -05:00 [INF] Executed DbCommand (19ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+        CREATE TABLE IF NOT EXISTS `Scripts` (
+            `ScriptId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `RequestId` char(36) NOT NULL COLLATE ascii_general_ci,
+            `ScriptType` varchar(50) NOT NULL,
+            `Content` text NOT NULL,
+            `FileName` varchar(250) NOT NULL,
+            `GeneratedBy` varchar(100) NOT NULL,
+            `GeneratedAt` datetime(6) NOT NULL,
+            PRIMARY KEY (`ScriptId`),
+            KEY `IX_Scripts_RequestId` (`RequestId`),
+            KEY `IX_Scripts_GeneratedAt` (`GeneratedAt`),
+            CONSTRAINT `FK_Scripts_Requests_RequestId` FOREIGN KEY (`RequestId`) REFERENCES `Requests` (`RequestId`) ON DELETE CASCADE
+        ) CHARACTER SET utf8mb4;
+2026-04-07 16:51:38.368 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Users` AS `u`)
+2026-04-07 16:51:38.390 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `DropdownOptions` AS `d`)
+2026-04-07 16:51:38.398 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `Vdoms` AS `v`)
+2026-04-07 16:51:38.404 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `SecurityProfiles` AS `s`)
+2026-04-07 16:51:38.408 -05:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM `ResourceGroups` AS `r`)
+2026-04-07 16:51:38.524 -05:00 [INF] User profile is available. Using '/home/kopi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-04-07 16:51:38.594 -05:00 [INF] Now listening on: http://localhost:5028
+2026-04-07 16:51:38.596 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-07 16:51:38.596 -05:00 [INF] Hosting environment: Development
+2026-04-07 16:51:38.596 -05:00 [INF] Content root path: /home/kopi/projects/vm-workflow/src/VMWorkflow.API
+2026-04-07 16:51:41.408 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json 46
+2026-04-07 16:51:41.508 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:51:41.533 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 16:51:41.751 -05:00 [INF] Executed DbCommand (37ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 16:51:42.235 -05:00 [INF] Executing OkObjectResult, writing value of type 'VMWorkflow.Application.DTOs.AuthResponseDto'.
+2026-04-07 16:51:42.255 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 717.517ms
+2026-04-07 16:51:42.257 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 16:51:42.262 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T21:51:42.2624227Z"
+2026-04-07 16:51:42.264 -05:00 [INF] [AUDIT] POST /api/auth/login responded 200
+2026-04-07 16:51:42.539 -05:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 16:51:42.552 -05:00 [INF] HTTP POST /api/auth/login responded 200 in 1091.0284 ms
+2026-04-07 16:51:42.561 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 200 null application/json; charset=utf-8 1155.0706ms
+2026-04-07 17:00:09.445 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/ - null null
+2026-04-07 17:00:09.465 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-04-07 17:00:09.490 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-04-07 17:00:09.490 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-04-07 17:00:09.491 -05:00 [INF] [AUDIT] GET / by anonymous at "2026-04-07T22:00:09.4918514Z"
+2026-04-07 17:00:09.492 -05:00 [INF] [AUDIT] GET / responded 200
+2026-04-07 17:00:09.522 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/css/app.css - null null
+2026-04-07 17:00:09.525 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 17:00:09.526 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.js - null null
+2026-04-07 17:00:09.526 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/js/effects.js - null null
+2026-04-07 17:00:09.526 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 17:00:09.527 -05:00 [INF] Sending file. Request path: '/css/app.css'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/css/app.css'
+2026-04-07 17:00:09.527 -05:00 [INF] Sending file. Request path: '/js/effects.js'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/js/effects.js'
+2026-04-07 17:00:09.527 -05:00 [INF] Sending file. Request path: '/_content/MudBlazor/MudBlazor.min.js'. Physical path: '/home/kopi/.nuget/packages/mudblazor/7.16.0/staticwebassets/MudBlazor.min.js'
+2026-04-07 17:00:09.527 -05:00 [INF] [AUDIT] GET /css/app.css by anonymous at "2026-04-07T22:00:09.5277202Z"
+2026-04-07 17:00:09.528 -05:00 [INF] [AUDIT] GET /js/effects.js by anonymous at "2026-04-07T22:00:09.5280339Z"
+2026-04-07 17:00:09.528 -05:00 [INF] [AUDIT] GET /js/effects.js responded 200
+2026-04-07 17:00:09.528 -05:00 [INF] [AUDIT] GET /css/app.css responded 200
+2026-04-07 17:00:09.528 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.js by anonymous at "2026-04-07T22:00:09.5286810Z"
+2026-04-07 17:00:09.528 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.js responded 200
+2026-04-07 17:00:09.532 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T22:00:09.5320148Z"
+2026-04-07 17:00:09.532 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 17:00:09.542 -05:00 [INF] Sending file. Request path: '/_framework/blazor.webassembly.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js.gz'
+2026-04-07 17:00:09.543 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T22:00:09.5437737Z"
+2026-04-07 17:00:09.543 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 200
+2026-04-07 17:00:09.719 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.719 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.719 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.719 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.720 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.720 -05:00 [INF] HTTP GET /css/app.css responded 200 in 195.8846 ms
+2026-04-07 17:00:09.719 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 200 in 192.6090 ms
+2026-04-07 17:00:09.720 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 194.1888 ms
+2026-04-07 17:00:09.720 -05:00 [INF] HTTP GET /js/effects.js responded 200 in 193.2215 ms
+2026-04-07 17:00:09.720 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 200 19025 text/javascript 193.3819ms
+2026-04-07 17:00:09.720 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/js/effects.js - 200 3591 text/javascript 193.7565ms
+2026-04-07 17:00:09.720 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/css/app.css - 200 21796 text/css 197.8238ms
+2026-04-07 17:00:09.720 -05:00 [INF] HTTP GET /index.html responded 200 in 272.5195 ms
+2026-04-07 17:00:09.720 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 195.2406ms
+2026-04-07 17:00:09.721 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 275.3116ms
+2026-04-07 17:00:09.721 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.721 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.css - null null
+2026-04-07 17:00:09.721 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 17:00:09.721 -05:00 [INF] HTTP GET /_content/MudBlazor/MudBlazor.min.js responded 200 in 194.8064 ms
+2026-04-07 17:00:09.722 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.js - 200 49824 text/javascript 195.4485ms
+2026-04-07 17:00:09.725 -05:00 [INF] Sending file. Request path: '/_content/MudBlazor/MudBlazor.min.css'. Physical path: '/home/kopi/.nuget/packages/mudblazor/7.16.0/staticwebassets/MudBlazor.min.css'
+2026-04-07 17:00:09.729 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.css by anonymous at "2026-04-07T22:00:09.7295503Z"
+2026-04-07 17:00:09.729 -05:00 [INF] [AUDIT] GET /_content/MudBlazor/MudBlazor.min.css responded 200
+2026-04-07 17:00:09.734 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.734 -05:00 [INF] HTTP GET /_content/MudBlazor/MudBlazor.min.css responded 200 in 12.6315 ms
+2026-04-07 17:00:09.734 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_content/MudBlazor/MudBlazor.min.css - 200 580975 text/css 13.1988ms
+2026-04-07 17:00:09.760 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 17:00:09.761 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.js.gz'
+2026-04-07 17:00:09.762 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T22:00:09.7621669Z"
+2026-04-07 17:00:09.762 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 200
+2026-04-07 17:00:09.766 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.767 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 200 in 6.9532 ms
+2026-04-07 17:00:09.767 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 200 11443 text/javascript 7.5298ms
+2026-04-07 17:00:09.768 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/favicon.png - null null
+2026-04-07 17:00:09.770 -05:00 [INF] Sending file. Request path: '/favicon.png'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/favicon.png'
+2026-04-07 17:00:09.770 -05:00 [INF] [AUDIT] GET /favicon.png by anonymous at "2026-04-07T22:00:09.7705268Z"
+2026-04-07 17:00:09.770 -05:00 [INF] [AUDIT] GET /favicon.png responded 200
+2026-04-07 17:00:09.777 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.778 -05:00 [INF] HTTP GET /favicon.png responded 200 in 8.6475 ms
+2026-04-07 17:00:09.778 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/favicon.png - 200 1148 image/png 9.3106ms
+2026-04-07 17:00:09.778 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 17:00:09.779 -05:00 [INF] Sending file. Request path: '/_framework/blazor.boot.json.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/blazor.boot.json.gz'
+2026-04-07 17:00:09.779 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T22:00:09.7794018Z"
+2026-04-07 17:00:09.779 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 200
+2026-04-07 17:00:09.784 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.784 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 200 in 6.0535 ms
+2026-04-07 17:00:09.784 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 200 9097 application/json 6.3019ms
+2026-04-07 17:00:09.786 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 17:00:09.786 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 17:00:09.787 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz'
+2026-04-07 17:00:09.787 -05:00 [INF] Sending file. Request path: '/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/bin/Debug/net8.0/wwwroot/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz'
+2026-04-07 17:00:09.789 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T22:00:09.7889892Z"
+2026-04-07 17:00:09.789 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 200
+2026-04-07 17:00:09.790 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T22:00:09.7900265Z"
+2026-04-07 17:00:09.790 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 200
+2026-04-07 17:00:09.793 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.794 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 200 in 7.3752 ms
+2026-04-07 17:00:09.794 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 200 36159 text/javascript 7.7806ms
+2026-04-07 17:00:09.794 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.794 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 200 in 8.0091 ms
+2026-04-07 17:00:09.794 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 200 64974 text/javascript 8.4159ms
+2026-04-07 17:00:09.809 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 17:00:09.810 -05:00 [INF] Sending file. Request path: '/appsettings.json'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/appsettings.json'
+2026-04-07 17:00:09.810 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T22:00:09.8107806Z"
+2026-04-07 17:00:09.810 -05:00 [INF] [AUDIT] GET /appsettings.json responded 200
+2026-04-07 17:00:09.815 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:09.815 -05:00 [INF] HTTP GET /appsettings.json responded 200 in 5.5004 ms
+2026-04-07 17:00:09.815 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 200 44 application/json 5.9529ms
+2026-04-07 17:00:10.989 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/login - null null
+2026-04-07 17:00:10.991 -05:00 [INF] Executing endpoint 'Fallback {*path:nonfile}'
+2026-04-07 17:00:10.991 -05:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/kopi/projects/vm-workflow/src/VMWorkflow.Web/wwwroot/index.html'
+2026-04-07 17:00:10.991 -05:00 [INF] Executed endpoint 'Fallback {*path:nonfile}'
+2026-04-07 17:00:10.991 -05:00 [INF] [AUDIT] GET /login by anonymous at "2026-04-07T22:00:10.9917422Z"
+2026-04-07 17:00:10.991 -05:00 [INF] [AUDIT] GET /login responded 200
+2026-04-07 17:00:11.001 -05:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.002 -05:00 [INF] HTTP GET /index.html responded 200 in 11.2688 ms
+2026-04-07 17:00:11.002 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/index.html - 200 1457 text/html 12.3488ms
+2026-04-07 17:00:11.105 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 17:00:11.106 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 17:00:11.106 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T22:00:11.1068495Z"
+2026-04-07 17:00:11.107 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 17:00:11.110 -05:00 [INF] The file /_framework/blazor.webassembly.js.gz was not modified
+2026-04-07 17:00:11.111 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T22:00:11.1110682Z"
+2026-04-07 17:00:11.111 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 304
+2026-04-07 17:00:11.118 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.120 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 14.2565 ms
+2026-04-07 17:00:11.120 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.121 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 304 in 14.7993 ms
+2026-04-07 17:00:11.121 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 15.7915ms
+2026-04-07 17:00:11.122 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 304 null text/javascript 15.9548ms
+2026-04-07 17:00:11.122 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 17:00:11.180 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 17:00:11.181 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T22:00:11.1814124Z"
+2026-04-07 17:00:11.181 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 17:00:11.189 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.189 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 8.7331 ms
+2026-04-07 17:00:11.189 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 9.3358ms
+2026-04-07 17:00:11.190 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 17:00:11.230 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 17:00:11.231 -05:00 [INF] The file /_framework/dotnet.js.gz was not modified
+2026-04-07 17:00:11.232 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T22:00:11.2320592Z"
+2026-04-07 17:00:11.232 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 304
+2026-04-07 17:00:11.242 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.243 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 304 in 12.2904 ms
+2026-04-07 17:00:11.243 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 304 null text/javascript 13.1977ms
+2026-04-07 17:00:11.248 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 17:00:11.249 -05:00 [INF] The file /_framework/blazor.boot.json.gz was not modified
+2026-04-07 17:00:11.249 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T22:00:11.2499162Z"
+2026-04-07 17:00:11.250 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 304
+2026-04-07 17:00:11.259 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.259 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 304 in 10.5869 ms
+2026-04-07 17:00:11.259 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 304 null application/json 11.3038ms
+2026-04-07 17:00:11.267 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 17:00:11.268 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 17:00:11.268 -05:00 [INF] The file /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz was not modified
+2026-04-07 17:00:11.268 -05:00 [INF] The file /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz was not modified
+2026-04-07 17:00:11.268 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T22:00:11.2687622Z"
+2026-04-07 17:00:11.268 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T22:00:11.2687971Z"
+2026-04-07 17:00:11.268 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 304
+2026-04-07 17:00:11.268 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 304
+2026-04-07 17:00:11.269 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 17:00:11.269 -05:00 [INF] The file /appsettings.json was not modified
+2026-04-07 17:00:11.269 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T22:00:11.2698869Z"
+2026-04-07 17:00:11.270 -05:00 [INF] [AUDIT] GET /appsettings.json responded 304
+2026-04-07 17:00:11.277 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.277 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 304 in 9.4979 ms
+2026-04-07 17:00:11.278 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.278 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:11.278 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 304 null text/javascript 10.2915ms
+2026-04-07 17:00:11.279 -05:00 [INF] HTTP GET /appsettings.json responded 304 in 9.6151 ms
+2026-04-07 17:00:11.279 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 304 in 11.1752 ms
+2026-04-07 17:00:11.279 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 304 null application/json 10.226ms
+2026-04-07 17:00:11.280 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 304 null text/javascript 12.1209ms
+2026-04-07 17:00:27.798 -05:00 [INF] Request starting HTTP/1.1 POST http://localhost:5028/api/auth/login - application/json; charset=utf-8 46
+2026-04-07 17:00:27.803 -05:00 [INF] CORS policy execution successful.
+2026-04-07 17:00:27.804 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 17:00:27.804 -05:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[VMWorkflow.Application.DTOs.AuthResponseDto]] Login(VMWorkflow.Application.DTOs.LoginDto) on controller VMWorkflow.API.Controllers.AuthController (VMWorkflow.API).
+2026-04-07 17:00:27.816 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__dto_Username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__dto_Username_0
+LIMIT 1
+2026-04-07 17:00:28.161 -05:00 [INF] Executing OkObjectResult, writing value of type 'VMWorkflow.Application.DTOs.AuthResponseDto'.
+2026-04-07 17:00:28.162 -05:00 [INF] Executed action VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API) in 357.0295ms
+2026-04-07 17:00:28.162 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.AuthController.Login (VMWorkflow.API)'
+2026-04-07 17:00:28.162 -05:00 [INF] [AUDIT] POST /api/auth/login by anonymous at "2026-04-07T22:00:28.1628065Z"
+2026-04-07 17:00:28.162 -05:00 [INF] [AUDIT] POST /api/auth/login responded 200
+2026-04-07 17:00:28.170 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.170 -05:00 [INF] HTTP POST /api/auth/login responded 200 in 369.6156 ms
+2026-04-07 17:00:28.171 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5028/api/auth/login - 200 null application/json; charset=utf-8 372.0293ms
+2026-04-07 17:00:28.351 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - null null
+2026-04-07 17:00:28.352 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css by anonymous at "2026-04-07T22:00:28.3527074Z"
+2026-04-07 17:00:28.353 -05:00 [INF] [AUDIT] GET /VMWorkflow.Web.styles.css responded 404
+2026-04-07 17:00:28.366 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js - null null
+2026-04-07 17:00:28.369 -05:00 [INF] The file /_framework/blazor.webassembly.js.gz was not modified
+2026-04-07 17:00:28.370 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js by anonymous at "2026-04-07T22:00:28.3701125Z"
+2026-04-07 17:00:28.370 -05:00 [INF] [AUDIT] GET /_framework/blazor.webassembly.js responded 304
+2026-04-07 17:00:28.371 -05:00 [INF] Executed DbCommand (10ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.374 -05:00 [INF] HTTP GET /VMWorkflow.Web.styles.css responded 404 in 22.8709 ms
+2026-04-07 17:00:28.375 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/VMWorkflow.Web.styles.css - 404 0 null 24.4935ms
+2026-04-07 17:00:28.375 -05:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5028/VMWorkflow.Web.styles.css, Response status code: 404
+2026-04-07 17:00:28.385 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.386 -05:00 [INF] HTTP GET /_framework/blazor.webassembly.js.gz responded 304 in 18.3857 ms
+2026-04-07 17:00:28.386 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.webassembly.js.gz - 304 null text/javascript 20.5119ms
+2026-04-07 17:00:28.428 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js - null null
+2026-04-07 17:00:28.429 -05:00 [INF] The file /_framework/dotnet.js.gz was not modified
+2026-04-07 17:00:28.430 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js by anonymous at "2026-04-07T22:00:28.4301714Z"
+2026-04-07 17:00:28.430 -05:00 [INF] [AUDIT] GET /_framework/dotnet.js responded 304
+2026-04-07 17:00:28.441 -05:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.442 -05:00 [INF] HTTP GET /_framework/dotnet.js.gz responded 304 in 12.6858 ms
+2026-04-07 17:00:28.442 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.js.gz - 304 null text/javascript 13.4003ms
+2026-04-07 17:00:28.460 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json - null null
+2026-04-07 17:00:28.461 -05:00 [INF] The file /_framework/blazor.boot.json.gz was not modified
+2026-04-07 17:00:28.461 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json by anonymous at "2026-04-07T22:00:28.4613284Z"
+2026-04-07 17:00:28.461 -05:00 [INF] [AUDIT] GET /_framework/blazor.boot.json responded 304
+2026-04-07 17:00:28.468 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.469 -05:00 [INF] HTTP GET /_framework/blazor.boot.json.gz responded 304 in 8.9754 ms
+2026-04-07 17:00:28.470 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/blazor.boot.json.gz - 304 null application/json 9.6967ms
+2026-04-07 17:00:28.485 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js - null null
+2026-04-07 17:00:28.485 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js - null null
+2026-04-07 17:00:28.486 -05:00 [INF] The file /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz was not modified
+2026-04-07 17:00:28.486 -05:00 [INF] The file /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz was not modified
+2026-04-07 17:00:28.486 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js by anonymous at "2026-04-07T22:00:28.4862462Z"
+2026-04-07 17:00:28.486 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js by anonymous at "2026-04-07T22:00:28.4862553Z"
+2026-04-07 17:00:28.486 -05:00 [INF] [AUDIT] GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js responded 304
+2026-04-07 17:00:28.486 -05:00 [INF] [AUDIT] GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js responded 304
+2026-04-07 17:00:28.490 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/appsettings.json - null null
+2026-04-07 17:00:28.492 -05:00 [INF] The file /appsettings.json was not modified
+2026-04-07 17:00:28.493 -05:00 [INF] [AUDIT] GET /appsettings.json by anonymous at "2026-04-07T22:00:28.4934178Z"
+2026-04-07 17:00:28.493 -05:00 [INF] [AUDIT] GET /appsettings.json responded 304
+2026-04-07 17:00:28.493 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.494 -05:00 [INF] HTTP GET /_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz responded 304 in 8.5880 ms
+2026-04-07 17:00:28.494 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.native.8.0.25.opypa5cpw1.js.gz - 304 null text/javascript 9.3508ms
+2026-04-07 17:00:28.495 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.495 -05:00 [INF] HTTP GET /_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz responded 304 in 9.9188 ms
+2026-04-07 17:00:28.495 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/_framework/dotnet.runtime.8.0.25.zcibhnztxc.js.gz - 304 null text/javascript 10.4514ms
+2026-04-07 17:00:28.501 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:28.501 -05:00 [INF] HTTP GET /appsettings.json responded 304 in 9.4711 ms
+2026-04-07 17:00:28.502 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/appsettings.json - 304 null application/json 11.7893ms
+2026-04-07 17:00:29.722 -05:00 [INF] Request starting HTTP/1.1 GET http://localhost:5028/api/requests - null null
+2026-04-07 17:00:29.777 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__username_0='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT `u`.`UserId`, `u`.`CreatedAt`, `u`.`DisplayName`, `u`.`Email`, `u`.`IsBlocked`, `u`.`PasswordHash`, `u`.`Role`, `u`.`UpdatedAt`, `u`.`Username`
+FROM `Users` AS `u`
+WHERE `u`.`Username` = @__username_0
+LIMIT 1
+2026-04-07 17:00:29.777 -05:00 [INF] Executing endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-04-07 17:00:29.783 -05:00 [INF] Route matched with {action = "GetAll", controller = "Requests"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[VMWorkflow.Application.DTOs.RequestResponseDto]]] GetAll() on controller VMWorkflow.API.Controllers.RequestsController (VMWorkflow.API).
+2026-04-07 17:00:30.006 -05:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-04-07 17:00:30.069 -05:00 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `r`.`RequestId`, `r`.`AccessGroup`, `r`.`ApplicationName`, `r`.`AuthenticationMethod`, `r`.`CisoApprovedAt`, `r`.`CisoApprovedBy`, `r`.`CisoComments`, `r`.`CisoDecision`, `r`.`CreatedAt`, `r`.`CreatedBy`, `r`.`DBMS`, `r`.`Environment`, `r`.`ExpectedUsers`, `r`.`ExternalSyncStatus`, `r`.`FQDNSuggestion`, `r`.`FortiGatePolicyId`, `r`.`Framework`, `r`.`GitRepoLink`, `r`.`IocComments`, `r`.`NetBoxId`, `r`.`ObjectSlug`, `r`.`OpsApprovedAt`, `r`.`OpsApprovedBy`, `r`.`OpsComments`, `r`.`OpsDecision`, `r`.`ProgrammingLanguage`, `r`.`Purpose`, `r`.`SLA`, `r`.`Status`, `r`.`UpdatedAt`, `s`.`SysAdminDetailsId`, `s`.`DatabaseName`, `s`.`DatabaseNameType`, `s`.`DatabaseUsername`, `s`.`Hostname`, `s`.`RequestId`, `s`.`SensitivityLevel`, `s`.`ServerResources`, `s`.`SubmittedAt`, `s`.`SubmittedBy`, `s`.`WebServer`, `d`.`DataCenterDetailsId`, `n`.`NOCDetailsId`, `s0`.`SOCDetailsId`, `s1`.`ServiceEntryId`, `s1`.`Port`, `s1`.`Protocol`, `s1`.`ServiceName`, `s1`.`SysAdminDetailsId`, `d`.`BareMetalType`, `d`.`Cluster`, `d`.`DC`, `d`.`Environment`, `d`.`PortNumber`, `d`.`RackNumber`, `d`.`RackRoom`, `d`.`RequestId`, `d`.`SubmittedAt`, `d`.`SubmittedBy`, `d`.`UplinkSpeed`, `n`.`FQDN`, `n`.`Gateway`, `n`.`IPAddress`, `n`.`Port`, `n`.`RequestId`, `n`.`SubmittedAt`, `n`.`SubmittedBy`, `n`.`SubnetMask`, `n`.`VIP`, `n`.`VLANID`, `n`.`VirtualFQDN`, `n`.`VirtualIP`, `n`.`VirtualPort`, `n0`.`NetworkPathEntryId`, `n0`.`LinkSpeed`, `n0`.`NOCDetailsId`, `n0`.`Port`, `n0`.`SwitchName`, `s0`.`RequestId`, `s0`.`SubmittedAt`, `s0`.`SubmittedBy`, `t0`.`FirewallEntryId`, `t0`.`Action`, `t0`.`DestinationIP`, `t0`.`DestinationInterface`, `t0`.`PolicyName`, `t0`.`SOCDetailsId`, `t0`.`Schedule`, `t0`.`SourceIP`, `t0`.`SourceInterface`, `t0`.`VDOM`, `t0`.`FirewallServiceEntryId`, `t0`.`FirewallEntryId0`, `t0`.`Port`, `t0`.`Protocol`, `t0`.`ServiceName`, `t0`.`FirewallEntryId1`, `t0`.`SecurityProfileId`, `t0`.`SecurityProfileId0`, `t0`.`CreatedAt`, `t0`.`CreatedBy`, `t0`.`Name`, `s3`.`StatusHistoryId`, `s3`.`ChangedBy`, `s3`.`Comments`, `s3`.`NewStatus`, `s3`.`OldStatus`, `s3`.`RequestId`, `s3`.`Timestamp`
+FROM `Requests` AS `r`
+LEFT JOIN `SysAdminDetails` AS `s` ON `r`.`RequestId` = `s`.`RequestId`
+LEFT JOIN `DataCenterDetails` AS `d` ON `r`.`RequestId` = `d`.`RequestId`
+LEFT JOIN `NOCDetails` AS `n` ON `r`.`RequestId` = `n`.`RequestId`
+LEFT JOIN `SOCDetails` AS `s0` ON `r`.`RequestId` = `s0`.`RequestId`
+LEFT JOIN `ServiceEntry` AS `s1` ON `s`.`SysAdminDetailsId` = `s1`.`SysAdminDetailsId`
+LEFT JOIN `NetworkPathEntries` AS `n0` ON `n`.`NOCDetailsId` = `n0`.`NOCDetailsId`
+LEFT JOIN (
+    SELECT `f`.`FirewallEntryId`, `f`.`Action`, `f`.`DestinationIP`, `f`.`DestinationInterface`, `f`.`PolicyName`, `f`.`SOCDetailsId`, `f`.`Schedule`, `f`.`SourceIP`, `f`.`SourceInterface`, `f`.`VDOM`, `f0`.`FirewallServiceEntryId`, `f0`.`FirewallEntryId` AS `FirewallEntryId0`, `f0`.`Port`, `f0`.`Protocol`, `f0`.`ServiceName`, `t`.`FirewallEntryId` AS `FirewallEntryId1`, `t`.`SecurityProfileId`, `t`.`SecurityProfileId0`, `t`.`CreatedAt`, `t`.`CreatedBy`, `t`.`Name`
+    FROM `FirewallEntries` AS `f`
+    LEFT JOIN `FirewallServiceEntries` AS `f0` ON `f`.`FirewallEntryId` = `f0`.`FirewallEntryId`
+    LEFT JOIN (
+        SELECT `f1`.`FirewallEntryId`, `f1`.`SecurityProfileId`, `s2`.`SecurityProfileId` AS `SecurityProfileId0`, `s2`.`CreatedAt`, `s2`.`CreatedBy`, `s2`.`Name`
+        FROM `FirewallEntrySecurityProfiles` AS `f1`
+        INNER JOIN `SecurityProfiles` AS `s2` ON `f1`.`SecurityProfileId` = `s2`.`SecurityProfileId`
+    ) AS `t` ON `f`.`FirewallEntryId` = `t`.`FirewallEntryId`
+) AS `t0` ON `s0`.`SOCDetailsId` = `t0`.`SOCDetailsId`
+LEFT JOIN `StatusHistories` AS `s3` ON `r`.`RequestId` = `s3`.`RequestId`
+ORDER BY `r`.`CreatedAt` DESC, `r`.`RequestId`, `s`.`SysAdminDetailsId`, `d`.`DataCenterDetailsId`, `n`.`NOCDetailsId`, `s0`.`SOCDetailsId`, `s1`.`ServiceEntryId`, `n0`.`NetworkPathEntryId`, `t0`.`FirewallEntryId`, `t0`.`FirewallServiceEntryId`, `t0`.`FirewallEntryId1`, `t0`.`SecurityProfileId`, `t0`.`SecurityProfileId0`
+2026-04-07 17:00:30.494 -05:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[VMWorkflow.Application.DTOs.RequestResponseDto, VMWorkflow.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-04-07 17:00:30.550 -05:00 [INF] Executed action VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API) in 767.3385ms
+2026-04-07 17:00:30.551 -05:00 [INF] Executed endpoint 'VMWorkflow.API.Controllers.RequestsController.GetAll (VMWorkflow.API)'
+2026-04-07 17:00:30.551 -05:00 [INF] [AUDIT] GET /api/requests by admin at "2026-04-07T22:00:30.5513620Z"
+2026-04-07 17:00:30.551 -05:00 [INF] [AUDIT] GET /api/requests responded 200
+2026-04-07 17:00:30.557 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 10), @p2='?' (Size = 500), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET AUTOCOMMIT = 1;
+INSERT INTO `AuditLogs` (`AuditLogId`, `HttpMethod`, `Path`, `StatusCode`, `Timestamp`, `User`)
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-04-07 17:00:30.558 -05:00 [INF] HTTP GET /api/requests responded 200 in 835.1899 ms
+2026-04-07 17:00:30.558 -05:00 [INF] Request finished HTTP/1.1 GET http://localhost:5028/api/requests - 200 null application/json; charset=utf-8 835.6086ms

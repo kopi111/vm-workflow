@@ -11,7 +11,7 @@ public class ApplicationDependencyConfiguration : IEntityTypeConfiguration<Appli
         builder.HasKey(d => d.ApplicationDependencyId);
 
 
-        builder.Property(d => d.DependencyName).IsRequired().HasMaxLength(200);
-        builder.Property(d => d.Protocol).IsRequired().HasMaxLength(20);
+        builder.Property(d => d.DependencyName).IsRequired().HasMaxLength(100);
+        builder.Property(d => d.Protocol).IsRequired().HasMaxLength(10);
     }
 }

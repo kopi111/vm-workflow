@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VMWorkflow.Application.DTOs;
+using VMWorkflow.Application.Interfaces;
 using VMWorkflow.Domain.Entities;
 using VMWorkflow.Infrastructure.Data;
 
@@ -18,15 +19,69 @@ public class AuthController : ControllerBase
 {
     private readonly WorkflowDbContext _db;
     private readonly IConfiguration _config;
+    private readonly ILdapAuthService _ldapAuth;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(WorkflowDbContext db, IConfiguration config)
+    public AuthController(WorkflowDbContext db, IConfiguration config, ILdapAuthService ldapAuth, ILogger<AuthController> logger)
     {
         _db = db;
         _config = config;
+        _ldapAuth = ldapAuth;
+        _logger = logger;
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto dto)
+    {
+        var adEnabled = _config.GetValue<bool>("ActiveDirectory:Enabled");
+
+        if (adEnabled)
+        {
+            return await LoginWithAd(dto);
+        }
+
+        return await LoginWithLocal(dto);
+    }
+
+    private async Task<ActionResult<AuthResponseDto>> LoginWithAd(LoginDto dto)
+    {
+        var ldapUser = _ldapAuth.Authenticate(dto.Username, dto.Password);
+        if (ldapUser == null)
+            return Unauthorized(new { error = "Invalid username or password." });
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
+
+        if (user == null)
+        {
+            var role = ResolveRole(ldapUser.Groups);
+            user = new User
+            {
+                UserId = Guid.NewGuid(),
+                Username = ldapUser.Username,
+                DisplayName = ldapUser.DisplayName,
+                Email = ldapUser.Email,
+                Role = role,
+                PasswordHash = "AD_AUTH",
+                IsBlocked = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+            _logger.LogInformation("Auto-provisioned AD user {Username} with role {Role}", user.Username, role);
+        }
+        else
+        {
+            user.DisplayName = ldapUser.DisplayName;
+            user.Email = ldapUser.Email;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+        }
+
+        return BlockedAccountResponse(user) ?? Ok(GenerateToken(user));
+    }
+
+    private async Task<ActionResult<AuthResponseDto>> LoginWithLocal(LoginDto dto)
     {
         var user = await _db.Users.AsNoTracking()
             .FirstOrDefaultAsync(u => u.Username == dto.Username);
@@ -34,36 +89,29 @@ public class AuthController : ControllerBase
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             return Unauthorized(new { error = "Invalid username or password." });
 
-        if (user.IsBlocked)
-            return StatusCode(403, new { error = "Your account has been blocked. Contact an administrator." });
-
-        return Ok(GenerateToken(user));
+        return BlockedAccountResponse(user) ?? Ok(GenerateToken(user));
     }
 
-    [HttpPost("register")]
-    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto dto)
+    private ActionResult<AuthResponseDto>? BlockedAccountResponse(User user)
     {
-        var exists = await _db.Users.AnyAsync(u => u.Username == dto.Username);
-        if (exists)
-            return Conflict(new { error = $"Username '{dto.Username}' already exists." });
+        if (!user.IsBlocked)
+            return null;
+        return StatusCode(403, new { error = "Your account has been blocked. Contact an administrator." });
+    }
 
-        var user = new User
+    private string ResolveRole(List<string> adGroups)
+    {
+        var roleMapping = _config.GetSection("ActiveDirectory:RoleMapping")
+            .GetChildren()
+            .ToDictionary(x => x.Key, x => x.Value ?? "Requester");
+
+        foreach (var (adGroup, appRole) in roleMapping)
         {
-            UserId = Guid.NewGuid(),
-            Username = dto.Username,
-            DisplayName = dto.DisplayName,
-            Email = dto.Email,
-            Role = dto.Role,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            IsBlocked = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            if (adGroups.Any(g => g.Equals(adGroup, StringComparison.OrdinalIgnoreCase)))
+                return appRole;
+        }
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        return Ok(GenerateToken(user));
+        return _config["ActiveDirectory:DefaultRole"] ?? "Requester";
     }
 
     private AuthResponseDto GenerateToken(User user)

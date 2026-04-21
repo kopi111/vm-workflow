@@ -7,10 +7,9 @@ using VMWorkflow.Infrastructure.Data;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/admin")]
 [Authorize(Roles = "SysAdmin,IOCManager,PlatformAdmin")]
-public class AdminController : ControllerBase
+public class AdminController : ApiControllerBase
 {
     private readonly WorkflowDbContext _db;
 
@@ -19,9 +18,7 @@ public class AdminController : ControllerBase
         _db = db;
     }
 
-    // ===== Resource Groups =====
-
-    [HttpGet("resource-groups")]
+[HttpGet("resource-groups")]
     [AllowAnonymous]
     public async Task<ActionResult<List<ResourceGroupDto>>> GetResourceGroups()
     {
@@ -46,7 +43,7 @@ public class AdminController : ControllerBase
             VCpu = dto.VCpu,
             Ram = dto.Ram,
             Hdd = dto.Hdd,
-            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedBy = RequireAuthenticatedUsername(),
             CreatedAt = DateTime.UtcNow
         };
         _db.ResourceGroups.Add(entity);
@@ -78,8 +75,6 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    // ===== Security Profiles =====
-
     [HttpGet("security-profiles")]
     [AllowAnonymous]
     public async Task<ActionResult<List<SecurityProfileDto>>> GetSecurityProfiles()
@@ -99,7 +94,7 @@ public class AdminController : ControllerBase
         {
             SecurityProfileId = Guid.NewGuid(),
             Name = dto.Name,
-            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedBy = RequireAuthenticatedUsername(),
             CreatedAt = DateTime.UtcNow
         };
         _db.SecurityProfiles.Add(entity);
@@ -128,8 +123,6 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    // ===== VDOMs =====
-
     [HttpGet("vdoms")]
     [AllowAnonymous]
     public async Task<ActionResult<List<VdomDto>>> GetVdoms()
@@ -149,7 +142,7 @@ public class AdminController : ControllerBase
         {
             VdomId = Guid.NewGuid(),
             Name = dto.Name,
-            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedBy = RequireAuthenticatedUsername(),
             CreatedAt = DateTime.UtcNow
         };
         _db.Vdoms.Add(entity);
@@ -178,7 +171,92 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    // ===== Dropdown Options =====
+    [HttpGet("schedules")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<ScheduleDto>>> GetSchedules()
+    {
+        var schedules = await _db.Schedules
+            .OrderBy(s => s.Type == VMWorkflow.Domain.Enums.ScheduleType.Always ? 0 : 1)
+            .ThenBy(s => s.Name)
+            .ToListAsync();
+
+        return Ok(schedules.Select(MapSchedule));
+    }
+
+    [HttpPost("schedules")]
+    public async Task<ActionResult<ScheduleDto>> CreateSchedule([FromBody] ScheduleDto dto)
+    {
+        if (string.Equals(dto.Name, "always", StringComparison.OrdinalIgnoreCase))
+            return Conflict("The reserved name 'always' cannot be used.");
+
+        if (await _db.Schedules.AnyAsync(s => s.Name == dto.Name))
+            return Conflict($"A schedule named '{dto.Name}' already exists.");
+
+        var entity = new Schedule
+        {
+            ScheduleId = Guid.NewGuid(),
+            Name = dto.Name,
+            Type = dto.Type,
+            Color = dto.Color,
+            StartAt = dto.StartAt,
+            EndAt = dto.EndAt,
+            RecurrenceDays = dto.RecurrenceDays,
+            PreExpirationEventLog = dto.PreExpirationEventLog,
+            NumberOfDaysBefore = dto.NumberOfDaysBefore,
+            CreatedBy = RequireAuthenticatedUsername(),
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.Schedules.Add(entity);
+        await _db.SaveChangesAsync();
+        dto.ScheduleId = entity.ScheduleId;
+        return CreatedAtAction(nameof(GetSchedules), dto);
+    }
+
+    [HttpPut("schedules/{id:guid}")]
+    public async Task<ActionResult> UpdateSchedule(Guid id, [FromBody] ScheduleDto dto)
+    {
+        var entity = await _db.Schedules.FindAsync(id);
+        if (entity == null) return NotFound();
+        if (entity.Type == VMWorkflow.Domain.Enums.ScheduleType.Always)
+            return BadRequest("The default 'always' schedule cannot be modified.");
+
+        entity.Name = dto.Name;
+        entity.Type = dto.Type;
+        entity.Color = dto.Color;
+        entity.StartAt = dto.StartAt;
+        entity.EndAt = dto.EndAt;
+        entity.RecurrenceDays = dto.RecurrenceDays;
+        entity.PreExpirationEventLog = dto.PreExpirationEventLog;
+        entity.NumberOfDaysBefore = dto.NumberOfDaysBefore;
+        await _db.SaveChangesAsync();
+        return Ok(dto);
+    }
+
+    [HttpDelete("schedules/{id:guid}")]
+    public async Task<ActionResult> DeleteSchedule(Guid id)
+    {
+        var entity = await _db.Schedules.FindAsync(id);
+        if (entity == null) return NotFound();
+        if (entity.Type == VMWorkflow.Domain.Enums.ScheduleType.Always)
+            return BadRequest("The default 'always' schedule cannot be deleted.");
+
+        _db.Schedules.Remove(entity);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    private static ScheduleDto MapSchedule(Schedule s) => new()
+    {
+        ScheduleId = s.ScheduleId,
+        Name = s.Name,
+        Type = s.Type,
+        Color = s.Color,
+        StartAt = s.StartAt,
+        EndAt = s.EndAt,
+        RecurrenceDays = s.RecurrenceDays,
+        PreExpirationEventLog = s.PreExpirationEventLog,
+        NumberOfDaysBefore = s.NumberOfDaysBefore
+    };
 
     [HttpGet("dropdown-options/{category}")]
     [AllowAnonymous]
@@ -206,7 +284,7 @@ public class AdminController : ControllerBase
             Category = dto.Category,
             Value = dto.Value,
             SortOrder = dto.SortOrder,
-            CreatedBy = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available."),
+            CreatedBy = RequireAuthenticatedUsername(),
             CreatedAt = DateTime.UtcNow
         };
         _db.DropdownOptions.Add(entity);

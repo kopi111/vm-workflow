@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/send-back")]
 [Authorize]
-public class SendBackController : ControllerBase
+public class SendBackController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class SendBackController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> SendBack(Guid id, [FromBody] SendBackDto dto)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
         var result = await _requestService.SendBackAsync(id, dto, user);
         return Ok(result);
     }

@@ -1,0 +1,117 @@
+@page "/sent-back-to-me"
+@inject IApiClient Api
+@inject NavigationManager Navigation
+
+@attribute [Authorize]
+
+<PageTitle>Sent Back to Me</PageTitle>
+
+<div class="page-content">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Sent Back to Me</MudText>
+            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Requests a reviewer has sent back to you for changes.</MudText>
+        </MudStack>
+        <MudChip T="string" Size="Size.Medium" Color="Color.Warning" Variant="Variant.Filled" Style="border-radius: 20px; font-weight: 600;">
+            @requests.Count request@(requests.Count != 1 ? "s" : "")
+        </MudChip>
+    </MudStack>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="border-radius: 8px;" />
+    }
+    else if (!requests.Any())
+    {
+        <MudPaper Elevation="0" Class="premium-card pa-8 text-center" Style="border: 1px solid var(--mud-palette-lines-default);">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Style="opacity: 0.2;" />
+            <MudText Typo="Typo.h6" Class="mt-3" Style="color: var(--mud-palette-text-secondary);">Nothing sent back to you</MudText>
+            <MudText Typo="Typo.body2" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+                No requests have been sent back to you for revision.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid Class="stagger-in">
+            @foreach (var req in requests)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Elevation="0" Class="premium-card pa-4" Style="border: 1px solid var(--mud-palette-lines-default); cursor: pointer;"
+                              @onclick="@(() => Navigation.NavigateTo($"/request/{req.RequestId}"))">
+                        <MudStack Spacing="2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 8px;">
+                                    @req.ObjectSlug
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled" Style="border-radius: 8px;">
+                                    Sent Back
+                                </MudChip>
+                            </MudStack>
+
+                            <MudText Typo="Typo.h6" Style="font-weight: 600;">@req.ApplicationName</MudText>
+
+                            <MudStack Row="true" Spacing="2">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Style="border-radius: 6px;">
+                                    @req.Environment
+                                </MudChip>
+                            </MudStack>
+
+                            @{
+                                var sendBackComment = GetLastSendBackComment(req);
+                            }
+                            @if (!string.IsNullOrEmpty(sendBackComment))
+                            {
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true" NoIcon="true"
+                                          Style="font-size: 0.75rem; padding: 4px 8px;">
+                                    @sendBackComment
+                                </MudAlert>
+                            }
+
+                            <MudDivider Class="my-1" />
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">
+                                    Updated @req.UpdatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                </MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                                               Href="@($"/request/{req.RequestId}")" />
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    private List<RequestResponse> requests = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var drafts = await Api.GetMyDraftsAsync();
+            requests = drafts.Where(HasEverBeenSentBack).ToList();
+        }
+        catch
+        {
+            requests = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static bool HasEverBeenSentBack(RequestResponse r) =>
+        r.StatusHistories?.Any(h => h.Comments != null && h.Comments.StartsWith("Sent back:")) == true;
+
+    private static string? GetLastSendBackComment(RequestResponse req) =>
+        req.StatusHistories?
+            .Where(h => h.Comments != null && h.Comments.StartsWith("Sent back:"))
+            .OrderByDescending(h => h.Timestamp)
+            .FirstOrDefault()?.Comments;
+}

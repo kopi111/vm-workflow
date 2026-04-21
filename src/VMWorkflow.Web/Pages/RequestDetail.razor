@@ -146,8 +146,8 @@ else
                     </MudSimpleTable>
                 </MudPaper>
 
-                @* Draft → Edit / Submit *@
-                @if (request.Status == "Draft")
+                @* Draft → Edit / Submit (only the creator can edit/submit their own draft) *@
+                @if (request.Status == "Draft" && string.Equals(request.CreatedBy, _username, StringComparison.OrdinalIgnoreCase))
                 {
                     @if (isEditingDraft)
                     {
@@ -242,7 +242,7 @@ else
                 }
 
                 @* SysAdmin Form *@
-                @if (CanSeeSection(1) && request.Status == "PendingSysAdmin")
+                @if (CanEditAsSysAdmin && request.Status == "PendingSysAdmin")
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -416,7 +416,7 @@ else
                 }
 
                 @* DataCenter Form *@
-                @if (CanSeeSection(2) && request.Status == "DataCenterReview")
+                @if (CanEditAsDataCenter && request.Status == "DataCenterReview")
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         @if (WasSentBack && _userRole is "DataCenter" or "PlatformAdmin")
@@ -536,7 +536,7 @@ else
                 }
 
                 @* NOC Form (NOC + IOC+ only) *@
-                @if (CanSeeNOC && !WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && (!nocSaved || isEditingNOC))
+                @if (CanEditAsNOC && request.Status is "PendingNOC" or "PendingSOC" && (!nocSaved || isEditingNOC || WasSentBack))
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -548,25 +548,27 @@ else
                         <MudForm @ref="nocForm">
                         <MudGrid>
                             <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.IPAddress" Label="Real IP Address" Variant="Variant.Outlined" Required="true" RequiredError="This field is required." Validation="@(new Func<string, string?>(IPAddressValidator))" Immediate="true" />
+                                <MudTextField Value="@nocModel.IPAddress" ValueChanged="@((string v) => OnIPOrSubnetChanged(v, nocModel.SubnetMask))" T="string"
+                                              Label="Real IP Address" Variant="Variant.Outlined" Required="true" RequiredError="This field is required."
+                                              Validation="@(new Func<string, string?>(IPAddressValidator))" Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.SubnetMask" Label="Real Subnet Mask" Variant="Variant.Outlined" Required="true" RequiredError="This field is required." Validation="@(new Func<string, string?>(SubnetMaskValidator))" Immediate="true" />
+                                <MudTextField Value="@nocModel.SubnetMask" ValueChanged="@((string v) => OnIPOrSubnetChanged(nocModel.IPAddress, v))" T="string"
+                                              Label="Real Subnet Mask" Variant="Variant.Outlined" Required="true" RequiredError="This field is required."
+                                              Validation="@(new Func<string, string?>(SubnetMaskValidator))" Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="nocModel.VLANID" Label="Real VLAN ID" Variant="Variant.Outlined" Required="true" RequiredError="VLAN ID is required." Validation="@(new Func<string, string?>(VLANValidator))" Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.Gateway" Label="Real Gateway" Variant="Variant.Outlined" Validation="@(new Func<string, string?>(OptionalIPValidator))" Immediate="true" />
+                                <MudTextField Value="@nocModel.Gateway" T="string" Label="Real Gateway (auto-calculated)" Variant="Variant.Outlined"
+                                              ReadOnly="true" HelperText="Computed as the last usable address in the subnet range." />
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="nocModel.Port" Label="Uplink Port" Variant="Variant.Outlined" Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="nocModel.VIP" Label="VIP (Virtual IP)" Variant="Variant.Outlined" Validation="@(new Func<string, string?>(OptionalIPValidator))" Immediate="true" />
-                            </MudItem>
-                            <MudItem xs="12" sm="6">
-                                <MudTextField @bind-Value="nocModel.FQDN" Label="FQDN" Variant="Variant.Outlined" Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
                                 <MudTextField @bind-Value="nocModel.VirtualPort" Label="Virtual Port" Variant="Variant.Outlined" Validation="@(new Func<string, string?>(OptionalPortValidator))" Immediate="true" />
@@ -632,13 +634,13 @@ else
                 }
 
                 @* NOC Details (read-only, NOC + IOC+ only) *@
-                @if (CanSeeNOC && request.NOCDetails != null && (request.Status is not ("PendingNOC" or "PendingSOC") || (nocSaved && !isEditingNOC)))
+                @if (CanSeeNOC && request.NOCDetails != null && (request.Status is not ("PendingNOC" or "PendingSOC") || (nocSaved && !isEditingNOC && !WasSentBack)))
                 {
                     <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         @if (WasSentBack && request.Status is "PendingNOC" or "PendingSOC")
                         {
-                            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-3" Icon="@Icons.Material.Filled.Visibility" Dense="true">
-                                Request was sent back — view only.
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-3" Icon="@Icons.Material.Filled.Replay" Dense="true">
+                                Request was sent back — please review, update if needed, and re-submit.
                             </MudAlert>
                         }
                         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
@@ -648,7 +650,7 @@ else
                                 </MudAvatar>
                                 <MudText Typo="Typo.h6">NOC Details</MudText>
                             </MudStack>
-                            @if (!WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && _userRole is "NOC" or "PlatformAdmin")
+                            @if (request.Status is "PendingNOC" or "PendingSOC" && _userRole is "NOC" or "PlatformAdmin")
                             {
                                 <MudStack Row="true" Spacing="2">
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
@@ -672,7 +674,6 @@ else
                                 <tr><td><strong>Real Gateway</strong></td><td>@request.NOCDetails.Gateway</td></tr>
                                 <tr><td><strong>Uplink Port</strong></td><td>@request.NOCDetails.Port</td></tr>
                                 <tr><td><strong>VIP (Virtual IP)</strong></td><td>@request.NOCDetails.VIP</td></tr>
-                                <tr><td><strong>FQDN</strong></td><td>@request.NOCDetails.FQDN</td></tr>
                                 <tr><td><strong>Virtual Port</strong></td><td>@request.NOCDetails.VirtualPort</td></tr>
                                 <tr><td><strong>Virtual FQDN</strong></td><td>@request.NOCDetails.VirtualFQDN</td></tr>
                             </tbody>
@@ -694,7 +695,7 @@ else
                 }
 
                 @* SOC Form (SOC + IOC+ only) *@
-                @if (CanSeeSOC && !WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && (!socSaved || isEditingSOC))
+                @if (CanEditAsSOC && request.Status is "PendingNOC" or "PendingSOC" && (!socSaved || isEditingSOC || WasSentBack))
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -707,6 +708,11 @@ else
                         {
                             var idx = i;
                             <MudPaper Elevation="0" Class="pa-3 mb-3" Style="border: 1px dashed var(--mud-palette-lines-default); border-radius: 8px;">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">Firewall Entry #@(idx + 1)</MudText>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                                   OnClick="@(() => socModel.FirewallEntries.RemoveAt(idx))" />
+                                </MudStack>
                                 <MudGrid>
                                     <MudItem xs="6">
                                         <MudTextField @bind-Value="socModel.FirewallEntries[idx].PolicyName" Label="Policy Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
@@ -731,10 +737,20 @@ else
                                     <MudItem xs="6">
                                         <MudTextField @bind-Value="socModel.FirewallEntries[idx].DestinationIP" Label="Destination IP" Variant="Variant.Outlined" Margin="Margin.Dense" />
                                     </MudItem>
-                                    <MudItem xs="4">
-                                        <MudTextField @bind-Value="socModel.FirewallEntries[idx].Schedule" Label="Schedule" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="e.g. 2026-03-05" InputType="InputType.Date" />
+                                    <MudItem xs="6">
+                                        <MudSelect @bind-Value="socModel.FirewallEntries[idx].Schedule" Label="Schedule" Variant="Variant.Outlined" Margin="Margin.Dense" T="string">
+                                            @foreach (var sch in schedules)
+                                            {
+                                                <MudSelectItem Value="@sch.Name">@sch.Name@(sch.Type == ScheduleTypeModel.Always ? "" : $" ({sch.Type})")</MudSelectItem>
+                                            }
+                                        </MudSelect>
                                     </MudItem>
-                                    <MudItem xs="4">
+                                    <MudItem xs="2" Class="d-flex align-center">
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                                   StartIcon="@Icons.Material.Filled.Add" Style="border-radius: 10px; text-transform: none;"
+                                                   OnClick="@(() => OpenNewScheduleDialog(idx))">
+                                            New Schedule
+                                        </MudButton>
                                     </MudItem>
 
                                     @* Security Profiles (multi-select from admin list) *@
@@ -761,7 +777,7 @@ else
                             </MudPaper>
                         }
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
-                            OnClick="@(() => socModel.FirewallEntries.Add(new()))" Style="border-radius: 10px; text-transform: none;">
+                            OnClick="AddFirewallEntry" Style="border-radius: 10px; text-transform: none;">
                             Add Firewall Entry
                         </MudButton>
                         <MudStack Row="true" Spacing="2" Class="mt-4">
@@ -796,13 +812,13 @@ else
                 }
 
                 @* SOC Details (read-only, SOC + IOC+ only) *@
-                @if (CanSeeSOC && request.SOCDetails != null && (request.Status is not ("PendingNOC" or "PendingSOC") || (socSaved && !isEditingSOC)))
+                @if (CanSeeSOC && request.SOCDetails != null && (request.Status is not ("PendingNOC" or "PendingSOC") || (socSaved && !isEditingSOC && !WasSentBack)))
                 {
                     <MudPaper Elevation="0" Class="section-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         @if (WasSentBack && request.Status is "PendingNOC" or "PendingSOC")
                         {
-                            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-3" Icon="@Icons.Material.Filled.Visibility" Dense="true">
-                                Request was sent back — view only.
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-3" Icon="@Icons.Material.Filled.Replay" Dense="true">
+                                Request was sent back — please review, update if needed, and re-submit.
                             </MudAlert>
                         }
                         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
@@ -812,7 +828,7 @@ else
                                 </MudAvatar>
                                 <MudText Typo="Typo.h6">SOC Details</MudText>
                             </MudStack>
-                            @if (!WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && _userRole is "SOC" or "PlatformAdmin")
+                            @if (request.Status is "PendingNOC" or "PendingSOC" && _userRole is "SOC" or "PlatformAdmin")
                             {
                                 <MudStack Row="true" Spacing="2">
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
@@ -888,7 +904,7 @@ else
                 }
 
                 @* IOC Manager — Publish NOC/SOC submissions *@
-                @if (CanSeeSection(4) && !WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && (request.NOCDetails != null || request.SOCDetails != null))
+                @if (CanEditAsIOC && !WasSentBack && request.Status is "PendingNOC" or "PendingSOC" && (request.NOCDetails != null || request.SOCDetails != null))
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -975,7 +991,7 @@ else
                 }
 
                 @* IOC Manager Approval *@
-                @if (CanSeeSection(4) && request.Status == "PendingIOCApproval")
+                @if (CanEditAsIOC && request.Status == "PendingIOCApproval")
                 {
                     <MudPaper Elevation="0" Class="section-card action-card pa-4 mb-4" Style="border: 1px solid var(--mud-palette-lines-default);">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -1116,7 +1132,6 @@ else
                                                     <tr><td><strong>IP</strong></td><td>@request.NOCDetails.IPAddress</td></tr>
                                                     <tr><td><strong>Subnet</strong></td><td>@request.NOCDetails.SubnetMask</td></tr>
                                                     <tr><td><strong>VLAN</strong></td><td>@request.NOCDetails.VLANID</td></tr>
-                                                    <tr><td><strong>FQDN</strong></td><td>@request.NOCDetails.FQDN</td></tr>
                                                     <tr><td><strong>Gateway</strong></td><td>@request.NOCDetails.Gateway</td></tr>
                                                 </tbody>
                                             </MudSimpleTable>
@@ -1296,10 +1311,15 @@ else
                     </MudAvatar>
                     <MudText Typo="Typo.h6">Status History</MudText>
                 </MudStack>
-                @if (request.StatusHistories.Any())
+                @{
+                    var visibleHistories = request.StatusHistories
+                        .Where(h => !(h.OldStatus == "Draft" && h.NewStatus == "Draft"))
+                        .ToList();
+                }
+                @if (visibleHistories.Any())
                 {
                     <MudTimeline TimelinePosition="TimelinePosition.Start">
-                        @foreach (var h in request.StatusHistories)
+                        @foreach (var h in visibleHistories)
                         {
                             var isSendBack = h.Comments?.StartsWith("Sent back") == true;
                             <MudTimelineItem Color="@(isSendBack ? Color.Warning : Color.Primary)" Size="Size.Small">
@@ -1335,6 +1355,44 @@ else
 }
 </div>
 
+<MudDialog @bind-Visible="showNewScheduleDialog" Options="@(new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6">New Schedule</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudSelect @bind-Value="newScheduleDraft.Type" Label="Type" Variant="Variant.Outlined" T="ScheduleTypeModel">
+                <MudSelectItem Value="ScheduleTypeModel.OneTime">One-Time</MudSelectItem>
+                <MudSelectItem Value="ScheduleTypeModel.Recurring">Recurring</MudSelectItem>
+                <MudSelectItem Value="ScheduleTypeModel.ScheduleGroup">Schedule Group</MudSelectItem>
+            </MudSelect>
+            <MudTextField @bind-Value="newScheduleDraft.Name" Label="Name" Variant="Variant.Outlined" Required="true" />
+            <MudTextField @bind-Value="newScheduleDraft.Color" Label="Color" Variant="Variant.Outlined" Placeholder="#43e97b" />
+            @if (newScheduleDraft.Type is ScheduleTypeModel.OneTime or ScheduleTypeModel.Recurring)
+            {
+                <MudStack Row="true" Spacing="2">
+                    <MudDatePicker @bind-Date="newScheduleStart" Label="Start date" Variant="Variant.Outlined" />
+                    <MudDatePicker @bind-Date="newScheduleEnd" Label="End date" Variant="Variant.Outlined" />
+                </MudStack>
+            }
+            @if (newScheduleDraft.Type == ScheduleTypeModel.Recurring)
+            {
+                <MudTextField @bind-Value="newScheduleDraft.RecurrenceDays" Label="Recurrence days" Variant="Variant.Outlined"
+                              Placeholder="e.g. Mon,Tue,Wed" />
+            }
+            <MudSwitch T="bool" @bind-Value="newScheduleDraft.PreExpirationEventLog" Label="Pre-expiration event log" Color="Color.Primary" />
+            @if (newScheduleDraft.PreExpirationEventLog)
+            {
+                <MudNumericField @bind-Value="newScheduleDraft.NumberOfDaysBefore" Label="Number of days before" Variant="Variant.Outlined" Min="0" Max="365" />
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => showNewScheduleDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveNewSchedule">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     [Parameter] public Guid RequestId { get; set; }
 
@@ -1363,6 +1421,15 @@ else
     // NOC/SOC specific: NOC only sees NOC, SOC only sees SOC, IOC+ sees both
     private bool CanSeeNOC => IsAdmin || _userRole == "NOC" || RoleLevel(_userRole) >= 4;
     private bool CanSeeSOC => IsAdmin || _userRole == "SOC" || RoleLevel(_userRole) >= 4;
+
+    // Edit gates — each role may only submit its own section.
+    private bool CanEditAsSysAdmin => IsAdmin || _userRole == "SysAdmin";
+    private bool CanEditAsDataCenter => IsAdmin || _userRole == "DataCenter";
+    private bool CanEditAsNOC => IsAdmin || _userRole == "NOC";
+    private bool CanEditAsSOC => IsAdmin || _userRole == "SOC";
+    private bool CanEditAsIOC => IsAdmin || _userRole == "IOCManager";
+    private bool CanEditAsCISO => IsAdmin || _userRole == "CISO";
+    private bool CanEditAsOps => IsAdmin || _userRole == "Ops";
 
     private RequestResponse? request;
     private bool isLoading = true;
@@ -1394,6 +1461,10 @@ else
     private List<ResourceGroupModel> resourceGroups = new();
     private List<VdomModel> vdoms = new();
     private List<SecurityProfileModel> securityProfiles = new();
+    private List<ScheduleModel> schedules = new();
+    private bool showNewScheduleDialog;
+    private int newScheduleFirewallIndex;
+    private ScheduleModel newScheduleDraft = new() { Type = ScheduleTypeModel.OneTime, NumberOfDaysBefore = 3 };
 
     private List<DropdownOptionModel> _sensitivityLevels = new();
     private List<DropdownOptionModel> _webServers = new();
@@ -1422,6 +1493,58 @@ else
         .Where(h => h.NewStatus == request.Status)
         .OrderByDescending(h => h.Timestamp)
         .FirstOrDefault()?.Comments?.StartsWith("Sent back:") == true;
+
+    private void OnIPOrSubnetChanged(string ip, string subnet)
+    {
+        nocModel.IPAddress = ip;
+        nocModel.SubnetMask = subnet;
+        nocModel.Gateway = GatewayCalculator.LastUsableAddress(ip, subnet) ?? string.Empty;
+    }
+
+    private void AddFirewallEntry() =>
+        socModel.FirewallEntries.Add(new FirewallEntryModel { Schedule = "always" });
+
+    private DateTime? newScheduleStart
+    {
+        get => newScheduleDraft.StartAt;
+        set => newScheduleDraft.StartAt = value;
+    }
+
+    private DateTime? newScheduleEnd
+    {
+        get => newScheduleDraft.EndAt;
+        set => newScheduleDraft.EndAt = value;
+    }
+
+    private void OpenNewScheduleDialog(int firewallIndex)
+    {
+        newScheduleFirewallIndex = firewallIndex;
+        newScheduleDraft = new ScheduleModel { Type = ScheduleTypeModel.OneTime, NumberOfDaysBefore = 3 };
+        showNewScheduleDialog = true;
+    }
+
+    private async Task SaveNewSchedule()
+    {
+        if (string.IsNullOrWhiteSpace(newScheduleDraft.Name))
+        {
+            Snackbar.Add("Schedule name is required.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var created = await Api.CreateScheduleAsync(newScheduleDraft);
+            schedules.Add(created);
+            if (newScheduleFirewallIndex >= 0 && newScheduleFirewallIndex < socModel.FirewallEntries.Count)
+                socModel.FirewallEntries[newScheduleFirewallIndex].Schedule = created.Name;
+            showNewScheduleDialog = false;
+            Snackbar.Add($"Schedule '{created.Name}' created.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
 
     // --- Validation Functions ---
     private static string? RequiredValidator(string val) =>
@@ -1514,13 +1637,19 @@ else
         try
         {
             request = await Api.GetRequestAsync(RequestId);
+            if (request == null) return;
             resourceGroups = await Api.GetResourceGroupsAsync();
             vdoms = await Api.GetVdomsAsync();
             securityProfiles = await Api.GetSecurityProfilesAsync();
+            schedules = await Api.GetSchedulesAsync();
             await LoadDropdownOptionsAsync();
             PrePopulateFromSavedData();
         }
-        catch { request = null; }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", $"LoadRequest failed: {ex.GetType().Name}: {ex.Message}", ex.ToString());
+            Snackbar.Add($"Failed to load request: {ex.Message}", Severity.Error);
+        }
         finally { isLoading = false; }
     }
 
@@ -1603,7 +1732,6 @@ else
                 Gateway = request.NOCDetails.Gateway,
                 Port = request.NOCDetails.Port,
                 VIP = request.NOCDetails.VIP,
-                FQDN = request.NOCDetails.FQDN,
                 VirtualIP = request.NOCDetails.VirtualIP,
                 VirtualPort = request.NOCDetails.VirtualPort,
                 VirtualFQDN = request.NOCDetails.VirtualFQDN,
@@ -1631,7 +1759,7 @@ else
                     DestinationInterface = fe.DestinationInterface,
                     SourceIP = fe.SourceIP,
                     DestinationIP = fe.DestinationIP,
-                    Schedule = fe.Schedule,
+                    Schedule = string.IsNullOrWhiteSpace(fe.Schedule) ? "always" : fe.Schedule,
                     Action = fe.Action,
                     Services = fe.Services?.Select(s => new ServiceEntryModel
                     {

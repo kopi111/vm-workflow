@@ -14,6 +14,7 @@
         <MudDatePicker Label="To" @bind-Date="_toDate" Clearable="true" />
         <MudTextField T="string" Label="User" @bind-Value="_userFilter" Clearable="true" Immediate="true" />
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilters" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="ResetFilters" StartIcon="@Icons.Material.Filled.Clear">Reset</MudButton>
     </MudStack>
 </MudPaper>
 
@@ -96,6 +97,14 @@
 
     private async Task ApplyFilters()
     {
+        await LoadData();
+    }
+
+    private async Task ResetFilters()
+    {
+        _fromDate = null;
+        _toDate = null;
+        _userFilter = null;
         await LoadData();
     }
 

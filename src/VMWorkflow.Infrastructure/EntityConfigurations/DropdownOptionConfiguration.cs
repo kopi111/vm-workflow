@@ -9,9 +9,9 @@ public class DropdownOptionConfiguration : IEntityTypeConfiguration<DropdownOpti
     public void Configure(EntityTypeBuilder<DropdownOption> builder)
     {
         builder.HasKey(d => d.DropdownOptionId);
-        builder.Property(d => d.Category).IsRequired().HasMaxLength(50);
-        builder.Property(d => d.Value).IsRequired().HasMaxLength(100);
-        builder.Property(d => d.CreatedBy).HasMaxLength(200);
+        builder.Property(d => d.Category).IsRequired().HasMaxLength(30);
+        builder.Property(d => d.Value).IsRequired().HasMaxLength(50);
+        builder.Property(d => d.CreatedBy).HasMaxLength(64);
         builder.HasIndex(d => new { d.Category, d.Value }).IsUnique();
     }
 }

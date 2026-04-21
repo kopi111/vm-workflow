@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace VMWorkflow.Web.Models;
 
 public class AuditLogEntry
@@ -118,6 +120,28 @@ public class VdomModel
     public string Name { get; set; } = string.Empty;
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ScheduleTypeModel
+{
+    Always = 0,
+    OneTime = 1,
+    Recurring = 2,
+    ScheduleGroup = 3
+}
+
+public class ScheduleModel
+{
+    public Guid? ScheduleId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public ScheduleTypeModel Type { get; set; }
+    public string? Color { get; set; }
+    public DateTime? StartAt { get; set; }
+    public DateTime? EndAt { get; set; }
+    public string? RecurrenceDays { get; set; }
+    public bool PreExpirationEventLog { get; set; }
+    public int? NumberOfDaysBefore { get; set; }
+}
+
 public class SecurityProfileModel
 {
     public Guid SecurityProfileId { get; set; }
@@ -144,7 +168,6 @@ public class NOCDetailsModel
     public string Gateway { get; set; } = string.Empty;
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
-    public string FQDN { get; set; } = string.Empty;
     public string VirtualIP { get; set; } = string.Empty;
     public string VirtualPort { get; set; } = string.Empty;
     public string VirtualFQDN { get; set; } = string.Empty;

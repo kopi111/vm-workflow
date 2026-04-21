@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/noc")]
-[Authorize(Roles = "NOC,IOCManager,PlatformAdmin")]
-public class NOCController : ControllerBase
+[Authorize(Roles = "NOC,PlatformAdmin")]
+public class NOCController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class NOCController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> SubmitNOC(Guid id, [FromBody] NOCDetailsDto dto, [FromQuery] string? action = null)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
         var result = action?.ToLower() == "save"
             ? await _requestService.SaveNOCAsync(id, dto, user)
             : await _requestService.SubmitNOCAsync(id, dto, user);

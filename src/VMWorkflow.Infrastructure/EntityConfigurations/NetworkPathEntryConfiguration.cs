@@ -10,8 +10,8 @@ public class NetworkPathEntryConfiguration : IEntityTypeConfiguration<NetworkPat
     {
         builder.HasKey(n => n.NetworkPathEntryId);
 
-        builder.Property(n => n.SwitchName).IsRequired().HasMaxLength(200);
-        builder.Property(n => n.Port).IsRequired().HasMaxLength(100);
-        builder.Property(n => n.LinkSpeed).HasMaxLength(50);
+        builder.Property(n => n.SwitchName).IsRequired().HasMaxLength(100);
+        builder.Property(n => n.Port).IsRequired().HasMaxLength(50);
+        builder.Property(n => n.LinkSpeed).HasMaxLength(20);
     }
 }

@@ -5,10 +5,9 @@ using VMWorkflow.Infrastructure.Data;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/scripts")]
 [Authorize(Roles = "NOC,SOC,IOCManager,PlatformAdmin")]
-public class ScriptsListController : ControllerBase
+public class ScriptsListController : ApiControllerBase
 {
     private readonly WorkflowDbContext _db;
 

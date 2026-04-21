@@ -24,7 +24,7 @@
         </div>
 
         <div class="auth-field text-center mb-2">
-            <MudText Typo="Typo.h4" Class="auth-title">VM Workflow</MudText>
+            <MudText Typo="Typo.h4" Class="auth-title">ICTD Workflow</MudText>
         </div>
         <div class="auth-field text-center mb-6">
             <MudText Typo="Typo.body2" Class="auth-subtitle">Sign in to your account</MudText>
@@ -39,6 +39,17 @@
                 </MudAlert>
             </div>
         }
+
+        <div class="auth-field">
+            <MudSelect T="string" Value="_quickUser" ValueChanged="OnQuickUserChanged"
+                       Label="Quick login as (dev)" Variant="Variant.Outlined" Class="mb-4"
+                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.SupervisorAccount">
+                @foreach (var account in _quickAccounts)
+                {
+                    <MudSelectItem Value="@account.Username">@account.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
 
         <div class="auth-field">
             <MudTextField @bind-Value="_model.Username" Label="Username" Variant="Variant.Outlined"
@@ -71,6 +82,31 @@
     private LoginModel _model = new();
     private string? _error;
     private bool _loading;
+    private string _quickUser = string.Empty;
+    private const string DevPassword = "Password@123";
+
+    private record QuickAccount(string Username, string Label);
+    private readonly QuickAccount[] _quickAccounts =
+    {
+        new("admin", "Platform Admin"),
+        new("requester", "Requester"),
+        new("developer", "Developer (Requester)"),
+        new("sysadmin", "System Admin"),
+        new("datacenter", "DataCenter"),
+        new("noc", "NOC"),
+        new("soc", "SOC"),
+        new("iocmanager", "IOC Manager"),
+        new("ciso", "CISO"),
+        new("ops", "Ops Manager"),
+    };
+
+    private void OnQuickUserChanged(string username)
+    {
+        _quickUser = username;
+        if (string.IsNullOrEmpty(username)) return;
+        _model.Username = username;
+        _model.Password = DevPassword;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

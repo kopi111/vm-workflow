@@ -1,4 +1,4 @@
-// VM Workflow — Premium Effects
+// ICTD Workflow — Premium Effects
 
 window.VmEffects = {
     // Particle canvas background for auth pages

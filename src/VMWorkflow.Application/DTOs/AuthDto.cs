@@ -4,28 +4,28 @@ namespace VMWorkflow.Application.DTOs;
 
 public class LoginDto
 {
-    [Required, StringLength(100, MinimumLength = 3)]
+    [Required, StringLength(64, MinimumLength = 3)]
     public string Username { get; set; } = string.Empty;
 
-    [Required, StringLength(200, MinimumLength = 6)]
+    [Required, StringLength(100, MinimumLength = 6)]
     public string Password { get; set; } = string.Empty;
 }
 
 public class RegisterDto
 {
-    [Required, StringLength(100, MinimumLength = 3)]
+    [Required, StringLength(64, MinimumLength = 3)]
     public string Username { get; set; } = string.Empty;
 
-    [Required, StringLength(200, MinimumLength = 2)]
+    [Required, StringLength(100, MinimumLength = 2)]
     public string DisplayName { get; set; } = string.Empty;
 
-    [Required, EmailAddress, StringLength(200)]
+    [Required, EmailAddress, StringLength(254)]
     public string Email { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(30)]
     public string Role { get; set; } = "Requester";
 
-    [Required, StringLength(200, MinimumLength = 6)]
+    [Required, StringLength(100, MinimumLength = 6)]
     public string Password { get; set; } = string.Empty;
 }
 

@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/approve")]
 [Authorize(Roles = "CISO,Ops,PlatformAdmin")]
-public class ApprovalController : ControllerBase
+public class ApprovalController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -17,14 +16,11 @@ public class ApprovalController : ControllerBase
         _requestService = requestService;
     }
 
-    /// <summary>
-    /// Generic approval endpoint. Derives role from authenticated user's claims.
-    /// Prefer role-specific endpoints: /ciso-approve, /ops-approve
-    /// </summary>
+    // Derives role from authenticated user's claims. Prefer /ciso-approve or /ops-approve.
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> ProcessApproval(Guid id, [FromBody] ApprovalDto dto)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
         var role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower() ?? "ciso";
         var result = await _requestService.ProcessApprovalAsync(id, dto, user, role);
         return Ok(result);

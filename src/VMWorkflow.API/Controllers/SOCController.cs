@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/soc")]
-[Authorize(Roles = "SOC,IOCManager,PlatformAdmin")]
-public class SOCController : ControllerBase
+[Authorize(Roles = "SOC,PlatformAdmin")]
+public class SOCController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class SOCController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> SubmitSOC(Guid id, [FromBody] SOCDetailsDto dto, [FromQuery] string? action = null)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
         var result = action?.ToLower() == "save"
             ? await _requestService.SaveSOCAsync(id, dto, user)
             : await _requestService.SubmitSOCAsync(id, dto, user);

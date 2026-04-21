@@ -10,14 +10,14 @@ public class FirewallEntryConfiguration : IEntityTypeConfiguration<FirewallEntry
     {
         builder.HasKey(f => f.FirewallEntryId);
 
-        builder.Property(f => f.PolicyName).IsRequired().HasMaxLength(200);
-        builder.Property(f => f.VDOM).IsRequired().HasMaxLength(200);
-        builder.Property(f => f.SourceInterface).HasMaxLength(200);
-        builder.Property(f => f.DestinationInterface).HasMaxLength(200);
-        builder.Property(f => f.SourceIP).HasMaxLength(100);
-        builder.Property(f => f.DestinationIP).HasMaxLength(100);
-        builder.Property(f => f.Schedule).HasMaxLength(100);
-        builder.Property(f => f.Action).IsRequired().HasConversion<string>().HasMaxLength(20);
+        builder.Property(f => f.PolicyName).IsRequired().HasMaxLength(100);
+        builder.Property(f => f.VDOM).IsRequired().HasMaxLength(50);
+        builder.Property(f => f.SourceInterface).HasMaxLength(50);
+        builder.Property(f => f.DestinationInterface).HasMaxLength(50);
+        builder.Property(f => f.SourceIP).HasMaxLength(50);
+        builder.Property(f => f.DestinationIP).HasMaxLength(50);
+        builder.Property(f => f.Schedule).HasMaxLength(50);
+        builder.Property(f => f.Action).IsRequired().HasConversion<string>().HasMaxLength(10);
 
         builder.HasMany(f => f.Services)
             .WithOne(s => s.FirewallEntry)

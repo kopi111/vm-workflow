@@ -5,12 +5,12 @@ namespace VMWorkflow.Application.DTOs;
 
 public class CreateRequestDto
 {
-    [Required, StringLength(200, MinimumLength = 2)]
+    [Required, StringLength(100, MinimumLength = 2)]
     public string ApplicationName { get; set; } = string.Empty;
 
     public EnvironmentType Environment { get; set; }
 
-    [StringLength(100)]
+    [StringLength(50)]
     public string? ProgrammingLanguage { get; set; }
 
     [StringLength(100)]
@@ -22,20 +22,20 @@ public class CreateRequestDto
     [Range(0, 1000000)]
     public int? ExpectedUsers { get; set; }
 
-    [StringLength(100)]
+    [StringLength(50)]
     public string? DBMS { get; set; }
 
     [StringLength(500)]
     public string? GitRepoLink { get; set; }
 
-    [StringLength(200)]
+    [StringLength(100)]
     public string? AccessGroup { get; set; }
 
     public SLALevel SLA { get; set; } = SLALevel.Standard;
 
-    [StringLength(500)]
+    [StringLength(253)]
     public string? FQDNSuggestion { get; set; }
 
-    [StringLength(100)]
+    [StringLength(50)]
     public string? AuthenticationMethod { get; set; }
 }

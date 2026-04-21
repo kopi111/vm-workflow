@@ -30,19 +30,17 @@ public class FortiGateScriptGenerator : IScriptGenerationService
         sb.AppendLine($"# Date: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
         sb.AppendLine();
 
-        // Address Object
         sb.AppendLine("# --- Address Object ---");
         sb.AppendLine("config firewall address");
         sb.AppendLine($"    edit \"{slug}\"");
         sb.AppendLine($"        set subnet {noc.IPAddress}/32");
-        if (!string.IsNullOrEmpty(noc.FQDN))
-            sb.AppendLine($"        set fqdn \"{noc.FQDN}\"");
+        if (!string.IsNullOrEmpty(request.FQDNSuggestion))
+            sb.AppendLine($"        set fqdn \"{request.FQDNSuggestion}\"");
         sb.AppendLine($"        set comment \"Auto-generated for {request.ApplicationName}\"");
         sb.AppendLine("    next");
         sb.AppendLine("end");
         sb.AppendLine();
 
-        // Firewall Entries
         foreach (var fw in soc.FirewallEntries)
         {
             sb.AppendLine($"# --- Firewall Policy: {fw.PolicyName} (VDOM: {fw.VDOM}) ---");

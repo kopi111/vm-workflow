@@ -9,8 +9,8 @@ public class SecurityProfileConfiguration : IEntityTypeConfiguration<SecurityPro
     public void Configure(EntityTypeBuilder<SecurityProfile> builder)
     {
         builder.HasKey(s => s.SecurityProfileId);
-        builder.Property(s => s.Name).IsRequired().HasMaxLength(100);
-        builder.Property(s => s.CreatedBy).HasMaxLength(200);
+        builder.Property(s => s.Name).IsRequired().HasMaxLength(50);
+        builder.Property(s => s.CreatedBy).HasMaxLength(64);
         builder.HasIndex(s => s.Name).IsUnique();
     }
 }

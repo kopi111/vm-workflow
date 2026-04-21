@@ -12,10 +12,8 @@ public static class ObjectSlugGenerator
             .Replace(" ", "-")
             .Replace("_", "-");
 
-        // Remove any non-alphanumeric/dash characters
         appPart = new string(appPart.Where(c => char.IsLetterOrDigit(c) || c == '-').ToArray());
 
-        // Collapse multiple dashes
         while (appPart.Contains("--"))
             appPart = appPart.Replace("--", "-");
 

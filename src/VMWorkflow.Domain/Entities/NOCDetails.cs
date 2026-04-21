@@ -11,7 +11,6 @@ public class NOCDetails
     public string Gateway { get; set; } = string.Empty;
     public string Port { get; set; } = string.Empty;
     public string VIP { get; set; } = string.Empty;
-    public string FQDN { get; set; } = string.Empty;
     public string VirtualIP { get; set; } = string.Empty;
     public string VirtualPort { get; set; } = string.Empty;
     public string VirtualFQDN { get; set; } = string.Empty;

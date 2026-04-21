@@ -6,10 +6,9 @@ using VMWorkflow.Infrastructure.Data;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/generate-script")]
 [Authorize(Roles = "NOC,SOC,IOCManager,SysAdmin,PlatformAdmin")]
-public class ScriptController : ControllerBase
+public class ScriptController : ApiControllerBase
 {
     private readonly WorkflowDbContext _db;
     private readonly IScriptGenerationService _scriptService;

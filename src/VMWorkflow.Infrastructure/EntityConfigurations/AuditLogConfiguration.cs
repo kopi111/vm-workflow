@@ -10,7 +10,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     {
         builder.HasKey(a => a.AuditLogId);
 
-        builder.Property(a => a.User).IsRequired().HasMaxLength(100);
+        builder.Property(a => a.User).IsRequired().HasMaxLength(64);
         builder.Property(a => a.HttpMethod).IsRequired().HasMaxLength(10);
         builder.Property(a => a.Path).IsRequired().HasMaxLength(500);
         builder.Property(a => a.StatusCode).IsRequired();

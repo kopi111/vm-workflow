@@ -12,17 +12,16 @@ public class NOCDetailsConfiguration : IEntityTypeConfiguration<NOCDetails>
 
         builder.HasIndex(n => n.RequestId).IsUnique();
 
-        builder.Property(n => n.IPAddress).IsRequired().HasMaxLength(50);
-        builder.Property(n => n.SubnetMask).IsRequired().HasMaxLength(50);
-        builder.Property(n => n.VLANID).IsRequired().HasMaxLength(20);
-        builder.Property(n => n.Gateway).IsRequired().HasMaxLength(50);
-        builder.Property(n => n.Port).IsRequired().HasMaxLength(50);
-        builder.Property(n => n.VIP).IsRequired().HasMaxLength(50);
-        builder.Property(n => n.FQDN).IsRequired().HasMaxLength(200);
-        builder.Property(n => n.VirtualIP).HasMaxLength(50);
-        builder.Property(n => n.VirtualPort).HasMaxLength(50);
-        builder.Property(n => n.VirtualFQDN).HasMaxLength(200);
-        builder.Property(n => n.SubmittedBy).IsRequired().HasMaxLength(100);
+        builder.Property(n => n.IPAddress).IsRequired().HasMaxLength(45);
+        builder.Property(n => n.SubnetMask).IsRequired().HasMaxLength(15);
+        builder.Property(n => n.VLANID).IsRequired().HasMaxLength(10);
+        builder.Property(n => n.Gateway).IsRequired().HasMaxLength(45);
+        builder.Property(n => n.Port).IsRequired().HasMaxLength(15);
+        builder.Property(n => n.VIP).HasMaxLength(45);
+        builder.Property(n => n.VirtualIP).HasMaxLength(45);
+        builder.Property(n => n.VirtualPort).HasMaxLength(15);
+        builder.Property(n => n.VirtualFQDN).HasMaxLength(253);
+        builder.Property(n => n.SubmittedBy).IsRequired().HasMaxLength(64);
 
         builder.HasMany(n => n.NetworkPaths).WithOne(np => np.NOCDetails).HasForeignKey(np => np.NOCDetailsId).OnDelete(DeleteBehavior.Cascade);
     }

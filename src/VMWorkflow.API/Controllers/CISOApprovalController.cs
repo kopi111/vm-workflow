@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/requests/{id:guid}/ciso-approve")]
 [Authorize(Roles = "CISO,PlatformAdmin")]
-public class CISOApprovalController : ControllerBase
+public class CISOApprovalController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -20,7 +19,7 @@ public class CISOApprovalController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RequestResponseDto>> ProcessCISOApproval(Guid id, [FromBody] ApprovalDto dto)
     {
-        var user = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var user = RequireAuthenticatedUsername();
         var result = await _requestService.ProcessApprovalAsync(id, dto, user, "ciso");
         return Ok(result);
     }
