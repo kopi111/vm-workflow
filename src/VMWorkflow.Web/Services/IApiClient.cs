@@ -6,6 +6,7 @@ public interface IApiClient
 {
     // Requests
     Task<List<RequestResponse>> GetRequestsAsync();
+    Task<List<RequestResponse>> GetMyDraftsAsync();
     Task<RequestResponse?> GetRequestAsync(Guid requestId);
     Task<RequestResponse> CreateRequestAsync(CreateRequestModel model);
     Task<RequestResponse> UpdateRequestAsync(Guid requestId, UpdateRequestModel model);
@@ -36,6 +37,7 @@ public interface IApiClient
     // Work Queue
     Task<List<RequestResponse>> GetQueueAsync(string role);
     Task<List<RequestResponse>> GetSentBackRequestsAsync();
+    Task<List<RequestResponse>> GetSentBackToMeAsync();
 
     // Resource Groups
     Task<List<ResourceGroupModel>> GetResourceGroupsAsync();
@@ -54,6 +56,12 @@ public interface IApiClient
     Task<VdomModel> CreateVdomAsync(VdomModel model);
     Task UpdateVdomAsync(Guid id, VdomModel model);
     Task DeleteVdomAsync(Guid id);
+
+    // Schedules
+    Task<List<ScheduleModel>> GetSchedulesAsync();
+    Task<ScheduleModel> CreateScheduleAsync(ScheduleModel model);
+    Task UpdateScheduleAsync(Guid id, ScheduleModel model);
+    Task DeleteScheduleAsync(Guid id);
 
     // Dropdown Options
     Task<List<DropdownOptionModel>> GetDropdownOptionsAsync(string category);

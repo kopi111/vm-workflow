@@ -120,7 +120,11 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.Draft)
             throw new InvalidOperationException("Only Draft requests can be updated.");
 
-        if (dto.ApplicationName != null) request.ApplicationName = dto.ApplicationName;
+        if (dto.ApplicationName != null && dto.ApplicationName != request.ApplicationName)
+        {
+            request.ApplicationName = dto.ApplicationName;
+            request.ObjectSlug = await GenerateUniqueSlugAsync(dto.ApplicationName, request.Environment, request.RequestId);
+        }
         if (dto.ProgrammingLanguage != null) request.ProgrammingLanguage = dto.ProgrammingLanguage;
         if (dto.Framework != null) request.Framework = dto.Framework;
         if (dto.Purpose != null) request.Purpose = dto.Purpose;
@@ -144,8 +148,13 @@ public class RequestService : IRequestService
         var request = await GetRequestWithIncludes(requestId)
             ?? throw new KeyNotFoundException($"Request {requestId} not found.");
 
+        if (!string.Equals(request.CreatedBy, submittedBy, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("Only the user who created a draft can submit it.");
+
         if (!_workflow.CanTransition(request.Status, RequestStatus.PendingSysAdmin))
             throw new InvalidOperationException($"Cannot submit request in {request.Status} status.");
+
+        EnsureRequiredRequestFieldsPopulated(request);
 
         var oldStatus = request.Status;
         request.Status = RequestStatus.PendingSysAdmin;
@@ -164,36 +173,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingSysAdmin)
             throw new InvalidOperationException($"Cannot submit SysAdmin details when status is {request.Status}.");
 
-        var sysAdminDetails = new SysAdminDetails
-        {
-            SysAdminDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            SensitivityLevel = dto.SensitivityLevel,
-            ServerResources = string.IsNullOrWhiteSpace(dto.ServerResources) ? "Micro" : dto.ServerResources,
-            WebServer = dto.WebServer,
-            DatabaseNameType = dto.DatabaseNameType ?? "none",
-            DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
-                ? $"{request.ApplicationName}-db"
-                : dto.DatabaseName,
-            DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
-                ? $"{request.ApplicationName}-user"
-                : dto.DatabaseUsername,
-            Hostname = dto.Hostname,
-            SubmittedBy = submittedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var svc in dto.Services)
-        {
-            sysAdminDetails.Services.Add(new ServiceEntry
-            {
-                ServiceEntryId = Guid.NewGuid(),
-                SysAdminDetailsId = sysAdminDetails.SysAdminDetailsId,
-                ServiceName = svc.ServiceName,
-                Port = svc.Port,
-                Protocol = svc.Protocol
-            });
-        }
+        var sysAdminDetails = BuildSysAdminDetails(requestId, dto, submittedBy, request);
 
         if (request.SysAdminDetails != null)
             _db.SysAdminDetails.Remove(request.SysAdminDetails);
@@ -217,21 +197,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.DataCenterReview)
             throw new InvalidOperationException($"Cannot submit DC details when status is {request.Status}.");
 
-        var dcDetails = new DataCenterDetails
-        {
-            DataCenterDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            Environment = dto.Environment,
-            UplinkSpeed = dto.UplinkSpeed,
-            BareMetalType = dto.BareMetalType,
-            PortNumber = dto.PortNumber,
-            DC = dto.DC,
-            RackRoom = dto.RackRoom,
-            RackNumber = dto.RackNumber,
-            Cluster = dto.Cluster,
-            SubmittedBy = submittedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
+        var dcDetails = BuildDataCenterDetails(requestId, dto, submittedBy);
 
         if (request.DataCenterDetails != null)
             _db.DataCenterDetails.Remove(request.DataCenterDetails);
@@ -255,36 +221,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingSysAdmin)
             throw new InvalidOperationException($"Cannot save SysAdmin details when status is {request.Status}.");
 
-        var sysAdminDetails = new SysAdminDetails
-        {
-            SysAdminDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            SensitivityLevel = dto.SensitivityLevel,
-            ServerResources = string.IsNullOrWhiteSpace(dto.ServerResources) ? "Micro" : dto.ServerResources,
-            WebServer = dto.WebServer,
-            DatabaseNameType = dto.DatabaseNameType ?? "none",
-            DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
-                ? $"{request.ApplicationName}-db"
-                : dto.DatabaseName,
-            DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
-                ? $"{request.ApplicationName}-user"
-                : dto.DatabaseUsername,
-            Hostname = dto.Hostname,
-            SubmittedBy = savedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var svc in dto.Services)
-        {
-            sysAdminDetails.Services.Add(new ServiceEntry
-            {
-                ServiceEntryId = Guid.NewGuid(),
-                SysAdminDetailsId = sysAdminDetails.SysAdminDetailsId,
-                ServiceName = svc.ServiceName,
-                Port = svc.Port,
-                Protocol = svc.Protocol
-            });
-        }
+        var sysAdminDetails = BuildSysAdminDetails(requestId, dto, savedBy, request);
 
         if (request.SysAdminDetails != null)
             _db.SysAdminDetails.Remove(request.SysAdminDetails);
@@ -305,21 +242,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.DataCenterReview)
             throw new InvalidOperationException($"Cannot save DC details when status is {request.Status}.");
 
-        var dcDetails = new DataCenterDetails
-        {
-            DataCenterDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            Environment = dto.Environment,
-            UplinkSpeed = dto.UplinkSpeed,
-            BareMetalType = dto.BareMetalType,
-            PortNumber = dto.PortNumber,
-            DC = dto.DC,
-            RackRoom = dto.RackRoom,
-            RackNumber = dto.RackNumber,
-            Cluster = dto.Cluster,
-            SubmittedBy = savedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
+        var dcDetails = BuildDataCenterDetails(requestId, dto, savedBy);
 
         if (request.DataCenterDetails != null)
             _db.DataCenterDetails.Remove(request.DataCenterDetails);
@@ -340,34 +263,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingIOCApproval)
             throw new InvalidOperationException($"Cannot submit NOC details when status is {request.Status}.");
 
-        var nocDetails = new NOCDetails
-        {
-            NOCDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            IPAddress = dto.IPAddress,
-            SubnetMask = dto.SubnetMask,
-            VLANID = dto.VLANID,
-            Gateway = dto.Gateway,
-            Port = dto.Port,
-            VIP = dto.VIP,
-            FQDN = dto.FQDN,
-            VirtualIP = dto.VirtualIP,
-            VirtualPort = dto.VirtualPort,
-            VirtualFQDN = dto.VirtualFQDN,
-            SubmittedBy = submittedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var np in dto.NetworkPaths)
-        {
-            nocDetails.NetworkPaths.Add(new NetworkPathEntry
-            {
-                NetworkPathEntryId = Guid.NewGuid(),
-                SwitchName = np.SwitchName,
-                Port = np.Port,
-                LinkSpeed = np.LinkSpeed
-            });
-        }
+        var nocDetails = BuildNOCDetails(requestId, dto, submittedBy);
 
         if (request.NOCDetails != null)
             _db.NOCDetails.Remove(request.NOCDetails);
@@ -408,54 +304,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingIOCApproval)
             throw new InvalidOperationException($"Cannot submit SOC details when status is {request.Status}.");
 
-        var socDetails = new SOCDetails
-        {
-            SOCDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            SubmittedBy = submittedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var fe in dto.FirewallEntries)
-        {
-            var entry = new FirewallEntry
-            {
-                FirewallEntryId = Guid.NewGuid(),
-                PolicyName = fe.PolicyName,
-                VDOM = fe.VDOM,
-                SourceInterface = fe.SourceInterface,
-                DestinationInterface = fe.DestinationInterface,
-                SourceIP = fe.SourceIP,
-                DestinationIP = fe.DestinationIP,
-                Schedule = fe.Schedule,
-                Action = Enum.Parse<PolicyAction>(fe.Action, true)
-            };
-
-            // Add service entries
-            foreach (var svc in fe.Services)
-            {
-                entry.Services.Add(new FirewallServiceEntry
-                {
-                    FirewallServiceEntryId = Guid.NewGuid(),
-                    FirewallEntryId = entry.FirewallEntryId,
-                    Port = svc.Port,
-                    Protocol = svc.Protocol,
-                    ServiceName = svc.ServiceName
-                });
-            }
-
-            // Add security profile associations
-            foreach (var profileId in fe.SecurityProfileIds)
-            {
-                entry.SecurityProfiles.Add(new FirewallEntrySecurityProfile
-                {
-                    FirewallEntryId = entry.FirewallEntryId,
-                    SecurityProfileId = profileId
-                });
-            }
-
-            socDetails.FirewallEntries.Add(entry);
-        }
+        var socDetails = BuildSOCDetails(requestId, dto, submittedBy);
 
         if (request.SOCDetails != null)
             _db.SOCDetails.Remove(request.SOCDetails);
@@ -480,7 +329,7 @@ public class RequestService : IRequestService
         }
         else
         {
-            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "SOC details re-submitted by IOC Manager");
+            AddStatusHistory(request, oldStatus, RequestStatus.PendingIOCApproval, submittedBy, "SOC details re-submitted");
         }
 
         await _db.SaveChangesAsync();
@@ -496,34 +345,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingNOC && request.Status != RequestStatus.PendingSOC)
             throw new InvalidOperationException($"Cannot save NOC details when status is {request.Status}.");
 
-        var nocDetails = new NOCDetails
-        {
-            NOCDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            IPAddress = dto.IPAddress,
-            SubnetMask = dto.SubnetMask,
-            VLANID = dto.VLANID,
-            Gateway = dto.Gateway,
-            Port = dto.Port,
-            VIP = dto.VIP,
-            FQDN = dto.FQDN,
-            VirtualIP = dto.VirtualIP,
-            VirtualPort = dto.VirtualPort,
-            VirtualFQDN = dto.VirtualFQDN,
-            SubmittedBy = savedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var np in dto.NetworkPaths)
-        {
-            nocDetails.NetworkPaths.Add(new NetworkPathEntry
-            {
-                NetworkPathEntryId = Guid.NewGuid(),
-                SwitchName = np.SwitchName,
-                Port = np.Port,
-                LinkSpeed = np.LinkSpeed
-            });
-        }
+        var nocDetails = BuildNOCDetails(requestId, dto, savedBy);
 
         if (request.NOCDetails != null)
             _db.NOCDetails.Remove(request.NOCDetails);
@@ -544,52 +366,7 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingSOC && request.Status != RequestStatus.PendingNOC)
             throw new InvalidOperationException($"Cannot save SOC details when status is {request.Status}.");
 
-        var socDetails = new SOCDetails
-        {
-            SOCDetailsId = Guid.NewGuid(),
-            RequestId = requestId,
-            SubmittedBy = savedBy,
-            SubmittedAt = DateTime.UtcNow
-        };
-
-        foreach (var fe in dto.FirewallEntries)
-        {
-            var entry = new FirewallEntry
-            {
-                FirewallEntryId = Guid.NewGuid(),
-                PolicyName = fe.PolicyName,
-                VDOM = fe.VDOM,
-                SourceInterface = fe.SourceInterface,
-                DestinationInterface = fe.DestinationInterface,
-                SourceIP = fe.SourceIP,
-                DestinationIP = fe.DestinationIP,
-                Schedule = fe.Schedule,
-                Action = Enum.Parse<PolicyAction>(fe.Action, true)
-            };
-
-            foreach (var svc in fe.Services)
-            {
-                entry.Services.Add(new FirewallServiceEntry
-                {
-                    FirewallServiceEntryId = Guid.NewGuid(),
-                    FirewallEntryId = entry.FirewallEntryId,
-                    Port = svc.Port,
-                    Protocol = svc.Protocol,
-                    ServiceName = svc.ServiceName
-                });
-            }
-
-            foreach (var profileId in fe.SecurityProfileIds)
-            {
-                entry.SecurityProfiles.Add(new FirewallEntrySecurityProfile
-                {
-                    FirewallEntryId = entry.FirewallEntryId,
-                    SecurityProfileId = profileId
-                });
-            }
-
-            socDetails.FirewallEntries.Add(entry);
-        }
+        var socDetails = BuildSOCDetails(requestId, dto, savedBy);
 
         if (request.SOCDetails != null)
             _db.SOCDetails.Remove(request.SOCDetails);
@@ -616,7 +393,6 @@ public class RequestService : IRequestService
         request.UpdatedAt = DateTime.UtcNow;
         AddStatusHistory(request, oldStatus, request.Status, approvedBy, dto.Comments ?? "IOC Manager submitted for approval");
 
-        // Auto-generate FortiGate script on IOC approval
         try
         {
             var scriptContent = _scriptService.GenerateFortiGateScript(request);
@@ -652,14 +428,12 @@ public class RequestService : IRequestService
         if (request.Status != RequestStatus.PendingApproval)
             throw new InvalidOperationException($"Cannot process approval when status is {request.Status}. Must be PendingApproval.");
 
-        // Handle send-back (Return) — sends request back to IOC Manager
         if (dto.Decision == ApprovalDecision.Return)
         {
             var oldSt = request.Status;
             var previousStatus = _workflow.GetPreviousStatus(request.Status);
             request.Status = previousStatus;
 
-            // Clear all approval decisions so approvers can re-vote after corrections
             request.CisoDecision = null;
             request.CisoComments = null;
             request.CisoApprovedBy = null;
@@ -679,7 +453,6 @@ public class RequestService : IRequestService
 
         var decision = dto.Decision == ApprovalDecision.Approve ? "Approved" : "Rejected";
 
-        // Record the individual approval
         switch (role.ToLower())
         {
             case "ciso":
@@ -700,13 +473,11 @@ public class RequestService : IRequestService
 
         var oldStatus = request.Status;
 
-        // Check if any approver rejected
         if (_workflow.HasRejection(request.CisoDecision, request.OpsDecision))
         {
             request.Status = RequestStatus.Rejected;
             AddStatusHistory(request, oldStatus, request.Status, approvedBy, $"{role.ToUpper()} rejected: {dto.Comments}");
         }
-        // Check if both CISO and Ops Manager approved
         else if (_workflow.HasFullApproval(request.CisoDecision, request.OpsDecision))
         {
             request.Status = RequestStatus.Approved;
@@ -840,7 +611,7 @@ public class RequestService : IRequestService
             "datacenter" => new[] { RequestStatus.DataCenterReview },
             "noc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC },
             "soc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC },
-            "ioc" => new[] { RequestStatus.PendingNOC, RequestStatus.PendingSOC, RequestStatus.PendingIOCApproval },
+            "ioc" => new[] { RequestStatus.PendingIOCApproval },
             "ciso" or "ops" => new[] { RequestStatus.PendingApproval },
             _ => throw new ArgumentException($"Invalid role: {role}")
         };
@@ -861,7 +632,6 @@ public class RequestService : IRequestService
             .Include(r => r.StatusHistories)
             .Where(r => targetStatuses.Contains(r.Status));
 
-        // For approvers, filter out requests already decided by this role
         if (role.ToLower() == "ciso")
             query = query.Where(r => r.CisoDecision == null);
         else if (role.ToLower() == "ops")
@@ -871,9 +641,52 @@ public class RequestService : IRequestService
         return requests.Select(MapToDto).ToList();
     }
 
+    public async Task<List<RequestResponseDto>> GetDraftsByUserAsync(string username)
+    {
+        var drafts = await _db.Requests
+            .Include(r => r.StatusHistories)
+            .Where(r => r.Status == RequestStatus.Draft && r.CreatedBy == username)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        return drafts.Select(MapToDto).ToList();
+    }
+
+    public async Task<List<RequestResponseDto>> GetSentBackToRoleAsync(string role)
+    {
+        var targetStatuses = role.ToLower() switch
+        {
+            "sysadmin" => new[] { RequestStatus.PendingSysAdmin },
+            "datacenter" => new[] { RequestStatus.DataCenterReview },
+            "noc" => new[] { RequestStatus.PendingNOC },
+            "soc" => new[] { RequestStatus.PendingSOC },
+            "ioc" => new[] { RequestStatus.PendingIOCApproval },
+            "ciso" or "ops" => new[] { RequestStatus.PendingApproval },
+            _ => Array.Empty<RequestStatus>()
+        };
+        if (targetStatuses.Length == 0) return new List<RequestResponseDto>();
+
+        var sentBackRequestIds = await _db.StatusHistories
+            .Where(h => h.Comments != null
+                        && (h.Comments.StartsWith("Sent back:")
+                            || h.Comments.Contains(" sent back:"))
+                        && targetStatuses.Contains(h.NewStatus))
+            .Select(h => h.RequestId)
+            .Distinct()
+            .ToListAsync();
+        if (!sentBackRequestIds.Any()) return new List<RequestResponseDto>();
+
+        var requests = await _db.Requests
+            .Include(r => r.StatusHistories)
+            .Where(r => sentBackRequestIds.Contains(r.RequestId) && targetStatuses.Contains(r.Status))
+            .OrderByDescending(r => r.UpdatedAt)
+            .ToListAsync();
+
+        return requests.Select(MapToDto).ToList();
+    }
+
     public async Task<List<RequestResponseDto>> GetSentBackByUserAsync(string username)
     {
-        // Find request IDs where this user performed a send-back (status history comments start with "Sent back:")
         var sentBackRequestIds = await _db.StatusHistories
             .Where(h => h.ChangedBy == username && h.Comments != null && h.Comments.StartsWith("Sent back:"))
             .Select(h => h.RequestId)
@@ -895,6 +708,176 @@ public class RequestService : IRequestService
             .ToListAsync();
 
         return requests.Select(MapToDto).ToList();
+    }
+
+    private static SysAdminDetails BuildSysAdminDetails(Guid requestId, SysAdminDetailsDto dto, string submittedBy, Request request)
+    {
+        var details = new SysAdminDetails
+        {
+            SysAdminDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            SensitivityLevel = dto.SensitivityLevel,
+            ServerResources = string.IsNullOrWhiteSpace(dto.ServerResources) ? "Micro" : dto.ServerResources,
+            WebServer = dto.WebServer,
+            DatabaseNameType = dto.DatabaseNameType ?? "none",
+            DatabaseName = string.IsNullOrWhiteSpace(dto.DatabaseName)
+                ? $"{request.ApplicationName}-db"
+                : dto.DatabaseName,
+            DatabaseUsername = string.IsNullOrWhiteSpace(dto.DatabaseUsername)
+                ? $"{request.ApplicationName}-user"
+                : dto.DatabaseUsername,
+            Hostname = dto.Hostname,
+            SubmittedBy = submittedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var svc in dto.Services)
+        {
+            details.Services.Add(new ServiceEntry
+            {
+                ServiceEntryId = Guid.NewGuid(),
+                SysAdminDetailsId = details.SysAdminDetailsId,
+                ServiceName = svc.ServiceName,
+                Port = svc.Port,
+                Protocol = svc.Protocol
+            });
+        }
+
+        return details;
+    }
+
+    private static DataCenterDetails BuildDataCenterDetails(Guid requestId, DataCenterDetailsDto dto, string submittedBy)
+    {
+        return new DataCenterDetails
+        {
+            DataCenterDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            Environment = dto.Environment,
+            UplinkSpeed = dto.UplinkSpeed,
+            BareMetalType = dto.BareMetalType,
+            PortNumber = dto.PortNumber,
+            DC = dto.DC,
+            RackRoom = dto.RackRoom,
+            RackNumber = dto.RackNumber,
+            Cluster = dto.Cluster,
+            SubmittedBy = submittedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+    }
+
+    private static NOCDetails BuildNOCDetails(Guid requestId, NOCDetailsDto dto, string submittedBy)
+    {
+        var details = new NOCDetails
+        {
+            NOCDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            IPAddress = dto.IPAddress,
+            SubnetMask = dto.SubnetMask,
+            VLANID = dto.VLANID,
+            Gateway = dto.Gateway,
+            Port = dto.Port,
+            VIP = dto.VIP,
+            VirtualIP = dto.VirtualIP,
+            VirtualPort = dto.VirtualPort,
+            VirtualFQDN = dto.VirtualFQDN,
+            SubmittedBy = submittedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var np in dto.NetworkPaths)
+        {
+            details.NetworkPaths.Add(new NetworkPathEntry
+            {
+                NetworkPathEntryId = Guid.NewGuid(),
+                SwitchName = np.SwitchName,
+                Port = np.Port,
+                LinkSpeed = np.LinkSpeed
+            });
+        }
+
+        return details;
+    }
+
+    private static SOCDetails BuildSOCDetails(Guid requestId, SOCDetailsDto dto, string submittedBy)
+    {
+        var details = new SOCDetails
+        {
+            SOCDetailsId = Guid.NewGuid(),
+            RequestId = requestId,
+            SubmittedBy = submittedBy,
+            SubmittedAt = DateTime.UtcNow
+        };
+
+        foreach (var fe in dto.FirewallEntries)
+        {
+            var entry = new FirewallEntry
+            {
+                FirewallEntryId = Guid.NewGuid(),
+                PolicyName = fe.PolicyName,
+                VDOM = fe.VDOM,
+                SourceInterface = fe.SourceInterface,
+                DestinationInterface = fe.DestinationInterface,
+                SourceIP = fe.SourceIP,
+                DestinationIP = fe.DestinationIP,
+                Schedule = fe.Schedule,
+                Action = Enum.Parse<PolicyAction>(fe.Action, true)
+            };
+
+            foreach (var svc in fe.Services)
+            {
+                entry.Services.Add(new FirewallServiceEntry
+                {
+                    FirewallServiceEntryId = Guid.NewGuid(),
+                    FirewallEntryId = entry.FirewallEntryId,
+                    Port = svc.Port,
+                    Protocol = svc.Protocol,
+                    ServiceName = svc.ServiceName
+                });
+            }
+
+            foreach (var profileId in fe.SecurityProfileIds)
+            {
+                entry.SecurityProfiles.Add(new FirewallEntrySecurityProfile
+                {
+                    FirewallEntryId = entry.FirewallEntryId,
+                    SecurityProfileId = profileId
+                });
+            }
+
+            details.FirewallEntries.Add(entry);
+        }
+
+        return details;
+    }
+
+    private static void EnsureRequiredRequestFieldsPopulated(Request request)
+    {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(request.ApplicationName)) missing.Add("Application Name");
+        if (string.IsNullOrWhiteSpace(request.ProgrammingLanguage)) missing.Add("Programming Language");
+        if (string.IsNullOrWhiteSpace(request.Framework)) missing.Add("Framework");
+        if (string.IsNullOrWhiteSpace(request.Purpose)) missing.Add("Purpose");
+        if (!request.ExpectedUsers.HasValue) missing.Add("Expected Concurrent User Count");
+
+        if (missing.Count > 0)
+            throw new InvalidOperationException(
+                $"Cannot submit request — the following fields must be populated: {string.Join(", ", missing)}.");
+    }
+
+    private async Task<string> GenerateUniqueSlugAsync(string applicationName, EnvironmentType environment, Guid requestId)
+    {
+        var baseCount = await _db.Requests
+            .CountAsync(r => r.ApplicationName == applicationName
+                             && r.Environment == environment
+                             && r.RequestId != requestId);
+
+        for (int offset = 0; offset < 10; offset++)
+        {
+            var candidate = ObjectSlugGenerator.Generate(applicationName, environment, baseCount + 1 + offset);
+            var taken = await _db.Requests.AnyAsync(r => r.ObjectSlug == candidate && r.RequestId != requestId);
+            if (!taken) return candidate;
+        }
+        throw new InvalidOperationException("Unable to allocate a unique slug for renamed request.");
     }
 
     private void AddStatusHistory(Request request, RequestStatus oldStatus, RequestStatus newStatus, string changedBy, string? comments)
@@ -998,7 +981,6 @@ public class RequestService : IRequestService
                 Gateway = r.NOCDetails.Gateway,
                 Port = r.NOCDetails.Port,
                 VIP = r.NOCDetails.VIP,
-                FQDN = r.NOCDetails.FQDN,
                 VirtualIP = r.NOCDetails.VirtualIP,
                 VirtualPort = r.NOCDetails.VirtualPort,
                 VirtualFQDN = r.NOCDetails.VirtualFQDN,

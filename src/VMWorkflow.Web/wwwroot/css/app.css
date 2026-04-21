@@ -312,9 +312,16 @@ h1:focus { outline: none; }
     border-radius: var(--radius-md) !important;
     padding: 24px !important;
     transition: var(--transition-smooth);
-    cursor: default;
+    cursor: pointer;
+    user-select: none;
     position: relative;
     overflow: hidden;
+}
+.stat-card.stat-card-selected {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: -3px;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18) !important;
 }
 .stat-card:hover {
     transform: translateY(-4px) scale(1.02);

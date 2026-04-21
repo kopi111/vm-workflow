@@ -18,7 +18,6 @@ public class ApiClient : IApiClient
         if (response.IsSuccessStatusCode)
             return;
 
-        // Try to extract a meaningful message from the response body
         try
         {
             var body = await response.Content.ReadAsStringAsync();
@@ -51,7 +50,6 @@ public class ApiClient : IApiClient
         catch (HttpRequestException) { throw; }
         catch { /* failed to parse body */ }
 
-        // Fallback: user-friendly messages by status code
         var friendlyMessage = response.StatusCode switch
         {
             System.Net.HttpStatusCode.BadRequest => "The request contains invalid data. Please check your inputs and try again.",
@@ -72,10 +70,14 @@ public class ApiClient : IApiClient
         return await response.Content.ReadFromJsonAsync<T>() ?? fallback;
     }
 
-    // Requests
     public async Task<List<RequestResponse>> GetRequestsAsync()
     {
         return await GetWithFriendlyErrorAsync("api/requests", new List<RequestResponse>());
+    }
+
+    public async Task<List<RequestResponse>> GetMyDraftsAsync()
+    {
+        return await GetWithFriendlyErrorAsync("api/requests/drafts/mine", new List<RequestResponse>());
     }
 
     public async Task<RequestResponse?> GetRequestAsync(Guid requestId)
@@ -227,7 +229,6 @@ public class ApiClient : IApiClient
         await EnsureSuccessOrThrowValidation(response);
     }
 
-    // Work Queue
     public async Task<List<RequestResponse>> GetQueueAsync(string role)
     {
         return await GetWithFriendlyErrorAsync($"api/queue/{role}", new List<RequestResponse>());
@@ -238,13 +239,16 @@ public class ApiClient : IApiClient
         return await GetWithFriendlyErrorAsync("api/queue/sent-back", new List<RequestResponse>());
     }
 
-    // Resource Groups
+    public async Task<List<RequestResponse>> GetSentBackToMeAsync()
+    {
+        return await GetWithFriendlyErrorAsync("api/queue/sent-back-to-me", new List<RequestResponse>());
+    }
+
     public async Task<List<ResourceGroupModel>> GetResourceGroupsAsync()
     {
         return await GetWithFriendlyErrorAsync("api/admin/resource-groups", new List<ResourceGroupModel>());
     }
 
-    // Resource Groups CRUD
     public async Task<ResourceGroupModel> CreateResourceGroupAsync(ResourceGroupModel model)
     {
         var response = await _http.PostAsJsonAsync("api/admin/resource-groups", model);
@@ -264,7 +268,6 @@ public class ApiClient : IApiClient
         await EnsureSuccessOrThrowValidation(response);
     }
 
-    // Security Profiles
     public async Task<List<SecurityProfileModel>> GetSecurityProfilesAsync()
     {
         return await GetWithFriendlyErrorAsync("api/admin/security-profiles", new List<SecurityProfileModel>());
@@ -289,7 +292,6 @@ public class ApiClient : IApiClient
         await EnsureSuccessOrThrowValidation(response);
     }
 
-    // VDOMs
     public async Task<List<VdomModel>> GetVdomsAsync()
     {
         return await GetWithFriendlyErrorAsync("api/admin/vdoms", new List<VdomModel>());
@@ -314,7 +316,30 @@ public class ApiClient : IApiClient
         await EnsureSuccessOrThrowValidation(response);
     }
 
-    // Dropdown Options
+    public async Task<List<ScheduleModel>> GetSchedulesAsync()
+    {
+        return await GetWithFriendlyErrorAsync("api/admin/schedules", new List<ScheduleModel>());
+    }
+
+    public async Task<ScheduleModel> CreateScheduleAsync(ScheduleModel model)
+    {
+        var response = await _http.PostAsJsonAsync("api/admin/schedules", model);
+        await EnsureSuccessOrThrowValidation(response);
+        return (await response.Content.ReadFromJsonAsync<ScheduleModel>())!;
+    }
+
+    public async Task UpdateScheduleAsync(Guid id, ScheduleModel model)
+    {
+        var response = await _http.PutAsJsonAsync($"api/admin/schedules/{id}", model);
+        await EnsureSuccessOrThrowValidation(response);
+    }
+
+    public async Task DeleteScheduleAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"api/admin/schedules/{id}");
+        await EnsureSuccessOrThrowValidation(response);
+    }
+
     public async Task<List<DropdownOptionModel>> GetDropdownOptionsAsync(string category)
     {
         return await GetWithFriendlyErrorAsync($"api/admin/dropdown-options/{Uri.EscapeDataString(category)}", new List<DropdownOptionModel>());
@@ -339,7 +364,6 @@ public class ApiClient : IApiClient
         await EnsureSuccessOrThrowValidation(response);
     }
 
-    // Audit Logs
     public async Task<List<AuditLogEntry>> GetAuditLogsAsync(DateTime? from = null, DateTime? to = null, string? user = null)
     {
         var query = BuildLogQuery("api/logs/audit", from, to, user);
@@ -352,7 +376,6 @@ public class ApiClient : IApiClient
         return await GetWithFriendlyErrorAsync(query, new List<StatusHistoryLogEntry>());
     }
 
-    // Scripts
     public async Task<List<ScriptModel>> GetScriptsAsync()
     {
         return await GetWithFriendlyErrorAsync("api/scripts", new List<ScriptModel>());
@@ -365,7 +388,6 @@ public class ApiClient : IApiClient
         return await response.Content.ReadAsByteArrayAsync();
     }
 
-    // Users
     public async Task<List<UserModel>> GetUsersAsync()
     {
         return await GetWithFriendlyErrorAsync("api/users", new List<UserModel>());

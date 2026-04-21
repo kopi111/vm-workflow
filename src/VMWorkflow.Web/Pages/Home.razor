@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject IApiClient Api
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -33,28 +34,28 @@
         @* Stat Cards *@
         <MudGrid Class="mb-6 stagger-in">
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="stat-card stat-total" Elevation="0">
+                <MudPaper Class="@StatCardClass("all", "stat-total")" Elevation="0" @onclick="@(() => SetStatusCategory("all"))" Style="cursor: pointer;">
                     <MudIcon Icon="@Icons.Material.Filled.Inbox" Class="stat-icon" />
                     <div class="stat-value">@requests.Count</div>
                     <div class="stat-label mt-1">Total Requests</div>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="stat-card stat-progress" Elevation="0">
+                <MudPaper Class="@StatCardClass("inProgress", "stat-progress")" Elevation="0" @onclick="@(() => SetStatusCategory("inProgress"))" Style="cursor: pointer;">
                     <MudIcon Icon="@Icons.Material.Filled.Pending" Class="stat-icon" />
                     <div class="stat-value">@inProgressCount</div>
                     <div class="stat-label mt-1">In Progress</div>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="stat-card stat-pending" Elevation="0">
+                <MudPaper Class="@StatCardClass("pendingApproval", "stat-pending")" Elevation="0" @onclick="@(() => SetStatusCategory("pendingApproval"))" Style="cursor: pointer;">
                     <MudIcon Icon="@Icons.Material.Filled.HourglassTop" Class="stat-icon" />
                     <div class="stat-value">@pendingApprovalCount</div>
                     <div class="stat-label mt-1">Pending Approval</div>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="stat-card stat-completed" Elevation="0">
+                <MudPaper Class="@StatCardClass("completed", "stat-completed")" Elevation="0" @onclick="@(() => SetStatusCategory("completed"))" Style="cursor: pointer;">
                     <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="stat-icon" />
                     <div class="stat-value">@completedCount</div>
                     <div class="stat-label mt-1">Completed</div>
@@ -200,6 +201,22 @@
     private int inProgressCount;
     private int pendingApprovalCount;
     private int completedCount;
+    private string statusCategory = "all";
+
+    private static readonly string[] InProgressStatuses = { "PendingSysAdmin", "DataCenterReview", "PendingNOC", "PendingSOC" };
+    private static readonly string[] PendingApprovalStatuses = { "PendingIOCApproval", "PendingApproval" };
+    private static readonly string[] CompletedStatuses = { "Approved", "Implemented", "Closed" };
+
+    private void SetStatusCategory(string category)
+    {
+        statusCategory = statusCategory == category ? "all" : category;
+    }
+
+    private string StatCardClass(string category, string variantClass)
+    {
+        var selected = statusCategory == category ? " stat-card-selected" : string.Empty;
+        return $"stat-card {variantClass}{selected}";
+    }
 
     // Chart data
     private record DonutSegment(string Label, double Value, int Count, string Color);
@@ -209,11 +226,19 @@
     private BarItem[] barData = Array.Empty<BarItem>();
     private int barMaxValue;
 
+    private string? _userRole;
+    private string? _username;
+
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userRole = state.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        _username = state.User.Identity?.Name;
+
         try
         {
-            requests = await Api.GetRequestsAsync();
+            var all = await Api.GetRequestsAsync();
+            requests = FilterForViewer(all);
             CalculateStats();
         }
         catch { }
@@ -223,9 +248,17 @@
         }
     }
 
+    private List<RequestResponse> FilterForViewer(IEnumerable<RequestResponse> source)
+    {
+        var visible = source.Where(r => r.Status != "Draft");
+        if (_userRole == "Requester" && !string.IsNullOrEmpty(_username))
+            visible = visible.Where(r => string.Equals(r.CreatedBy, _username, StringComparison.OrdinalIgnoreCase));
+        return visible.ToList();
+    }
+
     private void CalculateStats()
     {
-        inProgressCount = requests.Count(r => r.Status is "Draft" or "PendingSysAdmin" or "DataCenterReview" or "PendingNOC" or "PendingSOC");
+        inProgressCount = requests.Count(r => r.Status is "PendingSysAdmin" or "DataCenterReview" or "PendingNOC" or "PendingSOC");
         pendingApprovalCount = requests.Count(r => r.Status is "PendingIOCApproval" or "PendingApproval");
         completedCount = requests.Count(r => r.Status is "Approved" or "Implemented" or "Closed");
 
@@ -256,6 +289,7 @@
 
     private bool FilterFunc(RequestResponse r)
     {
+        if (!MatchesCategory(r)) return false;
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         var s = searchString.Trim();
         return r.ObjectSlug.Contains(s, StringComparison.OrdinalIgnoreCase)
@@ -263,6 +297,14 @@
             || r.Status.Contains(s, StringComparison.OrdinalIgnoreCase)
             || r.CreatedBy.Contains(s, StringComparison.OrdinalIgnoreCase);
     }
+
+    private bool MatchesCategory(RequestResponse r) => statusCategory switch
+    {
+        "inProgress" => InProgressStatuses.Contains(r.Status),
+        "pendingApproval" => PendingApprovalStatuses.Contains(r.Status),
+        "completed" => CompletedStatuses.Contains(r.Status),
+        _ => true
+    };
 
     private static string GetPulseClass(string status) => status switch
     {

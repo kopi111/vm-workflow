@@ -5,10 +5,9 @@ using VMWorkflow.Application.Interfaces;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/queue")]
 [Authorize]
-public class QueueController : ControllerBase
+public class QueueController : ApiControllerBase
 {
     private readonly IRequestService _requestService;
 
@@ -17,10 +16,7 @@ public class QueueController : ControllerBase
         _requestService = requestService;
     }
 
-    /// <summary>
-    /// Get pending requests for a specific role/group.
-    /// Valid roles: sysadmin, datacenter, noc, soc, ioc, ciso, ops
-    /// </summary>
+    // Valid roles: sysadmin, datacenter, noc, soc, ioc, ciso, ops
     [HttpGet("{role}")]
     public async Task<ActionResult<List<RequestResponseDto>>> GetPendingByRole(string role)
     {
@@ -28,24 +24,32 @@ public class QueueController : ControllerBase
         return Ok(results);
     }
 
-    /// <summary>
-    /// Get requests that were sent back by the current user.
-    /// </summary>
     [HttpGet("sent-back")]
     public async Task<ActionResult<List<RequestResponseDto>>> GetSentBack()
     {
-        var username = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var username = RequireAuthenticatedUsername();
         var results = await _requestService.GetSentBackByUserAsync(username);
         return Ok(results);
     }
 
-    /// <summary>
-    /// Get requests that were rejected by the current user.
-    /// </summary>
+    [HttpGet("sent-back-to-me")]
+    public async Task<ActionResult<List<RequestResponseDto>>> GetSentBackToMe()
+    {
+        var role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+        if (string.IsNullOrEmpty(role)) return Ok(new List<RequestResponseDto>());
+        var key = role switch
+        {
+            "IOCManager" => "ioc",
+            _ => role.ToLower()
+        };
+        var results = await _requestService.GetSentBackToRoleAsync(key);
+        return Ok(results);
+    }
+
     [HttpGet("rejected")]
     public async Task<ActionResult<List<RequestResponseDto>>> GetRejected()
     {
-        var username = User.Identity?.Name ?? throw new UnauthorizedAccessException("User identity not available.");
+        var username = RequireAuthenticatedUsername();
         var results = await _requestService.GetRejectedByUserAsync(username);
         return Ok(results);
     }

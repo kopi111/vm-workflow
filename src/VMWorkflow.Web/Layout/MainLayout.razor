@@ -1,6 +1,10 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject IApiClient Api
+@inject ISnackbar Snackbar
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="@_theme" />
 <MudPopoverProvider />
@@ -14,10 +18,24 @@
             <MudAvatar Size="Size.Small" Style="background: rgba(255,255,255,0.15);">
                 <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Small" Style="color: white;" />
             </MudAvatar>
-            <MudText Typo="Typo.h6" Style="font-family: 'Poppins', sans-serif; font-weight: 600; letter-spacing: 0.5px;">VM Workflow</MudText>
+            <MudText Typo="Typo.h6" Style="font-family: 'Poppins', sans-serif; font-weight: 600; letter-spacing: 0.5px;">ICTD Workflow</MudText>
         </MudStack>
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Style="opacity: 0.8;" />
+        @if (HasQueue)
+        {
+            <MudTooltip Text="@QueueTooltip" Placement="Placement.Bottom">
+                <MudBadge Content="@_queueCount" Color="Color.Info" Overlap="true" Visible="@(_queueCount > 0)" Bordered="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.Inbox" Color="Color.Inherit" Style="opacity: 0.8;"
+                                   OnClick="GoToQueue" />
+                </MudBadge>
+            </MudTooltip>
+        }
+        <MudTooltip Text="@NotificationTooltip" Placement="Placement.Bottom">
+            <MudBadge Content="@_sentBackCount" Color="Color.Error" Overlap="true" Visible="@(_sentBackCount > 0)" Bordered="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Style="opacity: 0.8;"
+                               OnClick="GoToSentBackAsync" />
+            </MudBadge>
+        </MudTooltip>
         <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Color="Color.Inherit" OnClick="@ToggleDarkMode" Style="opacity: 0.8;" />
         <AuthorizeView>
@@ -26,14 +44,12 @@
                     <ActivatorContent>
                         <MudChip T="string" Style="background: rgba(255,255,255,0.12); color: white; border-radius: 20px; cursor: pointer;" Class="ml-2">
                             <MudAvatar Style="background: var(--gradient-accent); width: 28px; height: 28px;" Size="Size.Small" Class="mr-1">
-                                <MudText Typo="Typo.caption" Style="color: white; font-weight: 600;">@(_displayName?.FirstOrDefault())</MudText>
+                                <MudText Typo="Typo.caption" Style="color: white; font-weight: 600;">@(_username?.FirstOrDefault().ToString().ToUpper())</MudText>
                             </MudAvatar>
                             @_username
                         </MudChip>
                     </ActivatorContent>
                     <ChildContent>
-                        <MudMenuItem Icon="@Icons.Material.Filled.Person">Profile</MudMenuItem>
-                        <MudDivider />
                         <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogout">Logout</MudMenuItem>
                     </ChildContent>
                 </MudMenu>
@@ -59,6 +75,7 @@
             </MudText>
             <AuthorizeView Roles="Requester,PlatformAdmin">
                 <MudNavLink Href="/drafts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Drafts">Drafts</MudNavLink>
+                <MudNavLink Href="/sent-back-to-me" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentReturn">Sent Back to Me</MudNavLink>
             </AuthorizeView>
             <AuthorizeView Roles="SysAdmin,PlatformAdmin">
                 <MudNavLink Href="/queue/sysadmin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Computer">SysAdmin</MudNavLink>
@@ -112,10 +129,10 @@
                 <div class="pa-4">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudAvatar Style="background: var(--gradient-primary);" Size="Size.Small">
-                            <MudText Style="color: white; font-weight: 600;" Typo="Typo.caption">@(_displayName?.FirstOrDefault())</MudText>
+                            <MudText Style="color: white; font-weight: 600;" Typo="Typo.caption">@(_username?.FirstOrDefault().ToString().ToUpper())</MudText>
                         </MudAvatar>
                         <MudStack Spacing="0">
-                            <MudText Typo="Typo.body2" Style="font-weight: 600;">@_displayName</MudText>
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">@_username</MudText>
                             <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@_role</MudText>
                         </MudStack>
                     </MudStack>
@@ -137,9 +154,73 @@
     private string? _username;
     private string? _displayName;
     private string? _role;
+    private int _sentBackCount;
+    private int _queueCount;
+    private bool _sentBackToastShown;
+    private bool _queueToastShown;
+
+    private static readonly Dictionary<string, (string QueueKey, string RouteSuffix)> QueueByRole = new()
+    {
+        { "SysAdmin",   ("sysadmin",   "sysadmin") },
+        { "DataCenter", ("datacenter", "datacenter") },
+        { "NOC",        ("noc",        "noc") },
+        { "SOC",        ("soc",        "soc") },
+        { "IOCManager", ("ioc",        "ioc") },
+        { "CISO",       ("ciso",       "ciso") },
+        { "Ops",        ("ops",        "ops") }
+    };
+
+    private bool HasQueue => !string.IsNullOrEmpty(_role) && QueueByRole.ContainsKey(_role);
+    private string QueueKey => HasQueue ? QueueByRole[_role!].QueueKey : string.Empty;
+    private string QueuePath => HasQueue ? $"/queue/{QueueByRole[_role!].RouteSuffix}" : "/";
+
+    private string QueueTooltip =>
+        _queueCount == 0
+            ? "No items waiting in your queue"
+            : $"{_queueCount} item{(_queueCount == 1 ? "" : "s")} waiting in your queue";
+
+    private string SentBackSeenKey => $"notif-sentback-seen-{_username}";
+    private string QueueSeenKey => $"notif-queue-seen-{_username}";
+
+    private async Task<DateTime> GetLastSeenAsync(string key)
+    {
+        try
+        {
+            var raw = await LocalStorage.GetItemAsync<string>(key);
+            return DateTime.TryParse(raw, out var dt) ? dt.ToUniversalTime() : DateTime.MinValue;
+        }
+        catch { return DateTime.MinValue; }
+    }
+
+    private async Task SetLastSeenAsync(string key)
+    {
+        try { await LocalStorage.SetItemAsync(key, DateTime.UtcNow.ToString("o")); }
+        catch { }
+    }
+
+    private async Task GoToQueue()
+    {
+        await SetLastSeenAsync(QueueSeenKey);
+        _queueCount = 0;
+        Navigation.NavigateTo(QueuePath);
+    }
+
+    private async Task GoToSentBackAsync()
+    {
+        await SetLastSeenAsync(SentBackSeenKey);
+        _sentBackCount = 0;
+        Navigation.NavigateTo(SentBackPath);
+    }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
+
+    private string NotificationTooltip =>
+        _sentBackCount == 0
+            ? "No requests sent back to you"
+            : $"{_sentBackCount} request{(_sentBackCount == 1 ? "" : "s")} sent back to you";
+
+    private string SentBackPath => _role == "Requester" ? "/sent-back-to-me" : QueuePath;
 
     private MudTheme _theme = new MudTheme
     {
@@ -199,11 +280,92 @@
             var user = state.User;
             if (user.Identity?.IsAuthenticated == true)
             {
+                var previousUser = _username;
                 _username = user.Identity.Name;
                 _displayName = user.FindFirst("displayName")?.Value ?? _username;
                 _role = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                if (previousUser != _username)
+                {
+                    _sentBackToastShown = false;
+                    _queueToastShown = false;
+                    await RefreshSentBackCountAsync(showToast: true);
+                    await RefreshQueueCountAsync(showToast: true);
+                }
             }
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await MarkSeenFromLocationAsync(e.Location);
+        await RefreshSentBackCountAsync(showToast: false);
+        await RefreshQueueCountAsync(showToast: false);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task MarkSeenFromLocationAsync(string location)
+    {
+        var path = new Uri(location).AbsolutePath.TrimEnd('/');
+        if (path.Equals(SentBackPath, StringComparison.OrdinalIgnoreCase))
+            await SetLastSeenAsync(SentBackSeenKey);
+        else if (HasQueue && path.Equals(QueuePath, StringComparison.OrdinalIgnoreCase))
+            await SetLastSeenAsync(QueueSeenKey);
+    }
+
+    private async Task RefreshSentBackCountAsync(bool showToast)
+    {
+        if (string.IsNullOrEmpty(_role)) return;
+        try
+        {
+            var lastSeen = await GetLastSeenAsync(SentBackSeenKey);
+            List<RequestResponse> items;
+            if (_role == "Requester")
+            {
+                var drafts = await Api.GetMyDraftsAsync();
+                items = drafts.Where(r => r.StatusHistories?.Any(h => h.Comments != null && h.Comments.StartsWith("Sent back:")) == true).ToList();
+            }
+            else
+            {
+                items = await Api.GetSentBackToMeAsync();
+            }
+            var count = items.Count(r => r.UpdatedAt.ToUniversalTime() > lastSeen);
+            _sentBackCount = count;
+            if (showToast && !_sentBackToastShown && count > 0)
+            {
+                _sentBackToastShown = true;
+                Snackbar.Add($"You have {count} new request{(count == 1 ? "" : "s")} sent back to you. Click the bell to review.",
+                    Severity.Warning, cfg => cfg.VisibleStateDuration = 8000);
+            }
+        }
+        catch { _sentBackCount = 0; }
+    }
+
+    private async Task RefreshQueueCountAsync(bool showToast)
+    {
+        if (!HasQueue) { _queueCount = 0; return; }
+        try
+        {
+            var lastSeen = await GetLastSeenAsync(QueueSeenKey);
+            var items = await Api.GetQueueAsync(QueueKey);
+            _queueCount = items.Count(r => r.UpdatedAt.ToUniversalTime() > lastSeen);
+            if (showToast && !_queueToastShown && _queueCount > 0)
+            {
+                _queueToastShown = true;
+                Snackbar.Add($"You have {_queueCount} new item{(_queueCount == 1 ? "" : "s")} in your queue.",
+                    Severity.Info, cfg => cfg.VisibleStateDuration = 8000);
+            }
+        }
+        catch { _queueCount = 0; }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private async Task HandleLogout()

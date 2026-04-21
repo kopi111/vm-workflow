@@ -6,10 +6,9 @@ using VMWorkflow.Infrastructure.Data;
 
 namespace VMWorkflow.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "SysAdmin,PlatformAdmin")]
-public class LogsController : ControllerBase
+public class LogsController : ApiControllerBase
 {
     private readonly WorkflowDbContext _db;
 
@@ -54,13 +53,16 @@ public class LogsController : ControllerBase
     public async Task<ActionResult<List<StatusHistoryLogDto>>> GetStatusHistory(
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
-        [FromQuery] string? user)
+        [FromQuery] string? user,
+        [FromQuery] Guid? requestId)
     {
         var query = _db.StatusHistories
             .AsNoTracking()
             .Include(s => s.Request)
             .AsQueryable();
 
+        if (requestId.HasValue)
+            query = query.Where(s => s.RequestId == requestId.Value);
         if (from.HasValue)
             query = query.Where(s => s.Timestamp >= from.Value);
         if (to.HasValue)

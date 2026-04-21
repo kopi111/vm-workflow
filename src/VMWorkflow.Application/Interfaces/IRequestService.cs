@@ -26,4 +26,6 @@ public interface IRequestService
     Task DeleteAsync(Guid requestId, string deletedBy);
     Task<List<RequestResponseDto>> GetPendingByRoleAsync(string role);
     Task<List<RequestResponseDto>> GetSentBackByUserAsync(string username);
+    Task<List<RequestResponseDto>> GetSentBackToRoleAsync(string role);
+    Task<List<RequestResponseDto>> GetDraftsByUserAsync(string username);
 }
